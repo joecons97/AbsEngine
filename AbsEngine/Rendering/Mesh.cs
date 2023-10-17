@@ -23,7 +23,7 @@ public class Mesh : IDisposable
     public Vector3D<float>[] Normals { get => _backendMesh.Normals; set => _backendMesh.Normals = value; }
     public Vector2D<float>[] Uvs { get => _backendMesh.Uvs; set => _backendMesh.Uvs = value; }
 
-    private IBackendMesh _backendMesh = null!;
+    private readonly IBackendMesh _backendMesh = null!;
 
     public Mesh()
     {
@@ -45,7 +45,11 @@ public class Mesh : IDisposable
         => _backendMesh?.Bind();
 
     public void Dispose()
-        => _backendMesh?.Dispose();
+    {
+        _backendMesh?.Dispose();
 
-    ~Mesh() => _backendMesh?.Dispose(); 
+        GC.SuppressFinalize(this);
+    }
+
+    ~Mesh() => Dispose();
 }

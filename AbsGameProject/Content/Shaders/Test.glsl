@@ -39,8 +39,13 @@ program-frag
 
     out vec4 FragColor;
 
+    uniform sampler2D uTexture;
+    uniform sampler2D uTexture1;
+
     void main()
     {
-        FragColor = vec4(vertData.uvs.x,vertData.uvs.y,0,1);
+        vec4 texCol = texture(uTexture, vertData.uvs);
+        vec4 texCol1 = texture(uTexture1, vertData.uvs);
+        FragColor = vec4(mix(texCol1, texCol, vertData.uvs.x));
     }
 }

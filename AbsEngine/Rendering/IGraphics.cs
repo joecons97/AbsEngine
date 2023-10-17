@@ -1,4 +1,5 @@
-﻿using AbsEngine.Rendering.OpenGL;
+﻿using AbsEngine.Rendering.DirectX11;
+using AbsEngine.Rendering.OpenGL;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 using System.Drawing;
@@ -13,7 +14,7 @@ public interface IGraphics
         switch (gfxAPi)
         {
             case GraphicsAPIs.OpenGL: return new OpenGLGraphics(window, gfxAPi);
-            //case GraphicsAPIs.D3D11: return new D3D11(window);
+            case GraphicsAPIs.D3D11: return new DirectX11Graphics(window, gfxAPi);
             default:
                 throw new ApplicationException("No graphics API has been set!");
         }

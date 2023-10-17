@@ -1,17 +1,15 @@
 ﻿using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AbsEngine.Rendering.OpenGL;
 
-internal class OpenGlShader : IBackendShader
+internal class OpenGLShader : IBackendShader
 {
-    private uint _handle;
-    private GL _gl;
+    private readonly uint _handle;
+    private readonly GL _gl;
+    private List<string> _samplers = new();
 
-    private Dictionary<string, int> _uniforms = new Dictionary<string, int>();
-
-    public OpenGlShader()
+    public OpenGLShader()
     {
         _gl = ((OpenGLGraphics)Game.Instance!.Graphics).Gl;
 
@@ -102,6 +100,22 @@ internal class OpenGlShader : IBackendShader
         }
     }
 
+    public void SetTexture(string name, IBackendTexture texture)
+    {
+        if(texture is OpenGLTexture tex)
+        {
+            var unit = _samplers.IndexOf(name);
+            if (unit == -1)
+                throw new IndexOutOfRangeException($"The texture uniform {name} could not be found");
+
+            _gl.ActiveTexture(TextureUnit.Texture0 + unit);
+            tex.Bind();
+            SetInt(name, unit);
+        }
+        else
+            throw new ArgumentException($"Texture of type {texture} is not supported in OpenGLShader", nameof(texture));
+    }
+
     public void SetUint(string name, uint value)
     {
         //Setting a uniform on a shader using a name.
@@ -158,6 +172,18 @@ internal class OpenGlShader : IBackendShader
             //var file = item.Replace("#include", "").Trim().Trim('"');
             //var includedFile = SceneLoader.ReadFileContents(file, out _);
             //finalProgram = finalProgram.Replace(item, includedFile);
+        }
+
+        var samplers = allLines.Where(x => x.Contains("uniform sampler"));
+        foreach(var item in samplers)
+        {
+            var line = item.Trim();
+            var split = line.Split(' ');
+            var type = split[1];
+            var name = split[2].Replace(";", "");
+
+            if(!_samplers.Contains(name))
+                _samplers.Add(name);
         }
 
         return finalProgram + "\n";

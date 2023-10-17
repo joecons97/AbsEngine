@@ -1,6 +1,7 @@
 ﻿using AbsEngine;
 using AbsEngine.ECS;
 using AbsEngine.ECS.Systems;
+using AbsEngine.IO;
 using AbsEngine.Rendering;
 using Silk.NET.Maths;
 using System.Drawing;
@@ -13,9 +14,9 @@ namespace AbsGameProject
 
         static MeshRendererSystem tempRenderer;
 
-        public static void Main(string[] args)
+        public static void Main()
         {
-            new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
+            _ = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
             if (Game.Instance == null)
                 return;
 

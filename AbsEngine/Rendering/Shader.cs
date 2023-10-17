@@ -14,36 +14,43 @@ internal interface IBackendShader : IDisposable
     public void SetFloat(string name, float value);
     public void SetVector(string name, Vector4D<float> value);
     public void SetMatrix(string name, Matrix4X4<float> value);
+    public void SetTexture(string name, IBackendTexture texture);
 }
 
 public class Shader : IDisposable
 {
     private IBackendShader _backendShader = null!;
 
-    public Shader(string fileLocation)
+    public Shader()
     {
         switch (Game.Instance!.Graphics.GraphicsAPIs)
         {
             case GraphicsAPIs.OpenGL:
-                _backendShader = new OpenGlShader();
+                _backendShader = new OpenGLShader();
                 break;
             case GraphicsAPIs.D3D11:
                 _backendShader = null!;
                 throw new NotImplementedException();
         }
-
-        var contents = File.ReadAllText(fileLocation);
-        if (string.IsNullOrEmpty(contents) == false)
-            _backendShader.LoadFromString(contents);
     }
+
+    internal void ApplyBackendShader(IBackendShader shader)
+        => _backendShader = shader;
+
+    internal IBackendShader GetBackendShader()
+        => _backendShader;
 
     public void Bind()
         => _backendShader?.Bind();
 
     public void Dispose()
-        => _backendShader?.Dispose();
+    { 
+        _backendShader?.Dispose();
 
-    ~Shader() => _backendShader?.Dispose();
+        GC.SuppressFinalize(this);
+    }
+
+    ~Shader() => Dispose();
 
 
     public void SetInt(string name, int value)
@@ -56,4 +63,6 @@ public class Shader : IDisposable
         => _backendShader?.SetVector(name, value);
     public void SetMatrix(string name, Matrix4X4<float> value)
         => _backendShader?.SetMatrix(name, value);
+    public void SetTexture(string name, Texture texture)
+        => _backendShader.SetTexture(name, texture.GetBackendTexture());
 }

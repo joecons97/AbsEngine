@@ -7,7 +7,7 @@ public static class MeshLoader
 {
     public static Rendering.Mesh? LoadMesh(string fileLocation)
     {
-        using AssimpContext assimpContext = new AssimpContext();
+        using AssimpContext assimpContext = new();
 
         var assimpScene = assimpContext.ImportFile(fileLocation,
             PostProcessSteps.CalculateTangentSpace | PostProcessSteps.Triangulate |

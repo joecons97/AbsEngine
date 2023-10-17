@@ -12,10 +12,7 @@ internal static class SceneLoader
         if (File.Exists(fileName) == false)
             throw new FileNotFoundException(fileName);
 
-        var jsonNodes = JsonNode.Parse(File.ReadAllText(fileName));
-        if (jsonNodes == null)
-            throw new InvalidDataException();
-
+        var jsonNodes = JsonNode.Parse(File.ReadAllText(fileName)) ?? throw new InvalidDataException();
         var jsonObject = jsonNodes.AsObject();
 
         if (IsRawScene(jsonObject))
@@ -68,7 +65,7 @@ internal static class SceneLoader
 
     private static Dictionary<Guid, Component> LoadComponents(Scene scene, JsonArray? json)
     {
-        Dictionary<Guid, Component> _refComponents = new Dictionary<Guid, Component>();
+        Dictionary<Guid, Component> _refComponents = new();
 
         if (json != null)
         {
@@ -83,8 +80,8 @@ internal static class SceneLoader
                 var typeName = component["type"]?.AsValue().GetValue<string>();
                 if (string.IsNullOrEmpty(typeName)) continue;
 
-                Type type = GetType(typeName) ?? throw new ArgumentOutOfRangeException();
-                Component instance = (Component?)Activator.CreateInstance(type) ?? throw new ArgumentOutOfRangeException();
+                Type type = GetType(typeName) ?? throw new ArgumentOutOfRangeException(nameof(typeName), typeName, "");
+                Component instance = (Component?)Activator.CreateInstance(type) ?? throw new ArgumentOutOfRangeException(nameof(type), type, "");
 
                 _refComponents.Add(guid.Value, instance);
                 scene.AddAsset(guid.GetValueOrDefault(), instance);
@@ -97,8 +94,7 @@ internal static class SceneLoader
 
                     if (prop.PropertyType.IsValueType)
                     {
-                        var jsonValue = node as JsonValue;
-                        if (jsonValue != null)
+                        if (node is JsonValue jsonValue)
                         {
                             var val = jsonValue.Deserialize(prop.PropertyType);
                             prop.SetValue(instance, val);
@@ -151,17 +147,12 @@ internal static class SceneLoader
                 object? asset = null;
 
 
-                switch (type)
+                asset = type switch
                 {
-                    case "Mesh":
-                        asset = MeshLoader.LoadMesh(file);
-                        break;
-                    case "Shader":
-                        asset = new Shader(file);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(type), $"Not expected value: {type}");
-                }
+                    "Mesh" => MeshLoader.LoadMesh(file),
+                    "Shader" => ShaderLoader.LoadShader(file),
+                    _ => throw new Exception($"Not expected value: {type}"),
+                };
                 if (asset != null)
                 {
                     scene.AddAsset(guid.Value, asset);

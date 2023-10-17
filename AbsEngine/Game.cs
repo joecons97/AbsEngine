@@ -43,7 +43,8 @@ public class Game
         {
             Size = _size,
             Title = _name,
-            VSync = false
+            VSync = false,
+            API = gfxApi == GraphicsAPIs.OpenGL ? GraphicsAPI.Default : GraphicsAPI.None
         };
 
         _window = Silk.NET.Windowing.Window.Create(_windowOptions);
