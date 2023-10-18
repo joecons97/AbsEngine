@@ -11,9 +11,11 @@ internal class OpenGLMesh : IBackendMesh
     public Vector3D<float>[] Positions { get => _positions; set => _positions = value; }
     public Vector3D<float>[] Normals { get => _normals; set => _normals = value; }
     public Vector2D<float>[] Uvs { get => _uvs; set => _uvs = value; }
+    public Vector3D<float>[] Tangents { get => _tangents; set => _tangents = value; }
 
     Vector3D<float>[] _positions;
     Vector3D<float>[] _normals;
+    Vector3D<float>[] _tangents;
     Vector4D<float>[] _colours;
     Vector2D<float>[] _uvs;
     uint[] _triangles;
@@ -31,6 +33,7 @@ internal class OpenGLMesh : IBackendMesh
         _colours = Array.Empty<Vector4D<float>>();
         _uvs = Array.Empty<Vector2D<float>>();
         _triangles = Array.Empty<uint>();
+        _tangents = Array.Empty<Vector3D<float>>();
 
         _gl = ((OpenGLGraphics)Game.Instance!.Graphics).Gl;
     }
@@ -73,8 +76,9 @@ internal class OpenGLMesh : IBackendMesh
         int coloursOffset = Colours.Length * 4;
         int uvsOffset = Uvs.Length * 2;
         int normalsOffset = Normals.Length * 3;
+        int tangentsOffset = Tangents.Length * 3;
 
-        float[] vertices = new float[positionsOffset + coloursOffset + uvsOffset + normalsOffset];
+        float[] vertices = new float[positionsOffset + coloursOffset + uvsOffset + normalsOffset + tangentsOffset];
         for (int i = 0; i < _positions.Length; i++)
         {
             Vector3D<float> pos = _positions[i];
@@ -97,6 +101,12 @@ internal class OpenGLMesh : IBackendMesh
         {
             Vector3D<float> normal = _normals[i];
             normal.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + (i * 3));
+        }
+
+        for (int i = 0; i < _tangents.Length; i++)
+        {
+            Vector3D<float> normal = _tangents[i];
+            normal.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + normalsOffset + (i * 3));
         }
 
         _vbo = new BufferContainer<float>(_gl, vertices, BufferTargetARB.ArrayBuffer);

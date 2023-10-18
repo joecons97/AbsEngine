@@ -8,6 +8,7 @@ internal class OpenGLShader : IBackendShader
     private readonly uint _handle;
     private readonly GL _gl;
     private List<string> _samplers = new();
+    private TriangleFace? _culling = TriangleFace.Back;
 
     public OpenGLShader()
     {
@@ -19,15 +20,16 @@ internal class OpenGLShader : IBackendShader
     public void Bind()
     {
         //_gl.DepthFunc(DepthFunction);
-        //if (EnableCulling)
-        //{
-        //    _gl.Enable(EnableCap.CullFace);
-        //    _gl.CullFace(CullFaceMode);
-        //}
-        //else
-        //{
-        //    _gl.Disable(EnableCap.CullFace);
-        //}
+        if (_culling.HasValue)
+        {
+            _gl.Enable(EnableCap.CullFace);
+            _gl.CullFace(_culling.Value);
+        }
+        else
+        {
+            _gl.Disable(EnableCap.CullFace);
+        }
+
         _gl.UseProgram(_handle);
     }
 
@@ -38,13 +40,15 @@ internal class OpenGLShader : IBackendShader
 
     public void LoadFromString(string str)
     {
-        string sharedProgram = GetProgram("shared", str);
-        string vertProgram = sharedProgram + GetProgram("vert", str);
-        string fragProgram = sharedProgram + GetProgram("frag", str);
+        GetUniforms(str);
+        GetDirectives(ref str);
+
+        var vertProgram = "#version 420 core\n#define VERT\n" + str;
+        var fragProgram = "#version 420 core\n#define FRAG\n" + str;
 
         //Load the individual shaders.
-        uint vertex = LoadShader(ShaderType.VertexShader, vertProgram);
-        uint fragment = LoadShader(ShaderType.FragmentShader, fragProgram);
+        uint vertex = CompileShader(ShaderType.VertexShader, vertProgram);
+        uint fragment = CompileShader(ShaderType.FragmentShader, fragProgram);
 
         //Attach the individual shaders.
         _gl.AttachShader(_handle, vertex);
@@ -141,55 +145,54 @@ internal class OpenGLShader : IBackendShader
         }
     }
 
-    private string GetProgram(string program, string shaderContents)
+    private void GetUniforms(string shader)
     {
-        var allLines = shaderContents.Replace("\r", "").Split("\n").ToList();
-
-        int programNameIndex = allLines.IndexOf("program-" + program);
-        if (programNameIndex == -1)
-            throw new Exception($"Program \"{program}\" not found in shader ");
-
-        allLines.RemoveRange(0, programNameIndex + 1);
-
-        int programStartIndex = allLines.IndexOf("{");
-        if (programStartIndex == -1)
-            throw new Exception($"Expected \"{{\"");
-
-        allLines.RemoveRange(0, programStartIndex + 1);
-
-        int programEndIndex = allLines.IndexOf("}");
-        if (programEndIndex == -1)
-            throw new Exception($"Expected \"}}\"");
-
-        allLines.RemoveRange(programEndIndex, allLines.Count - programEndIndex);
-
-        var finalProgram = string.Join('\n', allLines);
-
-        var includes = allLines.Where(x => x.Contains("#include"));
-        foreach (var item in includes)
-        {
-            throw new NotImplementedException();
-            //var file = item.Replace("#include", "").Trim().Trim('"');
-            //var includedFile = SceneLoader.ReadFileContents(file, out _);
-            //finalProgram = finalProgram.Replace(item, includedFile);
-        }
-
+        var allLines = shader.Replace("\r", "").Split("\n").ToList();
         var samplers = allLines.Where(x => x.Contains("uniform sampler"));
-        foreach(var item in samplers)
+        foreach (var item in samplers)
         {
             var line = item.Trim();
             var split = line.Split(' ');
             var type = split[1];
             var name = split[2].Replace(";", "");
 
-            if(!_samplers.Contains(name))
+            if (!_samplers.Contains(name))
                 _samplers.Add(name);
         }
-
-        return finalProgram + "\n";
     }
 
-    private uint LoadShader(ShaderType type, string program)
+    private void GetDirectives(ref string shader)
+    {
+        var allLines = shader.Replace("\r", "").Split("\n").ToList();
+        var directives = allLines.Where(x => x.Contains("#define"));
+        foreach(var item in directives)
+        {
+            var directive = item.Trim().ToLower();
+            var split = directive.Split(" ");
+            var type = split[1];
+            var param = split[2];
+
+            switch (type)
+            {
+                case "include":
+                    var file = File.ReadAllText(param.Trim('\"'));
+                    shader = $"{file}\n{shader}".Replace(item, "");
+                    break;
+                case "culling":
+                    _culling = param.ToLower() switch
+                    {
+                        "back" => TriangleFace.Back,
+                        "front" => TriangleFace.Front,
+                        "both" => TriangleFace.FrontAndBack,
+                        "none" => null,
+                        _ => TriangleFace.Back
+                    };
+                    break;
+            }
+        }
+    }
+
+    private uint CompileShader(ShaderType type, string program)
     {
         uint handle = _gl.CreateShader(type);
         _gl.ShaderSource(handle, program);

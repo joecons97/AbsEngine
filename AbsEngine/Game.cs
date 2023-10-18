@@ -1,4 +1,5 @@
-﻿using AbsEngine.Rendering;
+﻿using AbsEngine.IO;
+using AbsEngine.Rendering;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -55,6 +56,8 @@ public class Game
             InputContext = _window.CreateInput();
 
             Graphics.SetActiveDepthTest(true);
+
+            ShaderLoader.ScanShaders();
 
             OnLoad?.Invoke();
         };

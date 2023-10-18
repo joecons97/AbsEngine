@@ -38,13 +38,13 @@ public class MeshRendererSystem : ComponentSystem<MeshRendererComponent>
     {
         var trans = component.Entity.Transform;
 
-        component.Shader?.Bind();
+        component.Material?.Bind();
         component.Mesh?.Bind();
 
         var world = trans.WorldMatrix;
 
-        component.Shader?.SetMatrix("uWorldMatrix", world);
-        component.Shader?.SetMatrix("uMvp", world * vpMat);
+        component.Material?.SetMatrix("uWorldMatrix", world);
+        component.Material?.SetMatrix("uMvp", world * vpMat);
 
         Game.Instance!.Graphics.DrawElements((uint)component.Mesh?.Triangles.Length!);
     }

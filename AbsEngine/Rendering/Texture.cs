@@ -58,6 +58,7 @@ internal interface IBackendTexture : IDisposable
     public void SetWrapMode(TextureWrapMode wrapMode);
     public void SetMinFilter(TextureMinFilter minFilter);
     public void SetMagFilter(TextureMagFilter magFilter);
+    public void SetMaxMips(int maxMips);    
     public void GenerateMipMaps();
 }
 
@@ -71,7 +72,7 @@ public class Texture
     public PixelType PixelType { get; set; } = PixelType.UnsignedByte;
 
     public TextureWrapMode WrapMode { get; set; } = TextureWrapMode.Repeat;
-    public TextureMinFilter MinFilter { get; set; } = TextureMinFilter.Linear;
+    public TextureMinFilter MinFilter { get; set; } = TextureMinFilter.LinearMipmapLinear;
     public TextureMagFilter MagFilter { get; set; } = TextureMagFilter.Linear;
 
     public Texture()

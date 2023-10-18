@@ -5,12 +5,12 @@ namespace AbsEngine.ECS.Components;
 public class MeshRendererComponent : Component
 {
     public Mesh? Mesh { get; set; }
-    public Shader? Shader { get; set; }
+    public Material? Material { get; set; }
 
-    public MeshRendererComponent(Mesh mesh, Shader shader)
+    public MeshRendererComponent(Mesh mesh, Material material)
     {
         Mesh = mesh;
-        Shader = shader;
+        Material = material;
     }
 
     public MeshRendererComponent()

@@ -37,7 +37,8 @@ public static class MeshLoader
             Normals = mesh.Normals.Select(x => new Vector3D<float>(x.X, x.Y, x.Z)).ToArray(),
             Uvs = mesh.TextureCoordinateChannels[0].Select(x => new Vector2D<float>(x.X, x.Y)).ToArray(),
             Colours = Enumerable.Range(0, mesh.Vertices.Count).Select(x => new Vector4D<float>()).ToArray(),
-            Triangles = tris.ToArray()
+            Triangles = tris.ToArray(),
+            Tangents = mesh.Tangents.Select(x => new Vector3D<float>(x.X, x.Y, x.Z)).ToArray()
         };
 
         finalMesh.Build();

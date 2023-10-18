@@ -1,5 +1,4 @@
-﻿using Silk.NET.DXGI;
-using Silk.NET.OpenGL;
+﻿using Silk.NET.OpenGL;
 using StbImageSharp;
 
 namespace AbsEngine.Rendering.OpenGL;
@@ -15,8 +14,8 @@ internal class OpenGLTexture : IBackendTexture
     private PixelType _pixelType;
 
     public OpenGLTexture(
-        TextureTarget textureTarget, InternalFormat format, PixelFormat pixelFormat, 
-        PixelType pixelType, TextureWrapMode wrapMode, TextureMinFilter minFilter, 
+        TextureTarget textureTarget, InternalFormat format, PixelFormat pixelFormat,
+        PixelType pixelType, TextureWrapMode wrapMode, TextureMinFilter minFilter,
         TextureMagFilter magFilter)
     {
         _gl = ((OpenGLGraphics)Game.Instance!.Graphics).Gl;
@@ -26,11 +25,13 @@ internal class OpenGLTexture : IBackendTexture
         _pixelFormat = pixelFormat;
         _pixelType = pixelType;
 
-        Bind();
-
         SetWrapMode(wrapMode);
         SetMinFilter(minFilter);
         SetMagFilter(magFilter);
+
+        Bind();
+
+        SetMaxMips(10);
     }
 
     public void Bind()
@@ -38,16 +39,13 @@ internal class OpenGLTexture : IBackendTexture
         _gl.BindTexture(_textureTarget, _handle);
     }
 
-    public unsafe void LoadFromResult(ImageResult imageResult)
+    public void LoadFromResult(ImageResult imageResult)
     {
         Bind();
 
-        fixed (byte* ptr = imageResult.Data)
-        {
-            _gl.TexImage2D(_textureTarget, 0, _format,
-                (uint)imageResult.Width, (uint)imageResult.Height,
-                0, _pixelFormat, _pixelType, ptr);
-        }
+        _gl.TexImage2D<byte>(_textureTarget, 0, _format,
+            (uint)imageResult.Width, (uint)imageResult.Height,
+            0, _pixelFormat, _pixelType, imageResult.Data);
 
         GenerateMipMaps();
     }
@@ -126,5 +124,11 @@ internal class OpenGLTexture : IBackendTexture
     public void GenerateMipMaps()
     {
         _gl.GenerateMipmap(_textureTarget);
+    }
+
+    public void SetMaxMips(int maxMips)
+    {
+        _gl.TextureParameter(_handle, GLEnum.TextureBaseLevel, 0);
+        _gl.TextureParameter(_handle, GLEnum.TextureMaxLevel, maxMips);
     }
 }

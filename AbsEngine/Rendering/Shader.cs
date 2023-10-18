@@ -1,4 +1,5 @@
-﻿using AbsEngine.Rendering.OpenGL;
+﻿using AbsEngine.IO;
+using AbsEngine.Rendering.OpenGL;
 using Silk.NET.Maths;
 
 namespace AbsEngine.Rendering;
@@ -23,15 +24,12 @@ public class Shader : IDisposable
 
     public Shader()
     {
-        switch (Game.Instance!.Graphics.GraphicsAPIs)
+        _backendShader = Game.Instance!.Graphics.GraphicsAPIs switch
         {
-            case GraphicsAPIs.OpenGL:
-                _backendShader = new OpenGLShader();
-                break;
-            case GraphicsAPIs.D3D11:
-                _backendShader = null!;
-                throw new NotImplementedException();
-        }
+            GraphicsAPIs.OpenGL => new OpenGLShader(),
+            GraphicsAPIs.D3D11 => throw new NotImplementedException(),
+            _ => throw new NotImplementedException(),
+        };
     }
 
     internal void ApplyBackendShader(IBackendShader shader)

@@ -13,8 +13,8 @@
 			"id": "f2ab0a65-d5ac-452f-8b83-f5cf9c91ef5f"
 		},
 		{
-			"file": "Content/Shaders/Test.glsl",
-			"type": "Shader",
+			"file": "Content/Materials/Test.mat",
+			"type": "Material",
 			"id": "f2578c58-78d5-4822-8286-8b14870ec2f7"
 		}
 	],
@@ -42,7 +42,7 @@
 			"id": "96845764-dfab-4e59-a45c-6f311b9c335c",
 			"type": "MeshRendererComponent",
 			"Mesh": "93250dc6-cba9-40da-b21b-d622bdea6589",
-			"Shader": "f2578c58-78d5-4822-8286-8b14870ec2f7"
+			"Material": "f2578c58-78d5-4822-8286-8b14870ec2f7"
 		},
 		{
 			"id": "7ace95bb-aa6b-4d26-bf03-f690e365c104",
@@ -58,7 +58,7 @@
 			"id": "f1b9c3c9-eb77-48e3-b364-595d68fd9b96",
 			"type": "MeshRendererComponent",
 			"Mesh": "f2ab0a65-d5ac-452f-8b83-f5cf9c91ef5f",
-			"Shader": "f2578c58-78d5-4822-8286-8b14870ec2f7"
+			"Material": "f2578c58-78d5-4822-8286-8b14870ec2f7"
 		}
 	],
 	"entities": [

@@ -150,7 +150,7 @@ internal static class SceneLoader
                 asset = type switch
                 {
                     "Mesh" => MeshLoader.LoadMesh(file),
-                    "Shader" => ShaderLoader.LoadShader(file),
+                    "Material" => MaterialLoader.LoadMaterial(file),
                     _ => throw new Exception($"Not expected value: {type}"),
                 };
                 if (asset != null)

@@ -7,6 +7,7 @@ public static class TextureLoader
 {
     public static Texture? LoadTexture(string fileLocation)
     {
+        StbImage.stbi_set_flip_vertically_on_load(1);
         ImageResult result = ImageResult.FromMemory(File.ReadAllBytes(fileLocation), ColorComponents.RedGreenBlueAlpha);
 
         var texture = new Texture();

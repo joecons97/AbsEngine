@@ -1,0 +1,15 @@
+﻿{
+	"shader": "NewSyntax",
+	"uniforms": [
+		{
+			"name": "uTexture",
+			"type": "texture",
+			"value": "Content/Textures/alldownhillfromhere.PNG"
+		},
+		{
+			"name": "uTexture1",
+			"type": "texture",
+			"value": "Content/Textures/unknown.png"
+		}
+	]
+}
