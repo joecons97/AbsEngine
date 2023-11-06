@@ -62,7 +62,7 @@ internal interface IBackendTexture : IDisposable
     public void GenerateMipMaps();
 }
 
-public class Texture
+public class Texture : IDisposable
 {
     private IBackendTexture _backendTexture = null!;
 
@@ -93,4 +93,13 @@ public class Texture
 
     internal void ApplyBackendTexture(IBackendTexture backendTexture)
         => _backendTexture = backendTexture;
+
+    public void Dispose()
+    {
+        Game.Instance?.QueueDisposable(_backendTexture);
+
+        GC.SuppressFinalize(this);
+    }
+
+    ~Texture() => Dispose();
 }

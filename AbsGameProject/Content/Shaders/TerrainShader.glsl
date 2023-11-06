@@ -1,5 +1,4 @@
-#define include "Content/Shaders/Includes/TestInclude.glsl"
-#define culling back
+﻿#define culling back
 
 struct v2f 
 {
@@ -41,14 +40,10 @@ struct v2f
 
     out vec4 FragColor;
 
-    uniform sampler2D uTexture;
-    uniform sampler2D uTexture1;
-
     void main()
     {
-        vec4 texCol = texture(uTexture, vertData.uvs);
-        vec4 texCol1 = texture(uTexture1, vertData.uvs);
-        FragColor = vec4(mix(texCol1, texCol, vertData.uvs.x));
+        float ndl = clamp(dot(vertData.worldNormal, vec4(0.25, -0.5, 0.75, 1)), 0.0, 1.0) + 0.25;
+        FragColor = vec4(ndl,ndl,ndl,1);
     }
 
 #endif

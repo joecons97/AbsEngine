@@ -6,8 +6,6 @@ public abstract class System : IDisposable
 
     protected bool isDisposed = false;
 
-    internal bool isFrameComplete { get; set; }
-
     protected System(Scene scene)
     {
         Scene = scene;
@@ -15,7 +13,9 @@ public abstract class System : IDisposable
 
     public virtual void OnStart() { }
 
-    public virtual void Tick(float deltaTime) { }
+    public virtual void Tick(float deltaTime) 
+    {
+    }
 
     public void Dispose()
     {

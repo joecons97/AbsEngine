@@ -5,7 +5,7 @@ namespace AbsEngine.IO;
 
 public static class MeshLoader
 {
-    public static Rendering.Mesh? LoadMesh(string fileLocation)
+    public static Rendering.Mesh LoadMesh(string fileLocation)
     {
         using AssimpContext assimpContext = new();
 
@@ -14,10 +14,10 @@ public static class MeshLoader
             PostProcessSteps.JoinIdenticalVertices | PostProcessSteps.GenerateNormals);
 
         if (assimpScene.MeshCount == 0)
-            return null;
+            return new Rendering.Mesh();
 
         if (assimpScene.MeshCount > 1)
-            throw new NotImplementedException();
+            return new Rendering.Mesh();
 
         var mesh = assimpScene.Meshes.First();
 

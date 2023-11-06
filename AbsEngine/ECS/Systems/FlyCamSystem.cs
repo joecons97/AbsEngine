@@ -12,7 +12,7 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
     IMouse mouse;
     IKeyboard keyboard;
 
-    public float MoveSpeed { get; private set; } = 1;
+    public float MoveSpeed { get; private set; } = 15;
 
     protected override Func<CameraComponent, bool>? Predicate => (x) =>
     {

@@ -6,6 +6,8 @@ public abstract class ComponentSystem<T> : System where T : Component
 
     protected virtual bool UseParallel => false;
 
+    protected virtual int MaxIterationsPerFrame => int.MaxValue;
+
     protected ComponentSystem(Scene scene) : base(scene)
     {
     }
@@ -17,6 +19,8 @@ public abstract class ComponentSystem<T> : System where T : Component
         var comps = Predicate == null
             ? Scene.EntityManager.GetComponents<T>()
             : Scene.EntityManager.GetComponents(Predicate);
+
+        comps = comps.Take(MaxIterationsPerFrame);
 
         OnInitialiseTick(deltaTime);
 
@@ -34,8 +38,6 @@ public abstract class ComponentSystem<T> : System where T : Component
                 OnTick(comp, deltaTime);
             }
         }
-
-        isFrameComplete = true;
     }
 
     public abstract void OnTick(T component, float deltaTime);

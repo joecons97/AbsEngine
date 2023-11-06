@@ -42,41 +42,13 @@ internal class OpenGLMesh : IBackendMesh
     {
         if (_positions == null) return;
 
-        if (_colours == null)
-        {
-            _colours = new Vector4D<float>[_positions.Length];
-        }
-
-        if (_uvs == null)
-        {
-            _uvs = new Vector2D<float>[_positions.Length];
-        }
-
-        if (_normals == null)
-        {
-            _normals = new Vector3D<float>[_positions.Length];
-        }
-
-        if (Positions.Length != Uvs.Length)
-        {
-            throw new ArgumentException("the number of position and uvs must be equal");
-        }
-
-        if (Positions.Length != Normals.Length)
-        {
-            throw new ArgumentException("the number of position and normals must be equal");
-        }
-
-        if (Positions.Length != Colours.Length)
-        {
-            throw new ArgumentException("the number of position and colours must be equal");
-        }
+        var fallbackLength = Positions.Length;
 
         int positionsOffset = Positions.Length * 3;
-        int coloursOffset = Colours.Length * 4;
-        int uvsOffset = Uvs.Length * 2;
-        int normalsOffset = Normals.Length * 3;
-        int tangentsOffset = Tangents.Length * 3;
+        int coloursOffset = Colours == null || !Colours.Any() ? fallbackLength * 4 : Colours.Length * 4;
+        int uvsOffset = Uvs == null || !Uvs.Any() ? fallbackLength * 2 : Uvs.Length * 2;
+        int normalsOffset = Normals == null || !Normals.Any() ? fallbackLength * 3 : Normals.Length * 3;
+        int tangentsOffset = Tangents == null || !Tangents.Any() ? fallbackLength * 3 : Tangents.Length * 3;
 
         float[] vertices = new float[positionsOffset + coloursOffset + uvsOffset + normalsOffset + tangentsOffset];
         for (int i = 0; i < _positions.Length; i++)
@@ -105,8 +77,8 @@ internal class OpenGLMesh : IBackendMesh
 
         for (int i = 0; i < _tangents.Length; i++)
         {
-            Vector3D<float> normal = _tangents[i];
-            normal.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + normalsOffset + (i * 3));
+            Vector3D<float> tangent = _tangents[i];
+            tangent.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + normalsOffset + (i * 3));
         }
 
         _vbo = new BufferContainer<float>(_gl, vertices, BufferTargetARB.ArrayBuffer);
@@ -125,6 +97,7 @@ internal class OpenGLMesh : IBackendMesh
         _vao.VertexAttributePointer(1, 4, VertexAttribPointerType.Float, 0, positionsOffset);
         _vao.VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset);
         _vao.VertexAttributePointer(3, 3, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset + uvsOffset);
+        _vao.VertexAttributePointer(4, 3, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset + uvsOffset + normalsOffset);
     }
 
     public void Bind()

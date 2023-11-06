@@ -1,4 +1,6 @@
-﻿namespace AbsEngine.Maths;
+﻿using Silk.NET.Maths;
+
+namespace AbsEngine.Maths;
 
 public class AbsMaths
 {

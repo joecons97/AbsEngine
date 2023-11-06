@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Dependencie"
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Component"
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Entitie"
+      }
+    },
+    "systems": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/System"
+      }
+    }
+  },
+  "definitions": {
+    "Dependencie": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "LocalEulerAngles": {
+      "type": "object",
+      "properties": {
+        "X": {
+          "type": "number"
+        },
+        "Y": {
+          "type": "number"
+        },
+        "Z": {
+          "type": "number"
+        }
+      }
+    },
+    "Component": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "FieldOfView": {
+          "type": "integer"
+        },
+        "IsMainCamera": {
+          "type": "boolean"
+        },
+        "LocalEulerAngles": {
+          "$ref": "#/definitions/LocalEulerAngles"
+        },
+        "Mesh": {
+          "type": "string"
+        },
+        "Material": {
+          "type": "string"
+        },
+        "Parent": {
+          "type": "string"
+        },
+        "LocalPosition": {
+          "$ref": "#/definitions/LocalEulerAngles"
+        }
+      }
+    },
+    "Anonymous4": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "Anonymous5": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "Anonymous6": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "Entitie": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Anonymous4"
+          }
+        }
+      }
+    },
+    "System": {
+      "type": "string"
+    }
+  }
+}

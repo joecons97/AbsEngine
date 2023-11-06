@@ -48,7 +48,7 @@ public class Mesh : IDisposable
 
     public void Dispose()
     {
-        _backendMesh?.Dispose();
+        Game.Instance?.QueueDisposable(_backendMesh);
 
         GC.SuppressFinalize(this);
     }

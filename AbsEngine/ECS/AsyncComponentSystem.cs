@@ -2,22 +2,10 @@
 
 public abstract class AsyncComponentSystem<T> : System where T : Component
 {
-    bool canTick = false;
-
     protected virtual Func<T, bool>? Predicate => null;
 
     protected AsyncComponentSystem(Scene scene) : base(scene)
     {
-    }
-
-    public async Task NextTick()
-    {
-        isFrameComplete = true;
-
-        while (canTick == false)
-            await Task.Yield();
-
-        canTick = false;
     }
 
     public override void Tick(float deltaTime)
@@ -32,9 +20,6 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
             {
                 await OnTickAsync(comp, Scene._deltaTime);
             });
-
-            isFrameComplete = true;
-            canTick = true;
         });
     }
 

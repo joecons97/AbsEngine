@@ -37,15 +37,23 @@ public class Scene : IDisposable
 
     public static Scene Load()
     {
-        return new Scene("New Scene");
+        var scene = new Scene("New Scene");
+
+        Game.Instance?._activeScenes.Add(scene);    
+
+        return scene;
     }
 
     public static Scene Load(string fileLocation)
     {
-        return SceneLoader.LoadSceneFromFile(fileLocation);
+        var scene = SceneLoader.LoadSceneFromFile(fileLocation);
+
+        Game.Instance?._activeScenes.Add(scene);
+
+        return scene;
     }
 
-    public async Task Tick(float deltaTime)
+    public void Tick(float deltaTime)
     {
         _hasTickBegun = true;
         _deltaTime = deltaTime;
@@ -53,9 +61,6 @@ public class Scene : IDisposable
         foreach(var system in _systems)
         {
             system.Tick(deltaTime);
-
-            while(system.isFrameComplete == false)
-                await Task.Yield();
         }
 
         _hasTickBegun = false;

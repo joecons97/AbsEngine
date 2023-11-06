@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "shader": {
+      "type": "string"
+    },
+    "uniforms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Uniform"
+      }
+    }
+  },
+  "definitions": {
+    "Uniform": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["texture", "float", "int", "uint", "vector", "matrix"]
+        },
+        "value": {
+          "type": [ "number", "string", "boolean", "object", "array" ]
+        }
+      }
+    }
+  }
+}

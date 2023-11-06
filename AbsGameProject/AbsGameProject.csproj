@@ -30,6 +30,9 @@
     <None Update="Content\Shaders\NewSyntax.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Content\Shaders\TerrainShader.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Textures\alldownhillfromhere.PNG">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -37,5 +40,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties content_4maps_4rawscene_1rsc__JsonSchema="..\..\..\AbsEngine\JsonSchemas\RawScene.schema.json" content_4materials_4test_1mat__JsonSchema="..\..\..\AbsEngine\JsonSchemas\Material.schema.json" /></VisualStudio></ProjectExtensions>
 
 </Project>

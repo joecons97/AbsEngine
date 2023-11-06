@@ -42,8 +42,8 @@ public class Shader : IDisposable
         => _backendShader?.Bind();
 
     public void Dispose()
-    { 
-        _backendShader?.Dispose();
+    {
+        Game.Instance?.QueueDisposable(_backendShader);
 
         GC.SuppressFinalize(this);
     }

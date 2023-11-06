@@ -1,6 +1,5 @@
 ﻿using AbsEngine.IO;
 using Silk.NET.Maths;
-using System.Xml.Linq;
 
 namespace AbsEngine.Rendering;
 
@@ -12,7 +11,7 @@ public class Material
 
     public Material(string shaderName)
     {
-        Shader = ShaderLoader.GetShaderByName(shaderName) 
+        Shader = ShaderLoader.GetShaderByName(shaderName)
             ?? throw new ArgumentException(nameof(shaderName), $"Shader with name not found {shaderName}");
     }
 
@@ -20,7 +19,7 @@ public class Material
     {
         Shader.Bind();
 
-        foreach ( var texture in _textures )
+        foreach (var texture in _textures)
         {
             Shader.SetTexture(texture.Key, texture.Value);
         }
@@ -38,7 +37,7 @@ public class Material
         => Shader?.SetMatrix(name, value);
     public void SetTexture(string name, Texture texture)
     {
-        if(_textures.ContainsKey(name))
+        if (_textures.ContainsKey(name))
             _textures[name] = texture;
         else
             _textures.Add(name, texture);

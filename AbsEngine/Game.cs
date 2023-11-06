@@ -1,19 +1,21 @@
-﻿using AbsEngine.IO;
+﻿using AbsEngine.ECS;
+using AbsEngine.IO;
 using AbsEngine.Rendering;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
 namespace AbsEngine;
 
 public class Game
 {
+    const int MAX_DISPOSABLE_PER_FRAME = 10;
+
     public static Game? Instance { get; private set; }
 
     public event Action? OnLoad;
-    public event Func<double, Task>? OnUpdate;
-    public event Func<double, Task>? OnRender;
+    public event Action<double>? OnUpdate;
+    public event Action<double>? OnRender;
 
     public IInputContext InputContext { get; private set; } = null!;
     public IGraphics Graphics { get; private set; } = null!;
@@ -26,6 +28,10 @@ public class Game
     private WindowOptions _windowOptions;
     private IWindow _window;
 
+    private Queue<IDisposable> _queueForDisposal = new Queue<IDisposable>();
+
+    internal List<Scene> _activeScenes = new();
+
     public Game(string org, string name, GraphicsAPIs gfxApi, Vector2D<int> size = default)
     {
         if (Instance != null)
@@ -36,7 +42,7 @@ public class Game
         _organsition = org;
         _name = name;
         //if(size == default)
-            //TODO Load from file
+        //TODO Load from file
 
         _size = size;
 
@@ -64,12 +70,33 @@ public class Game
 
         _window.Update += (dt) =>
         {
-            OnUpdate?.Invoke(dt).Wait();
+            int count = 0;
+            while (_queueForDisposal.Count > 0)
+            {
+                _queueForDisposal.Dequeue().Dispose();
+                count++;
+
+                if (count > MAX_DISPOSABLE_PER_FRAME)
+                    break;
+            }
+
+            foreach (var item in _activeScenes)
+            {
+                item.Tick((float)dt);
+            }
+
+            OnUpdate?.Invoke(dt);
         };
+
         _window.Render += (dt) =>
         {
-            OnRender?.Invoke(dt).Wait();
+            Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
+
+            Rendering.Renderer.CompleteFrame();
+
+            OnRender?.Invoke(dt);
         };
+
         _window.FramebufferResize += (s) =>
         {
             Graphics?.UpdateViewport(s);
@@ -79,5 +106,11 @@ public class Game
     public void Run()
     {
         _window.Run();
+    }
+
+    public void QueueDisposable(IDisposable disposable)
+    {
+        if (!_queueForDisposal.Contains(disposable))
+            _queueForDisposal.Enqueue(disposable);
     }
 }
