@@ -1,7 +1,6 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using Silk.NET.Maths;
-using System.Diagnostics;
 
 namespace AbsGameProject.Terrain
 {
@@ -48,6 +47,7 @@ namespace AbsGameProject.Terrain
 
                     if (chunk.Any())
                     {
+                        HandleNeighbours(chunk.First(), xF, zF);
                         activeChunks.AddRange(chunk);
                         continue;
                     }
@@ -69,48 +69,16 @@ namespace AbsGameProject.Terrain
                     {
                         var chunkEnt = Scene.EntityManager.CreateEntity();
                         chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>(chunkEnt.AddComponent<MeshRendererComponent>());
+                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
 
                         chunkEnt.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
                         activeChunks.Add(chunkComp);
                     }
 
-                    var neighbours = Scene.EntityManager.GetComponents<TerrainChunkComponent>(x =>
-                        (x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH) ||
-                        (x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH) ||
-                        (x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH && x.Entity.Transform.LocalPosition.Z == zF) ||
-                        (x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH && x.Entity.Transform.LocalPosition.Z == zF));
-
-                    if (neighbours.Count() == 4)
-                    {
-                        Debug.WriteLine("Hello");
-                    }
-
-                    chunkComp.NorthNeighbour = neighbours.FirstOrDefault(x => x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH);
-
-                    chunkComp.SouthNeighbour = neighbours.FirstOrDefault(x => x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH);
-
-                    chunkComp.LeftNeighbour = neighbours.FirstOrDefault(x => x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH && x.Entity.Transform.LocalPosition.Z == zF);
-
-                    chunkComp.RightNeighbour = neighbours.FirstOrDefault(x => x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH && x.Entity.Transform.LocalPosition.Z == zF);
-
-                    if (chunkComp.NorthNeighbour != null)
-                    {
-                        chunkComp.NorthNeighbour.SouthNeighbour = chunkComp;
-                    }
-                    if (chunkComp.RightNeighbour != null)
-                    {
-                        chunkComp.RightNeighbour.LeftNeighbour = chunkComp;
-                    }
-                    if (chunkComp.LeftNeighbour != null)
-                    {
-                        chunkComp.LeftNeighbour.RightNeighbour = chunkComp;
-                    }
-                    if (chunkComp.SouthNeighbour != null)
-                    {
-                        chunkComp.SouthNeighbour.NorthNeighbour = chunkComp;
-                    }
+                    HandleNeighbours(chunkComp, xF, zF);
                 }
             }
+
 
             foreach (var chunk in Scene.EntityManager.GetComponents<TerrainChunkComponent>()
                 .Except(activeChunks)
@@ -121,11 +89,86 @@ namespace AbsGameProject.Terrain
             {
                 if (!pool.Contains(chunk))
                 {
+                    if (chunk.NorthNeighbour != null)
+                    {
+                        chunk.NorthNeighbour.SouthNeighbour = null;
+                        chunk.NorthNeighbour = null;
+                    }
+                    if (chunk.RightNeighbour != null)
+                    {
+                        chunk.RightNeighbour.LeftNeighbour = null;
+                        chunk.RightNeighbour = null;
+                    }
+                    if (chunk.LeftNeighbour != null)
+                    {
+                        chunk.LeftNeighbour.RightNeighbour = null;
+                        chunk.LeftNeighbour = null;
+                    }
+                    if (chunk.SouthNeighbour != null)
+                    {
+                        chunk.SouthNeighbour.NorthNeighbour = null;
+                        chunk.SouthNeighbour = null;
+                    }
+
                     pool.Add(chunk);
                 }
             }
 
             base.Tick(deltaTime);
+        }
+
+        void HandleNeighbours(TerrainChunkComponent chunkComp, int xF, int zF)
+        {
+            var neighbours = Scene.EntityManager
+                .GetComponents<TerrainChunkComponent>(x =>
+                ((int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH) ||
+
+                ((int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH) ||
+
+                ((int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF) ||
+
+                ((int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF));
+
+            chunkComp.NorthNeighbour = neighbours
+                .FirstOrDefault(x =>
+                (int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH) ?? chunkComp.NorthNeighbour;
+
+            chunkComp.SouthNeighbour = neighbours
+                .FirstOrDefault(x =>
+                (int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH) ?? chunkComp.SouthNeighbour;
+
+            chunkComp.LeftNeighbour = neighbours
+                .FirstOrDefault(x => 
+                (int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF) ?? chunkComp.LeftNeighbour;
+
+            chunkComp.RightNeighbour = neighbours
+                .FirstOrDefault(x => 
+                (int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF) ?? chunkComp.RightNeighbour;
+
+            if (chunkComp.NorthNeighbour != null)
+            {
+                chunkComp.NorthNeighbour.SouthNeighbour = chunkComp;
+            }
+            if (chunkComp.RightNeighbour != null)
+            {
+                chunkComp.RightNeighbour.LeftNeighbour = chunkComp;
+            }
+            if (chunkComp.LeftNeighbour != null)
+            {
+                chunkComp.LeftNeighbour.RightNeighbour = chunkComp;
+            }
+            if (chunkComp.SouthNeighbour != null)
+            {
+                chunkComp.SouthNeighbour.NorthNeighbour = chunkComp;
+            }
         }
     }
 }

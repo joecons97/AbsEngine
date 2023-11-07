@@ -21,7 +21,11 @@ namespace AbsGameProject.Terrain
         public Mesh? Mesh { get; set; }
         public MeshRendererComponent Renderer { get; set; }
 
-        public bool HasAllNeighbours => LeftNeighbour != null && RightNeighbour != null && NorthNeighbour != null && SouthNeighbour != null;
+        public bool HasAllNeighbours => 
+            LeftNeighbour != null && LeftNeighbour.State != TerrainState.None && 
+            RightNeighbour != null && RightNeighbour.State != TerrainState.None &&
+            NorthNeighbour != null && NorthNeighbour.State != TerrainState.None &&
+            SouthNeighbour != null && SouthNeighbour.State != TerrainState.None;
 
         public TerrainChunkComponent? LeftNeighbour;
         public TerrainChunkComponent? RightNeighbour;

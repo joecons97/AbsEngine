@@ -9,7 +9,9 @@ namespace AbsGameProject.Terrain
     {
         private Material material;
 
-        protected override Func<TerrainChunkComponent, bool>? Predicate => ((x) => x.State == TerrainChunkComponent.TerrainState.NoiseGenerated);
+        protected override Func<TerrainChunkComponent, bool>? Predicate =>
+            (x) => x.State == TerrainChunkComponent.TerrainState.NoiseGenerated && x.HasAllNeighbours;
+
         protected override int MaxIterationsPerFrame => 1;
 
         public TerrainMeshGeneratorSystem(Scene scene) : base(scene)
@@ -19,7 +21,7 @@ namespace AbsGameProject.Terrain
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
         {
-            if (component.VoxelData == null)// || !component.HasAllNeighbours)
+            if (component.VoxelData == null)
                 return;
 
             var renderer = component.Entity.GetComponent<MeshRendererComponent>();
@@ -207,32 +209,50 @@ namespace AbsGameProject.Terrain
             }
 
             component.State = TerrainChunkComponent.TerrainState.MeshGenerated;
-            component.VoxelData = null;
-
 
             bool ShouldRenderFace(int x, int y, int z)
             {
                 if (x <= -1)
                 {
+                    x = TerrainChunkComponent.WIDTH + x;
+
+                    if (component.LeftNeighbour?.VoxelData != null)
+                        return component.LeftNeighbour.VoxelData[x, y, z] == 0;
+
                     return true;
                 }
 
                 if (x >= TerrainChunkComponent.WIDTH)
                 {
+                    x = x - TerrainChunkComponent.WIDTH;
+
+                    if (component.RightNeighbour?.VoxelData != null)
+                        return component.RightNeighbour.VoxelData[x, y, z] == 0;
+
                     return true;
                 }
 
                 if (z <= -1)
                 {
+                    z = TerrainChunkComponent.WIDTH + z;
+
+                    if (component.SouthNeighbour?.VoxelData != null)
+                        return component.SouthNeighbour.VoxelData[x, y, z] == 0;
+
                     return true;
                 }
 
                 if (z >= TerrainChunkComponent.WIDTH)
                 {
+                    z = z - TerrainChunkComponent.WIDTH;
+
+                    if (component.NorthNeighbour?.VoxelData != null)
+                        return component.NorthNeighbour.VoxelData[x, y, z] == 0;
+
                     return true;
                 }
 
-                if (y < 0 || y > TerrainChunkComponent.HEIGHT - 1)
+                if (y <= 0 || y >= TerrainChunkComponent.HEIGHT - 1)
                     return true;
 
                 if (component.VoxelData == null)
