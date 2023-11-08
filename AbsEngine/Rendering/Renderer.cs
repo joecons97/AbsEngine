@@ -43,7 +43,10 @@ public static class Renderer
             r.Item2.SetMatrix("uWorldMatrix", r.Item3);
             r.Item2.SetMatrix("uMvp", r.Item3 * vpMat);
 
-            Game.Instance!.Graphics.DrawElements((uint)r.Item1.Triangles.Length);
+            if(r.Item1.UseTriangles)
+                Game.Instance!.Graphics.DrawElements((uint)r.Item1.Triangles.Length);
+            else
+                Game.Instance!.Graphics.DrawArrays((uint)r.Item1.Positions.Length);
         }
     }
 }

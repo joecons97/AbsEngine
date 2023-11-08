@@ -2,6 +2,7 @@
 
 struct v2f 
 {
+    vec4 localPos;
     vec4 worldPos;
     vec4 worldNormal;
     vec2 uvs;
@@ -26,6 +27,7 @@ struct v2f
          //gl_Position, is a built-in variable on all vertex shaders that will specify the position of our vertex.
         gl_Position = uMvp * vec4(vPos, 1.0);
 
+        vertData.localPos = vec4(vPos / 16.0, 1.0);
         vertData.worldPos = uWorldMatrix * vec4(vPos, 1.0);
         vertData.worldNormal = normalize(uWorldMatrix * vec4(vNormal, 0));
         vertData.worldTangent = normalize(uWorldMatrix * vec4(vTangent, 0));
@@ -43,7 +45,7 @@ struct v2f
     void main()
     {
         float ndl = clamp(dot(vertData.worldNormal, vec4(0.25, -0.5, 0.75, 1)), 0.0, 1.0) + 0.25;
-        FragColor = vec4(ndl,ndl,ndl,1);
+        FragColor = vec4(vertData.localPos.x,0,0, 0);//vec4(ndl,ndl,ndl,1);
     }
 
 #endif

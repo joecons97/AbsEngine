@@ -137,5 +137,10 @@ namespace AbsEngine.Rendering.DirectX11
             device.Dispose();
             deviceContext.Dispose();
         }
+
+        public void DrawArrays(uint length)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

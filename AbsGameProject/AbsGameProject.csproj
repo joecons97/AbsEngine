@@ -18,6 +18,15 @@
     <None Update="Content\Materials\Test.mat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\Models\Blocks\anvil.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Models\Blocks\Cube.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Models\Blocks\Stairs.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Models\Sphere.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,6 +1,7 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
+using AbsGameProject.Models;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Terrain
@@ -8,6 +9,7 @@ namespace AbsGameProject.Terrain
     public class TerrainMeshGeneratorSystem : ComponentSystem<TerrainChunkComponent>
     {
         private Material material;
+        private CullableMesh defaultModel;
 
         protected override Func<TerrainChunkComponent, bool>? Predicate =>
             (x) => x.State == TerrainChunkComponent.TerrainState.NoiseGenerated && x.HasAllNeighbours;
@@ -17,6 +19,10 @@ namespace AbsGameProject.Terrain
         public TerrainMeshGeneratorSystem(Scene scene) : base(scene)
         {
             material = new Material("TerrainShader");
+            if(VoxelModel.TryFromFile("Content/Models/Blocks/Cube.json", out var model))
+            {
+                CullableMesh.TryFromVoxelMesh(model!, out defaultModel!);
+            }
         }
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
@@ -45,149 +51,27 @@ namespace AbsGameProject.Terrain
                             if (state == 0)
                                 continue;
 
-                            //Front Face
+                            List<Vector3D<float>> verts = new();
+
                             if (ShouldRenderFace(x, y, z + 1))
-                            {
-                                vertices.Add(new Vector3D<float>(1 + x, 1 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 1 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 0 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 0 + y, 1 + z));
+                                verts.AddRange(defaultModel.verts[CullFaceDirection.South].ToArray());
 
-                                normals.Add(new Vector3D<float>(0, 0, 1));
-                                normals.Add(new Vector3D<float>(0, 0, 1));
-                                normals.Add(new Vector3D<float>(0, 0, 1));
-                                normals.Add(new Vector3D<float>(0, 0, 1));
-
-                                indices.Add(indexCount);
-                                indices.Add(indexCount + 1);
-                                indices.Add(indexCount + 2);
-
-                                indices.Add(indexCount + 2);
-                                indices.Add(indexCount + 3);
-                                indices.Add(indexCount);
-
-                                indexCount += 4;
-                            }
-
-                            //Back
                             if (ShouldRenderFace(x, y, z - 1))
-                            {
-                                vertices.Add(new Vector3D<float>(0 + x, 1 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 1 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 0 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 0 + y, 0 + z));
+                                verts.AddRange(defaultModel.verts[CullFaceDirection.North].ToArray());
 
-                                normals.Add(new Vector3D<float>(0, 0, -1));
-                                normals.Add(new Vector3D<float>(0, 0, -1));
-                                normals.Add(new Vector3D<float>(0, 0, -1));
-                                normals.Add(new Vector3D<float>(0, 0, -1));
-
-                                indices.Add(indexCount);
-                                indices.Add(indexCount + 1);
-                                indices.Add(indexCount + 2);
-
-                                indices.Add(indexCount + 2);
-                                indices.Add(indexCount + 3);
-                                indices.Add(indexCount);
-
-                                indexCount += 4;
-                            }
-
-                            //Top
                             if (ShouldRenderFace(x, y + 1, z))
-                            {
-                                vertices.Add(new Vector3D<float>(1 + x, 1 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 1 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 1 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 1 + y, 1 + z));
+                                verts.AddRange(defaultModel.verts[CullFaceDirection.Up].ToArray());
 
-                                normals.Add(new Vector3D<float>(0, 1, 0));
-                                normals.Add(new Vector3D<float>(0, 1, 0));
-                                normals.Add(new Vector3D<float>(0, 1, 0));
-                                normals.Add(new Vector3D<float>(0, 1, 0));
-
-                                indices.Add(indexCount);
-                                indices.Add(indexCount + 1);
-                                indices.Add(indexCount + 2);
-
-                                indices.Add(indexCount + 2);
-                                indices.Add(indexCount + 3);
-                                indices.Add(indexCount);
-
-                                indexCount += 4;
-                            }
-
-                            //Bottom
                             if (ShouldRenderFace(x, y - 1, z))
-                            {
-                                vertices.Add(new Vector3D<float>(1 + x, 0 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 0 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 0 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 0 + y, 0 + z));
+                                verts.AddRange(defaultModel.verts[CullFaceDirection.Down].ToArray());
 
-                                normals.Add(new Vector3D<float>(0, -1, 0));
-                                normals.Add(new Vector3D<float>(0, -1, 0));
-                                normals.Add(new Vector3D<float>(0, -1, 0));
-                                normals.Add(new Vector3D<float>(0, -1, 0));
-
-                                indices.Add(indexCount);
-                                indices.Add(indexCount + 1);
-                                indices.Add(indexCount + 2);
-
-                                indices.Add(indexCount + 2);
-                                indices.Add(indexCount + 3);
-                                indices.Add(indexCount);
-
-                                indexCount += 4;
-                            }
-
-                            //Right
                             if (ShouldRenderFace(x + 1, y, z))
-                            {
-                                vertices.Add(new Vector3D<float>(1 + x, 1 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 1 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 0 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(1 + x, 0 + y, 0 + z));
+                                verts.AddRange(defaultModel.verts[CullFaceDirection.East].ToArray());
 
-                                normals.Add(new Vector3D<float>(1, 0, 0));
-                                normals.Add(new Vector3D<float>(1, 0, 0));
-                                normals.Add(new Vector3D<float>(1, 0, 0));
-                                normals.Add(new Vector3D<float>(1, 0, 0));
-
-                                indices.Add(indexCount);
-                                indices.Add(indexCount + 1);
-                                indices.Add(indexCount + 2);
-
-                                indices.Add(indexCount + 2);
-                                indices.Add(indexCount + 3);
-                                indices.Add(indexCount);
-
-                                indexCount += 4;
-                            }
-
-                            //Left
                             if (ShouldRenderFace(x - 1, y, z))
-                            {
-                                vertices.Add(new Vector3D<float>(0 + x, 1 + y, 1 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 1 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 0 + y, 0 + z));
-                                vertices.Add(new Vector3D<float>(0 + x, 0 + y, 1 + z));
+                                verts.AddRange(defaultModel.verts[CullFaceDirection.West].ToArray());
 
-                                normals.Add(new Vector3D<float>(-1, 0, 0));
-                                normals.Add(new Vector3D<float>(-1, 0, 0));
-                                normals.Add(new Vector3D<float>(-1, 0, 0));
-                                normals.Add(new Vector3D<float>(-1, 0, 0));
-
-                                indices.Add(indexCount);
-                                indices.Add(indexCount + 1);
-                                indices.Add(indexCount + 2);
-
-                                indices.Add(indexCount + 2);
-                                indices.Add(indexCount + 3);
-                                indices.Add(indexCount);
-
-                                indexCount += 4;
-                            }
+                            vertices.AddRange(verts.Select(v => v + new Vector3D<float>(x, y, z)));
                         }
                     }
                 }
@@ -198,6 +82,7 @@ namespace AbsGameProject.Terrain
                 mesh.Tangents = new Vector3D<float>[0];
                 mesh.Colours = new Vector4D<float>[0];
                 mesh.Uvs = new Vector2D<float>[0];
+                mesh.UseTriangles = false;
             }).Wait();
 
             mesh.Build();
@@ -253,7 +138,7 @@ namespace AbsGameProject.Terrain
                 }
 
                 if (y <= 0 || y >= TerrainChunkComponent.HEIGHT - 1)
-                    return true;
+                    return false;
 
                 if (component.VoxelData == null)
                     return false;

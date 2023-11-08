@@ -29,4 +29,5 @@ public interface IGraphics
     public void SetActiveDepthTest(bool enabled);
 
     public void DrawElements(uint length);
+    public void DrawArrays(uint length);
 }

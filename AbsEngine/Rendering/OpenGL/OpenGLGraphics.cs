@@ -28,6 +28,11 @@ internal class OpenGLGraphics : IGraphics
         Gl.DrawElements(PrimitiveType.Triangles, length, DrawElementsType.UnsignedInt, null);
     }
 
+    public unsafe void DrawArrays(uint length)
+    {
+        Gl.DrawArrays(PrimitiveType.Triangles, 0, length);
+    }
+
     public void UpdateViewport(Vector2D<int> viewport)
     {
         Gl.Viewport(viewport);

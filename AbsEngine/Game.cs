@@ -73,7 +73,7 @@ public class Game
             int count = 0;
             while (_queueForDisposal.Count > 0)
             {
-                _queueForDisposal.Dequeue().Dispose();
+                _queueForDisposal.Dequeue()?.Dispose();
                 count++;
 
                 if (count > MAX_DISPOSABLE_PER_FRAME)

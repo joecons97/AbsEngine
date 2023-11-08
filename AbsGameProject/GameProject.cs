@@ -3,6 +3,7 @@ using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.ECS.Systems;
 using AbsEngine.Rendering;
+using AbsGameProject.Models;
 using AbsGameProject.Terrain;
 using Silk.NET.Maths;
 using System.Drawing;
@@ -34,6 +35,21 @@ namespace AbsGameProject
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
             scene.RegisterSystem<TerrainMeshGeneratorSystem>();
             scene.RegisterSystem<MeshRendererSystem>();
+
+            var cubeEnt = scene.EntityManager.CreateEntity();
+            var renderer = cubeEnt.AddComponent<MeshRendererComponent>();
+            if (VoxelModel.TryFromFile("Content/Models/Blocks/anvil.json", out var model))
+            {
+                CullableMesh.TryFromVoxelMesh(model!, out var defaultModel);
+                var mesh = new Mesh();
+                mesh.UseTriangles = false;
+                mesh.Positions = defaultModel.verts.Where(x => x.Key != CullFaceDirection.South).SelectMany(x => x.Value).ToArray();
+                //mesh.Triangles = defaultModel.indices.SelectMany(x => x.Value).ToArray();   
+                mesh.Build();
+
+                renderer.Mesh = mesh;
+                renderer.Material = new Material("TerrainShader");
+            }
         }
     }
 }

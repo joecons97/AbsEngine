@@ -83,7 +83,7 @@ internal class OpenGLMesh : IBackendMesh
 
         _vbo = new BufferContainer<float>(_gl, vertices, BufferTargetARB.ArrayBuffer);
 
-        if (Triangles != null)
+        if (Triangles != null && Triangles.Length != 0)
         {
             _ebo = new BufferContainer<uint>(_gl, Triangles.ToArray(), BufferTargetARB.ElementArrayBuffer);
             _vao = new VertexArrayContainer<float, uint>(_gl, _vbo, _ebo);
