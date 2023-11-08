@@ -97,7 +97,6 @@ public class VoxelModel
                         indices.Add(vertOffset + 7);
                         break;
                     case CullFaceDirection.West:
-                        //TODO Fix
                         indices.Add(vertOffset + 1);
                         indices.Add(vertOffset + 2);
                         indices.Add(vertOffset + 3);

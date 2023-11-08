@@ -43,7 +43,7 @@ namespace AbsGameProject
                 CullableMesh.TryFromVoxelMesh(model!, out var defaultModel);
                 var mesh = new Mesh();
                 mesh.UseTriangles = false;
-                mesh.Positions = defaultModel.verts.Where(x => x.Key != CullFaceDirection.South).SelectMany(x => x.Value).ToArray();
+                mesh.Positions = defaultModel.verts.Where(x => x.Key != CullFaceDirection.Down).SelectMany(x => x.Value).ToArray();
                 //mesh.Triangles = defaultModel.indices.SelectMany(x => x.Value).ToArray();   
                 mesh.Build();
 

@@ -43,6 +43,7 @@ namespace AbsGameProject.Terrain
 
                         h = (h / 2) + 1;
                         h *= amplitude;
+                        h /= 1.75f;
 
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                         {

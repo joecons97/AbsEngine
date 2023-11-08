@@ -3,6 +3,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Models;
 using Silk.NET.Maths;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace AbsGameProject.Terrain
 {
@@ -19,10 +20,12 @@ namespace AbsGameProject.Terrain
         public TerrainMeshGeneratorSystem(Scene scene) : base(scene)
         {
             material = new Material("TerrainShader");
-            if(VoxelModel.TryFromFile("Content/Models/Blocks/Cube.json", out var model))
+            if (!VoxelModel.TryFromFile("Content/Models/Blocks/Cube.json", out var model))
             {
-                CullableMesh.TryFromVoxelMesh(model!, out defaultModel!);
+                throw new Exception("Unable to load Content/Models/Blocks/Cube.json");
             }
+
+            CullableMesh.TryFromVoxelMesh(model!, out defaultModel!);
         }
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
@@ -36,8 +39,6 @@ namespace AbsGameProject.Terrain
 
             Task.Run(() =>
             {
-                uint indexCount = 0;
-
                 var vertices = new List<Vector3D<float>>();
                 var normals = new List<Vector3D<float>>();
                 var indices = new List<uint>();
@@ -52,25 +53,27 @@ namespace AbsGameProject.Terrain
                                 continue;
 
                             List<Vector3D<float>> verts = new();
+                            CullFaceDirection toCull = CullFaceDirection.None;
 
-                            if (ShouldRenderFace(x, y, z + 1))
-                                verts.AddRange(defaultModel.verts[CullFaceDirection.South].ToArray());
+                            if (ShouldRenderFace(x, y, z + 1) == false)
+                                toCull |= CullFaceDirection.North;
+                            
+                            if (ShouldRenderFace(x, y, z - 1) == false)
+                                toCull |= CullFaceDirection.South;
+                            
+                            if (ShouldRenderFace(x, y + 1, z) == false)
+                                toCull |= CullFaceDirection.Down;
+                            
+                            if (ShouldRenderFace(x, y - 1, z) == false)
+                                toCull |= CullFaceDirection.Up;
+                            
+                            if (ShouldRenderFace(x + 1, y, z) == false)
+                                toCull |= CullFaceDirection.West;
+                            
+                            if (ShouldRenderFace(x - 1, y, z) == false)
+                                toCull |= CullFaceDirection.East;
 
-                            if (ShouldRenderFace(x, y, z - 1))
-                                verts.AddRange(defaultModel.verts[CullFaceDirection.North].ToArray());
-
-                            if (ShouldRenderFace(x, y + 1, z))
-                                verts.AddRange(defaultModel.verts[CullFaceDirection.Up].ToArray());
-
-                            if (ShouldRenderFace(x, y - 1, z))
-                                verts.AddRange(defaultModel.verts[CullFaceDirection.Down].ToArray());
-
-                            if (ShouldRenderFace(x + 1, y, z))
-                                verts.AddRange(defaultModel.verts[CullFaceDirection.East].ToArray());
-
-                            if (ShouldRenderFace(x - 1, y, z))
-                                verts.AddRange(defaultModel.verts[CullFaceDirection.West].ToArray());
-
+                            verts.AddRange(defaultModel.verts.Where(x => !toCull.HasFlag(x.Key)).SelectMany(x => x.Value));
                             vertices.AddRange(verts.Select(v => v + new Vector3D<float>(x, y, z)));
                         }
                     }
