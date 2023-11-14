@@ -10,7 +10,7 @@ namespace AbsGameProject.Terrain
         private float noiseSize = 4f;
         private float amplitude = 70;
 
-        private int octaves = 8;
+        private int octaves = 12;
         private float lacunarity = 2;
         private float persistence = 0.5f;
 
