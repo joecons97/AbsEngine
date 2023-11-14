@@ -1,5 +1,4 @@
-﻿using AbsEngine.IO;
-using AbsEngine.Rendering.OpenGL;
+﻿using AbsEngine.Rendering.OpenGL;
 using Silk.NET.Maths;
 
 namespace AbsEngine.Rendering;

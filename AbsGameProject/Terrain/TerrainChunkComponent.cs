@@ -13,6 +13,7 @@ namespace AbsGameProject.Terrain
         {
             None,
             NoiseGenerated,
+            MeshConstructed,
             MeshGenerated
         }
 

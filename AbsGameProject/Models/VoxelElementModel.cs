@@ -24,6 +24,9 @@ public class VoxelElementModelFace
     [JsonPropertyName("texture")]
     public string Texture { get; init; } = "";
 
+    [JsonPropertyName("tintindex")]
+    public int? TintIndex { get; init; } = null;
+
     [JsonPropertyName("cullface")]
     public CullFaceDirection? CullFace { get; init; }
 

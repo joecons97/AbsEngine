@@ -31,6 +31,9 @@ public class VoxelModel
 {
     const int VERT_SCALE = 16;
 
+    [JsonPropertyName("textures")]
+    public Dictionary<string, string> Textures { get; init; } = new Dictionary<string, string>();
+
     [JsonPropertyName("elements")]
     public List<VoxelElementModel> Elements { get; init; } = new List<VoxelElementModel>();
 
@@ -149,18 +152,16 @@ public class VoxelModel
         return mesh;
     }
 
-    public static bool TryFromFile(string path, out VoxelModel? model)
+    public static VoxelModel? TryFromFile(string path)
     {
         var file = File.ReadAllText(path);
         try
         {
-            model = JsonSerializer.Deserialize<VoxelModel>(file);
-            return true;
+            return JsonSerializer.Deserialize<VoxelModel>(file);
         }
         catch (Exception ex)
         {
-            model = null;
-            return false;
+            return null;
         }
     }
 }

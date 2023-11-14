@@ -1,12 +1,12 @@
 {	
 	"__comment": "Hello there :)",
-	"parent": "block/block", 
+	"parent": "block/block",
 	"textures": {
-		"particle": "block/iron_block", 
-		"feet": "block/anvil_feet", 
-		"body": "block/anvil_body", 
-		"head": "block/anvil_head_short", 
-		"top": "block/anvil_head_long"    
+		"particle": "Content/Textures/Blocks/iron_block.png",
+		"feet": "Content/Textures/Blocks/anvil_feet.png",
+		"body": "Content/Textures/Blocks/anvil_body.png",
+		"head": "Content/Textures/Blocks/anvil_head_short.png",
+		"top": "Content/Textures/Blocks/anvil_head_long.png"
 	},
     "display": {
 		"fixed": {

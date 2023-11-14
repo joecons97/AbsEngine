@@ -3,10 +3,10 @@ using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.ECS.Systems;
 using AbsEngine.Rendering;
-using AbsGameProject.Models;
+using AbsGameProject.Blocks;
 using AbsGameProject.Terrain;
+using AbsGameProject.Textures;
 using Silk.NET.Maths;
-using System.Drawing;
 
 namespace AbsGameProject
 {
@@ -25,6 +25,14 @@ namespace AbsGameProject
 
         private static void Instance_OnLoad()
         {
+            TextureAtlas.Initialise(1024, 0);
+
+            BlockRegistry.AddBlock(Block.New("stone", "Stone").WithVoxelModel("Content/Models/Blocks/Cube.json").Build());
+            BlockRegistry.AddBlock(Block.New("dirt", "Dirt").WithVoxelModel("Content/Models/Blocks/Dirt.json").Build());
+            BlockRegistry.AddBlock(Block.New("grass", "Grass").WithVoxelModel("Content/Models/Blocks/Grass.json").Build());
+
+            TextureAtlas.Build();
+
             var scene = Scene.Load();
 
             var camEnt = scene.EntityManager.CreateEntity();
@@ -33,23 +41,12 @@ namespace AbsGameProject
             scene.RegisterSystem<FlyCamSystem>();
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
-            scene.RegisterSystem<TerrainMeshGeneratorSystem>();
+            scene.RegisterSystem<TerrainMeshConstructorSystem>();
+            scene.RegisterSystem<TerrainMeshBuilderSystem>();
             scene.RegisterSystem<MeshRendererSystem>();
 
             var cubeEnt = scene.EntityManager.CreateEntity();
             var renderer = cubeEnt.AddComponent<MeshRendererComponent>();
-            if (VoxelModel.TryFromFile("Content/Models/Blocks/anvil.json", out var model))
-            {
-                CullableMesh.TryFromVoxelMesh(model!, out var defaultModel);
-                var mesh = new Mesh();
-                mesh.UseTriangles = false;
-                mesh.Positions = defaultModel.verts.Where(x => x.Key != CullFaceDirection.Down).SelectMany(x => x.Value).ToArray();
-                //mesh.Triangles = defaultModel.indices.SelectMany(x => x.Value).ToArray();   
-                mesh.Build();
-
-                renderer.Mesh = mesh;
-                renderer.Material = new Material("TerrainShader");
-            }
         }
     }
 }

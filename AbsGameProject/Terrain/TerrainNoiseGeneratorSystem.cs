@@ -7,7 +7,7 @@ namespace AbsGameProject.Terrain
     public class TerrainNoiseGeneratorSystem : ComponentSystem<TerrainChunkComponent>
     {
         private FastNoiseLite noise;
-        private float noiseSize = 3f;
+        private float noiseSize = 4f;
         private float amplitude = 70;
 
         private int octaves = 8;
@@ -47,8 +47,14 @@ namespace AbsGameProject.Terrain
 
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                         {
-                            if (h <= y)
-                                component.VoxelData[x, y, z] = 1;
+                            if (h <= y - 1)
+                            {
+                                component.VoxelData[x, y, z] = 2;
+                            }
+                            else if(h < y)
+                            {
+                                component.VoxelData[x, y, z] = 3;
+                            }
                             else
                                 component.VoxelData[x, y, z] = 0;
                         }

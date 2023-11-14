@@ -17,4 +17,10 @@ public static class TextureLoader
 
         return texture;
     }
+
+    public static ImageResult LoadImageResult(string fileLocation)
+    {
+        StbImage.stbi_set_flip_vertically_on_load(1);
+        return ImageResult.FromMemory(File.ReadAllBytes(fileLocation), ColorComponents.RedGreenBlueAlpha);
+    }
 }

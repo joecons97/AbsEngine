@@ -7,6 +7,7 @@ struct v2f
     vec4 worldNormal;
     vec2 uvs;
     vec4 worldTangent;
+    vec4 vertexColour;
 };
 
 #ifdef VERT
@@ -32,6 +33,7 @@ struct v2f
         vertData.worldNormal = normalize(uWorldMatrix * vec4(vNormal, 0));
         vertData.worldTangent = normalize(uWorldMatrix * vec4(vTangent, 0));
         vertData.uvs = vec2(vUvs.x, vUvs.y);
+        vertData.vertexColour = vColor;
     }
 
 #endif
@@ -40,12 +42,19 @@ struct v2f
 
     in v2f vertData;
 
+    uniform sampler2D uAtlas;
+
     out vec4 FragColor;
 
     void main()
     {
+        vec4 col = texture2D(uAtlas, vertData.uvs.yx);
+
+        if(col.a < 0.5)
+            discard;
+
         float ndl = clamp(dot(vertData.worldNormal, vec4(0.25, -0.5, 0.75, 1)), 0.0, 1.0) + 0.25;
-        FragColor = vec4(0,vertData.localPos.y/128,0, 0);//vec4(ndl,ndl,ndl,1);
+        FragColor = col * vertData.vertexColour;//vec4(col.x, col.y,0, 0);//vec4(ndl,ndl,ndl,1);
     }
 
 #endif

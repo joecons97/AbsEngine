@@ -62,6 +62,7 @@ namespace AbsGameProject.Terrain
                         chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         chunkComp.Renderer.Mesh = null;
+                        chunkComp.Mesh = null;
 
                         activeChunks.Add(chunkComp);
                     }

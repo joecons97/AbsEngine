@@ -54,11 +54,16 @@ public enum TextureMagFilter
 internal interface IBackendTexture : IDisposable
 {
     public void LoadFromResult(ImageResult imageResult);
+    public void LoadFromPixels(byte[] pixels, int width, int height);
     public void Bind();
+    public void SetTextureTarget(TextureTarget textureTarget);
+    public void SetInternalFormat(InternalFormat internalFormat);
+    public void SetPixelFormat(PixelFormat pixelFormat);
+    public void SetPixelType(PixelType pixelType);
     public void SetWrapMode(TextureWrapMode wrapMode);
     public void SetMinFilter(TextureMinFilter minFilter);
     public void SetMagFilter(TextureMagFilter magFilter);
-    public void SetMaxMips(int maxMips);    
+    public void SetMaxMips(int maxMips);
     public void GenerateMipMaps();
 }
 
@@ -66,14 +71,76 @@ public class Texture : IDisposable
 {
     private IBackendTexture _backendTexture = null!;
 
-    public TextureTarget TextureTarget { get; set; } = TextureTarget.Texture2D;
-    public InternalFormat InternalFormat { get; set; } = InternalFormat.Rgba;
-    public PixelFormat PixelFormat { get; set; } = PixelFormat.Rgba;
-    public PixelType PixelType { get; set; } = PixelType.UnsignedByte;
+    private TextureTarget _textureTarget = TextureTarget.Texture2D;
+    private InternalFormat _internalFormat = InternalFormat.Rgba;
+    private PixelFormat _pixelFormat = PixelFormat.Rgba;
+    private PixelType _pixelType = PixelType.UnsignedByte;
+    private TextureWrapMode _wrapMode = TextureWrapMode.Repeat;
+    private TextureMinFilter _minFilter = TextureMinFilter.LinearMipmapLinear;
+    private TextureMagFilter _magFilter = TextureMagFilter.Linear;
 
-    public TextureWrapMode WrapMode { get; set; } = TextureWrapMode.Repeat;
-    public TextureMinFilter MinFilter { get; set; } = TextureMinFilter.LinearMipmapLinear;
-    public TextureMagFilter MagFilter { get; set; } = TextureMagFilter.Linear;
+    public TextureTarget TextureTarget
+    {
+        get => _textureTarget; set
+        {
+            _textureTarget = value;
+            _backendTexture.SetTextureTarget(value);
+        }
+    }
+
+    public InternalFormat InternalFormat
+    {
+        get => _internalFormat; set
+        {
+            _internalFormat = value;
+            _backendTexture.SetInternalFormat(value);
+
+        }
+    }
+    public PixelFormat PixelFormat
+    {
+        get => _pixelFormat; set
+        {
+            _pixelFormat = value;
+            _backendTexture.SetPixelFormat(value);
+        }
+    }
+
+    public PixelType PixelType
+    {
+        get => _pixelType; set
+        {
+            _pixelType = value;
+            _backendTexture.SetPixelType(value);
+        }
+    }
+
+    public TextureWrapMode WrapMode
+    {
+        get => _wrapMode; set
+        {
+            _wrapMode = value;
+            _backendTexture.SetWrapMode(value);
+        }
+    }
+
+    public TextureMinFilter MinFilter
+    {
+        get => _minFilter; set
+        {
+            _minFilter = value;
+            _backendTexture.SetMinFilter(value);
+        }
+    }
+
+    public TextureMagFilter MagFilter
+    {
+        get => _magFilter; set
+        {
+            _magFilter = value;
+            _backendTexture.SetMagFilter(value);
+        }
+    }
 
     public Texture()
     {
@@ -87,6 +154,9 @@ public class Texture : IDisposable
                 throw new NotImplementedException();
         }
     }
+
+    public void SetPixels(byte[] pixels, int width, int height)
+        => _backendTexture.LoadFromPixels(pixels, width, height);
 
     internal IBackendTexture GetBackendTexture()
         => _backendTexture;

@@ -38,7 +38,7 @@ internal class OpenGLMesh : IBackendMesh
         _gl = ((OpenGLGraphics)Game.Instance!.Graphics).Gl;
     }
 
-    public unsafe void Build()
+    public void Build()
     {
         if (_positions == null) return;
 
@@ -51,36 +51,47 @@ internal class OpenGLMesh : IBackendMesh
         int tangentsOffset = Tangents == null || !Tangents.Any() ? fallbackLength * 3 : Tangents.Length * 3;
 
         float[] vertices = new float[positionsOffset + coloursOffset + uvsOffset + normalsOffset + tangentsOffset];
-        for (int i = 0; i < _positions.Length; i++)
+        Task.Run(async () =>
         {
-            Vector3D<float> pos = _positions[i];
-            pos.CopyTo(vertices, i * 3);
-        }
-
-        for (int i = 0; i < _colours.Length; i++)
-        {
-            Vector4D<float> col = _colours[i];
-            col.CopyTo(vertices, positionsOffset + (i * 4));
-        }
-
-        for (int i = 0; i < _uvs.Length; i++)
-        {
-            Vector2D<float> uv = _uvs[i];
-            uv.CopyTo(vertices, positionsOffset + coloursOffset + (i * 2));
-        }
-
-        for (int i = 0; i < _normals.Length; i++)
-        {
-            Vector3D<float> normal = _normals[i];
-            normal.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + (i * 3));
-        }
-
-        for (int i = 0; i < _tangents.Length; i++)
-        {
-            Vector3D<float> tangent = _tangents[i];
-            tangent.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + normalsOffset + (i * 3));
-        }
-
+            await Task.WhenAll(
+                Task.Run(() => {
+                    for (int i = 0; i < _positions.Length; i++)
+                    {
+                        Vector3D<float> pos = _positions[i];
+                        pos.CopyTo(vertices, i * 3);
+                    }
+                }),
+                Task.Run(() => {
+                    for (int i = 0; i < _colours.Length; i++)
+                    {
+                        Vector4D<float> col = _colours[i];
+                        col.CopyTo(vertices, positionsOffset + (i * 4));
+                    }
+                }),
+                Task.Run(() => {
+                    for (int i = 0; i < _uvs.Length; i++)
+                    {
+                        Vector2D<float> uv = _uvs[i];
+                        uv.CopyTo(vertices, positionsOffset + coloursOffset + (i * 2));
+                    }
+                }),
+                Task.Run(() => {
+                    for (int i = 0; i < _normals.Length; i++)
+                    {
+                        Vector3D<float> normal = _normals[i];
+                        normal.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + (i * 3));
+                    }
+                }),
+                Task.Run(() => {
+                    for (int i = 0; i < _tangents.Length; i++)
+                    {
+                        Vector3D<float> tangent = _tangents[i];
+                        tangent.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + normalsOffset + (i * 3));
+                    }
+                })
+            );
+        }).Wait();
+        
         _vbo = new BufferContainer<float>(_gl, vertices, BufferTargetARB.ArrayBuffer);
 
         if (Triangles != null && Triangles.Length != 0)

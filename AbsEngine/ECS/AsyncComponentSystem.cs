@@ -3,6 +3,7 @@
 public abstract class AsyncComponentSystem<T> : System where T : Component
 {
     protected virtual Func<T, bool>? Predicate => null;
+    protected virtual int MaxIterationsPerFrame => int.MaxValue;
 
     protected AsyncComponentSystem(Scene scene) : base(scene)
     {
@@ -15,6 +16,8 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
             var comps = Predicate == null
                 ? Scene.EntityManager.GetComponents<T>()
                 : Scene.EntityManager.GetComponents(Predicate);
+
+            comps = comps.Take(MaxIterationsPerFrame);
 
             await Parallel.ForEachAsync(comps, async (comp, token) =>
             {
