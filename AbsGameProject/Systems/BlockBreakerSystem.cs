@@ -8,7 +8,6 @@ namespace AbsGameProject.Systems;
 public class BlockBreakerSystem : AbsEngine.ECS.System
 {
     private CameraComponent _mainCamera = null!;
-    private Entity cubeEnt;
 
     public BlockBreakerSystem(Scene scene) : base(scene)
     {
@@ -17,14 +16,13 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
     public override void OnStart()
     {
         _mainCamera = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).First();
-        cubeEnt = Scene.EntityManager.GetComponents<NameComponent>(x => x.Name == "Test Forward Cube").First().Entity;
 
-        Game.Instance.InputContext.Keyboards[0].KeyDown += BlockBreakerSystem_KeyDown;
+        Scene.Game.InputContext.Mice.First().Click += BlockBreakerSystem_Click;
     }
 
-    private void BlockBreakerSystem_KeyDown(Silk.NET.Input.IKeyboard arg1, Silk.NET.Input.Key arg2, int arg3)
+    private void BlockBreakerSystem_Click(Silk.NET.Input.IMouse mouse, Silk.NET.Input.MouseButton btn, System.Numerics.Vector2 pos)
     {
-        if(arg2 == Silk.NET.Input.Key.Space)
+        if(btn == Silk.NET.Input.MouseButton.Left)
         {
             if (ChunkPhysics.CastVoxel(_mainCamera.Entity.Transform.LocalPosition, _mainCamera.Entity.Transform.Forward, 5, out var output))
             {

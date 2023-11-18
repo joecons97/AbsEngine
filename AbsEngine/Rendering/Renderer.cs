@@ -1,4 +1,5 @@
 ﻿using AbsEngine.ECS.Components;
+using AbsEngine.Exceptions;
 using AbsEngine.Maths;
 using Silk.NET.Maths;
 
@@ -17,7 +18,7 @@ public static class Renderer
     {
         var game = Game.Instance;
         if (game == null)
-            throw new Exception("Cannot complete frame, Game is null");
+            throw new GameInstanceException();
 
         var cam = !SceneCameraComponent.IsInSceneView ?
             game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault()
@@ -29,8 +30,8 @@ public static class Renderer
         var trans = cam.Entity.Transform;
 
         var viewMat = Matrix4X4.CreateLookAt(trans.LocalPosition, trans.LocalPosition + trans.Forward, trans.Up);
-        var winX = (float)Game.Instance!.Window.FramebufferSize.X;
-        var winY = (float)Game.Instance!.Window.FramebufferSize.Y;
+        var winX = (float)game.Window.FramebufferSize.X;
+        var winY = (float)game.Window.FramebufferSize.Y;
         var projMat = Matrix4X4.CreatePerspectiveFieldOfView(cam.FieldOfView * AbsMaths.DEG_2_RAD,
         winX / winY, cam.NearClipPlane, cam.FarClipPlane);
 
@@ -47,9 +48,9 @@ public static class Renderer
             r.Item2.SetMatrix("uMvp", r.Item3 * vpMat);
 
             if(r.Item1.UseTriangles)
-                Game.Instance!.Graphics.DrawElements((uint)r.Item1.Triangles.Length);
+                game.Graphics.DrawElements((uint)r.Item1.Triangles.Length);
             else
-                Game.Instance!.Graphics.DrawArrays((uint)r.Item1.Positions.Length);
+                game.Graphics.DrawArrays((uint)r.Item1.Positions.Length);
         }
     }
 }

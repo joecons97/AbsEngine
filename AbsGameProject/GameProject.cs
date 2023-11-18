@@ -17,13 +17,10 @@ namespace AbsGameProject
     {
         public static void Main()
         {
-            _ = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
-            if (Game.Instance == null)
-                return;
+            var game = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
 
-            Game.Instance.OnLoad += Instance_OnLoad;
-
-            Game.Instance.Run();
+            game.OnLoad += Instance_OnLoad;
+            game.Run();
         }
 
         private static void Instance_OnLoad()

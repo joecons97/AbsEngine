@@ -21,7 +21,7 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
     public SceneCameraSystem(Scene scene) : base(scene)
     {
-        inputContext = Game.Instance!.InputContext;
+        inputContext = scene.Game.InputContext;
         mouse = inputContext.Mice.First();
         keyboard = inputContext.Keyboards.First();
 

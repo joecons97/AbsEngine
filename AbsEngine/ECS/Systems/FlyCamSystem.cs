@@ -21,7 +21,7 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
 
     public FlyCamSystem(Scene scene) : base(scene)
     {
-        inputContext = Game.Instance!.InputContext;
+        inputContext = scene.Game.InputContext;
         mouse = inputContext.Mice.First();
         keyboard = inputContext.Keyboards.First();
 

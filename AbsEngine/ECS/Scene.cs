@@ -1,4 +1,5 @@
-﻿using AbsEngine.IO;
+﻿using AbsEngine.Exceptions;
+using AbsEngine.IO;
 using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
 
@@ -7,7 +8,7 @@ namespace AbsEngine.ECS;
 public class Scene : IDisposable
 {
     public string Name { get; set; }
-
+    public Game Game { get; private set; }
     public EntityManager EntityManager { get; }
 
     private List<System> _systems = new List<System>();
@@ -20,6 +21,11 @@ public class Scene : IDisposable
 
     internal Scene(string name)
     {
+        if (Game.Instance == null)
+            throw new GameInstanceException();
+
+        Game = Game.Instance;
+
         Name = name;
 
         EntityManager = new EntityManager(this);
@@ -39,7 +45,7 @@ public class Scene : IDisposable
     {
         var scene = new Scene("New Scene");
 
-        Game.Instance?._activeScenes.Add(scene);    
+        scene.Game._activeScenes.Add(scene);    
 
         return scene;
     }
@@ -48,7 +54,7 @@ public class Scene : IDisposable
     {
         var scene = SceneLoader.LoadSceneFromFile(fileLocation);
 
-        Game.Instance?._activeScenes.Add(scene);
+        scene.Game._activeScenes.Add(scene);
 
         return scene;
     }
