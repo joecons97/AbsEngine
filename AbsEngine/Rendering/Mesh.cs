@@ -25,6 +25,7 @@ public class Mesh : IDisposable
     public Vector3D<float>[] Tangents { get => _backendMesh.Tangents; set => _backendMesh.Tangents = value; }
     public Vector2D<float>[] Uvs { get => _backendMesh.Uvs; set => _backendMesh.Uvs = value; }
     public bool UseTriangles { get; set; } = true;
+    public bool HasBeenBuilt { get; private set; }
 
     private readonly IBackendMesh _backendMesh = null!;
 
@@ -42,7 +43,10 @@ public class Mesh : IDisposable
     }
 
     public void Build()
-        => _backendMesh?.Build();
+    {
+        HasBeenBuilt = true;
+        _backendMesh?.Build();
+    }
 
     public void Bind()
         => _backendMesh?.Bind();

@@ -63,18 +63,20 @@ public class TransformComponent : Component
             return Vector3D.Normalize(Vector3D.Transform(Vector3D<float>.UnitZ, LocalRotation));
         }
     }
+
     public Vector3D<float> Right
     {
         get
         {
-            return Vector3D.Normalize(Vector3D.Transform(Vector3D<float>.UnitX, LocalRotation));
+            return Vector3D.Normalize(Vector3D.Transform(-Vector3D<float>.UnitX, LocalRotation));
         }
     }
+
     public Vector3D<float> Up
     {
         get
         {
-            return Vector3D.Normalize(Vector3D.Cross(Right, Forward));
+            return Vector3D.Normalize(Vector3D.Cross(-Right, Forward));
         }
     }
 }

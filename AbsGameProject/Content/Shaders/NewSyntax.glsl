@@ -41,14 +41,11 @@ struct v2f
 
     out vec4 FragColor;
 
-    uniform sampler2D uTexture;
-    uniform sampler2D uTexture1;
+    uniform vec4 Colour;
 
     void main()
     {
-        vec4 texCol = texture(uTexture, vertData.uvs);
-        vec4 texCol1 = texture(uTexture1, vertData.uvs);
-        FragColor = vec4(mix(texCol1, texCol, vertData.uvs.x));
+        FragColor = Colour;
     }
 
 #endif

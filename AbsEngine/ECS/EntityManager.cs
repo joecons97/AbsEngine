@@ -59,12 +59,15 @@ public class EntityManager
         return component;
     }
 
-    public Entity CreateEntity()
+    public Entity CreateEntity(string name = "New Entity")
     {
         var ent = new Entity((uint)_entities.Count, Scene);
         _entities.Add(ent);
 
         CreateComponent<TransformComponent>(ent);
+        CreateComponent<NameComponent>(ent);
+
+        ent.Name = name;
 
         return ent;
     }

@@ -9,6 +9,7 @@ public class Entity
     public uint ID { get; }
 
     private TransformComponent _cachedTransform = null!;
+    private NameComponent _cachedNameComponent = null!;
 
     public TransformComponent Transform
     {
@@ -18,6 +19,24 @@ public class Entity
                 _cachedTransform = GetComponent<TransformComponent>()!;
 
             return _cachedTransform;
+        }
+    }
+
+    public string Name
+    {
+        get
+        {
+            if (_cachedNameComponent == null)
+                _cachedNameComponent = GetComponent<NameComponent>()!;
+
+            return _cachedNameComponent.Name;
+        }
+        set
+        {
+            if (_cachedNameComponent == null)
+                _cachedNameComponent = GetComponent<NameComponent>()!;
+
+            _cachedNameComponent.Name = value;
         }
     }
 

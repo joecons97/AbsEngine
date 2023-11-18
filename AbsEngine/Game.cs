@@ -21,6 +21,8 @@ public class Game
     public IGraphics Graphics { get; private set; } = null!;
     public IWindow Window { get => _window; }
 
+    public IReadOnlyList<Scene> ActiveScenes { get => _activeScenes; }
+
     private string _organsition;
     private string _name;
     private Vector2D<int> _size;
@@ -92,7 +94,7 @@ public class Game
         {
             Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
 
-            Rendering.Renderer.CompleteFrame();
+            Renderer.CompleteFrame();
 
             OnRender?.Invoke(dt);
         };

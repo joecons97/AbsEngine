@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace AbsEngine.ECS.Systems;
 
-public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
+public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 {
     Vector2 lastPos;
     IInputContext inputContext;
@@ -14,12 +14,12 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
 
     public float MoveSpeed { get; private set; } = 15;
 
-    protected override Func<CameraComponent, bool>? Predicate => (x) =>
+    protected override Func<SceneCameraComponent, bool>? Predicate => (x) =>
     {
         return x.IsMainCamera;
     };
 
-    public FlyCamSystem(Scene scene) : base(scene)
+    public SceneCameraSystem(Scene scene) : base(scene)
     {
         inputContext = Game.Instance!.InputContext;
         mouse = inputContext.Mice.First();
@@ -28,7 +28,7 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
         mouse.Cursor.CursorMode = CursorMode.Disabled;
     }
 
-    public void OnTick(CameraComponent component, float deltaTime)
+    public void OnTick(SceneCameraComponent component, float deltaTime)
     {
         var t = component.Entity.Transform;
 
@@ -60,6 +60,15 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
         {
             SceneCameraComponent.IsInSceneView = true;
         }
+        else if (keyboard.IsKeyPressed(Key.Minus))
+        {
+            SceneCameraComponent.IsInSceneView = false;
+        }
+
+        if (keyboard.IsKeyPressed(Key.Minus))
+        {
+            SceneCameraComponent.IsInSceneView = false;
+        }
 
         var d = lastPos - p;
         lastPos = p;
@@ -70,9 +79,9 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
         t.LocalPosition += velocity;
     }
 
-    public override Task OnTickAsync(CameraComponent component, float deltaTime)
+    public override Task OnTickAsync(SceneCameraComponent component, float deltaTime)
     {
-        if (!SceneCameraComponent.IsInSceneView)
+        if(SceneCameraComponent.IsInSceneView)
             OnTick(component, deltaTime);
 
         return Task.CompletedTask;

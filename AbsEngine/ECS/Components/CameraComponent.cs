@@ -9,3 +9,8 @@ public class CameraComponent : Component
     public float NearClipPlane = 0.01f;
     public float FarClipPlane = 1000f;
 }
+
+public class SceneCameraComponent : CameraComponent
+{
+    public static bool IsInSceneView = false;
+}

@@ -19,7 +19,10 @@ public static class Renderer
         if (game == null)
             throw new Exception("Cannot complete frame, Game is null");
 
-        var cam = game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault();
+        var cam = !SceneCameraComponent.IsInSceneView ?
+            game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault()
+            : game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<SceneCameraComponent>().FirstOrDefault();
+
         if (cam == null)
             throw new Exception("Cannot complete frame, Main camera is null");
 

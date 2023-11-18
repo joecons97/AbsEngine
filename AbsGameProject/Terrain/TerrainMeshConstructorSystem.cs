@@ -50,7 +50,7 @@ namespace AbsGameProject.Terrain
                             if (state == 0)
                                 continue;
 
-                            var blockIndex = state - 1;
+                            var blockIndex = state;
                             var block = BlockRegistry.GetBlock(blockIndex);
                             if (block?.Mesh == null) continue;
 

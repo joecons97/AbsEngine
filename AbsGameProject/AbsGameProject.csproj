@@ -33,6 +33,9 @@
     <None Update="Content\Models\Blocks\Stairs.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Content\Models\Cube.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Models\Sphere.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -19,7 +19,15 @@ public static class BlockRegistry
     }
     public static Block? GetBlock(int index)
     {
-        return _blocks.ElementAtOrDefault(index).Value;
+        return _blocks.ElementAtOrDefault(index - 1).Value;
+    }
+
+    public static ushort GetBlockIndex(Block? block)
+    {
+        if (block == null)
+            return 0;
+
+        return (ushort)_blocks.Keys.ToList().IndexOf(block.Id);
     }
 
     public static List<Block> GetBlocks() 

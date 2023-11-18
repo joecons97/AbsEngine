@@ -2,8 +2,11 @@
 using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.ECS.Systems;
+using AbsEngine.IO;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
+using AbsGameProject.Models;
+using AbsGameProject.Systems;
 using AbsGameProject.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
@@ -35,18 +38,35 @@ namespace AbsGameProject
 
             var scene = Scene.Load();
 
+            var sceneCam = scene.EntityManager.CreateEntity("Scene Camera");
+            sceneCam.AddComponent<SceneCameraComponent>();
+
             var camEnt = scene.EntityManager.CreateEntity();
             var cam = camEnt.AddComponent<CameraComponent>();
 
+            var cubeEnt = scene.EntityManager.CreateEntity();
+            cubeEnt.Name = "Test Forward Cube";
+            var renderer = cubeEnt.AddComponent<MeshRendererComponent>();
+            var vox = VoxelModel.TryFromFile("Content/Models/Blocks/Dirt.json");
+            var cullableMesh = CullableMesh.TryFromVoxelMesh(vox);
+            var mesh = new Mesh();
+            mesh.UseTriangles = false;
+            mesh.Positions = cullableMesh.Faces.Select(x => x.Value.Positions).SelectMany(x => x).ToArray();
+
+            mesh.Build();
+
+            renderer.Mesh = mesh;
+            renderer.Material = new Material("NewSyntax");
+
             scene.RegisterSystem<FlyCamSystem>();
+            scene.RegisterSystem<SceneCameraSystem>();
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
             scene.RegisterSystem<TerrainMeshBuilderSystem>();
             scene.RegisterSystem<MeshRendererSystem>();
+            scene.RegisterSystem<BlockBreakerSystem>();
 
-            var cubeEnt = scene.EntityManager.CreateEntity();
-            var renderer = cubeEnt.AddComponent<MeshRendererComponent>();
         }
     }
 }

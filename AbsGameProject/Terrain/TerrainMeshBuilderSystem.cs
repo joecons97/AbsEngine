@@ -23,7 +23,7 @@ namespace AbsGameProject.Terrain
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
         {
-            if (component.Mesh == null)
+            if (component.Mesh == null || component.Mesh.HasBeenBuilt)
                 return;
 
             var renderer = component.Entity.GetComponent<MeshRendererComponent>();
