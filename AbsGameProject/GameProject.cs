@@ -1,11 +1,13 @@
 ﻿using AbsEngine;
 using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
+using AbsEngine.ECS.Components.Physics;
+using AbsEngine.ECS.Extensions;
 using AbsEngine.ECS.Systems;
-using AbsEngine.IO;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
-using AbsGameProject.Models;
+using AbsGameProject.Physics;
+using AbsGameProject.Player;
 using AbsGameProject.Systems;
 using AbsGameProject.Terrain;
 using AbsGameProject.Textures;
@@ -35,35 +37,35 @@ namespace AbsGameProject
 
             var scene = Scene.Load();
 
-            var sceneCam = scene.EntityManager.CreateEntity("Scene Camera");
-            sceneCam.AddComponent<SceneCameraComponent>();
+            SetupPlayer(scene);
 
-            var camEnt = scene.EntityManager.CreateEntity();
-            var cam = camEnt.AddComponent<CameraComponent>();
+            scene.RegisterMeshRenderer();
+            scene.RegisterSceneCamera();
 
-            var cubeEnt = scene.EntityManager.CreateEntity();
-            cubeEnt.Name = "Test Forward Cube";
-            var renderer = cubeEnt.AddComponent<MeshRendererComponent>();
-            var vox = VoxelModel.TryFromFile("Content/Models/Blocks/Dirt.json");
-            var cullableMesh = CullableMesh.TryFromVoxelMesh(vox);
-            var mesh = new Mesh();
-            mesh.UseTriangles = false;
-            mesh.Positions = cullableMesh.Faces.Select(x => x.Value.Positions).SelectMany(x => x).ToArray();
-
-            mesh.Build();
-
-            renderer.Mesh = mesh;
-            renderer.Material = new Material("NewSyntax");
-
-            scene.RegisterSystem<FlyCamSystem>();
-            scene.RegisterSystem<SceneCameraSystem>();
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
             scene.RegisterSystem<TerrainMeshBuilderSystem>();
-            scene.RegisterSystem<MeshRendererSystem>();
             scene.RegisterSystem<BlockBreakerSystem>();
+            scene.RegisterSystem<FlyCamSystem>();
+            //scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
+        }
 
+        static void SetupPlayer(Scene scene)
+        {
+            var playerEntity = scene.EntityManager.CreateEntity("Player");
+            playerEntity.Transform.LocalPosition = new Vector3D<float>(0, 50, 0);
+            var collider = playerEntity.AddComponent<BoxColliderComponent>();
+            playerEntity.AddComponent<VoxelRigidbodyComponent>();
+            collider.Min = new Vector3D<float>(-0.5f, -2, -0.5f);
+            collider.Max = new Vector3D<float>(0.5f, 0, 0.5f);
+
+            var playerCamera = scene.EntityManager.CreateEntity("Player Camera");
+            playerCamera.AddComponent<CameraComponent>();
+            playerCamera.Transform.Parent = playerEntity.Transform;
+            playerCamera.Transform.LocalPosition = Vector3D<float>.Zero;
+
+            playerEntity.AddComponent<PlayerControllerComponent>();
         }
     }
 }

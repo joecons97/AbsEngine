@@ -21,6 +21,8 @@ public class Game
     public IGraphics Graphics { get; private set; } = null!;
     public IWindow Window { get => _window; }
 
+    public float DeltaTime { get; private set; }
+
     public IReadOnlyList<Scene> ActiveScenes { get => _activeScenes; }
 
     private string _organsition;
@@ -72,6 +74,7 @@ public class Game
 
         _window.Update += (dt) =>
         {
+            DeltaTime = (float)dt;
             int count = 0;
             while (_queueForDisposal.Count > 0)
             {

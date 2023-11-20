@@ -8,4 +8,6 @@ public class Component
     {
         Entity = entity;
     }
+
+    public virtual void OnStart() { }
 }

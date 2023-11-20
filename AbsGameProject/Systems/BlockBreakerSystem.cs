@@ -32,13 +32,4 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
             }
         }
     }
-
-    public override void Tick(float deltaTime)
-    {
-        //if (ChunkPhysics.CastVoxel(_mainCamera.Entity.Transform.LocalPosition, _mainCamera.Entity.Transform.Forward, 5, out var output))
-        //{
-        //    cubeEnt.Transform.LocalPosition = output.WorldPosition;
-        //}
-    }
-
 }

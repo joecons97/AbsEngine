@@ -1,7 +1,5 @@
 ﻿using AbsEngine.Exceptions;
 using AbsEngine.IO;
-using System.Diagnostics;
-using System.Runtime.ConstrainedExecution;
 
 namespace AbsEngine.ECS;
 
@@ -33,7 +31,7 @@ public class Scene : IDisposable
 
     internal void AddAsset(Guid guid, object asset)
     {
-        _assets.Add(guid, asset);   
+        _assets.Add(guid, asset);
     }
 
     internal T GetAsset<T>(Guid guid)
@@ -45,7 +43,7 @@ public class Scene : IDisposable
     {
         var scene = new Scene("New Scene");
 
-        scene.Game._activeScenes.Add(scene);    
+        scene.Game._activeScenes.Add(scene);
 
         return scene;
     }
@@ -64,7 +62,7 @@ public class Scene : IDisposable
         _hasTickBegun = true;
         _deltaTime = deltaTime;
 
-        foreach(var system in _systems)
+        foreach (var system in _systems)
         {
             system.Tick(deltaTime);
         }

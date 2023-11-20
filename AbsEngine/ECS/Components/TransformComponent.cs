@@ -6,10 +6,25 @@ namespace AbsEngine.ECS.Components;
 
 public class TransformComponent : Component
 {
+    TransformComponent? parent;
+    List<TransformComponent> children = new List<TransformComponent>();
     Vector3D<float> eulerAngles;
     Quaternion<float> quaternion = Quaternion<float>.Identity;
 
-    public TransformComponent? Parent { get; set; }
+    public TransformComponent? Parent 
+    {
+        get => parent; 
+        set
+        {
+            if(parent != null && parent.children.Contains(this))
+                parent.children.Remove(this);
+
+            parent = value;
+
+            if(parent != null)
+                parent.children.Add(this);  
+        }
+    }
 
     public Matrix4X4<float> WorldMatrix
     {
@@ -43,6 +58,7 @@ public class TransformComponent : Component
                 eulerAngles.Z * AbsMaths.DEG_2_RAD);
         }
     }
+
     public Quaternion<float> LocalRotation
     {
         get => quaternion;
@@ -60,7 +76,7 @@ public class TransformComponent : Component
     {
         get
         {
-            return Vector3D.Normalize(Vector3D.Transform(Vector3D<float>.UnitZ, LocalRotation));
+            return Vector3D.Normalize(Vector3D.Transform(-Vector3D<float>.UnitZ, LocalRotation));
         }
     }
 
@@ -76,7 +92,12 @@ public class TransformComponent : Component
     {
         get
         {
-            return Vector3D.Normalize(Vector3D.Cross(-Right, Forward));
+            return Vector3D.Normalize(Vector3D.Cross(Right, Forward));
         }
+    }
+
+    public TransformComponent? GetChild(string name)
+    {
+        return children.FirstOrDefault(x => x.Entity.Name == name); 
     }
 }

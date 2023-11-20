@@ -1,6 +1,7 @@
 ﻿using AbsEngine.ECS.Components;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace AbsEngine.ECS.Systems;
@@ -31,6 +32,8 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
     public void OnTick(CameraComponent component, float deltaTime)
     {
         var t = component.Entity.Transform;
+
+        Debug.WriteLine(component.Entity.Transform.LocalPosition.ToString());
 
         var p = mouse.Position;
         if (lastPos == default)
@@ -66,7 +69,7 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
 
         float m = 0.1f;
 
-        t.LocalEulerAngles += new Vector3D<float>(d.Y * m, -d.X * m, 0);
+        t.LocalEulerAngles += new Vector3D<float>(d.Y * m, d.X * m, 0);
         t.LocalPosition += velocity;
     }
 

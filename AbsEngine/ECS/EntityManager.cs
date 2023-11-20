@@ -56,6 +56,8 @@ public class EntityManager
         else
             _components[type].Add(component);
 
+        component.OnStart();
+
         return component;
     }
 

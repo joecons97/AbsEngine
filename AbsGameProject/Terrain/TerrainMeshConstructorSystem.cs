@@ -63,10 +63,10 @@ namespace AbsGameProject.Terrain
                                 toCull |= CullFaceDirection.South;
 
                             if (ShouldRenderFace(x, y + 1, z) == false)
-                                toCull |= CullFaceDirection.Down;
+                                toCull |= CullFaceDirection.Up;
 
                             if (ShouldRenderFace(x, y - 1, z) == false)
-                                toCull |= CullFaceDirection.Up;
+                                toCull |= CullFaceDirection.Down;
 
                             if (ShouldRenderFace(x + 1, y, z) == false)
                                 toCull |= CullFaceDirection.West;

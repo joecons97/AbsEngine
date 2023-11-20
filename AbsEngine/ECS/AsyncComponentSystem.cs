@@ -4,6 +4,9 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
 {
     protected virtual Func<T, bool>? Predicate => null;
     protected virtual int MaxIterationsPerFrame => int.MaxValue;
+    protected virtual float? FixedTimeStep => null;
+
+    float lastTickTime = 0;
 
     protected AsyncComponentSystem(Scene scene) : base(scene)
     {
@@ -11,6 +14,20 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
 
     public override void Tick(float deltaTime)
     {
+        if (FixedTimeStep != null)
+        {
+            if (lastTickTime >= FixedTimeStep.Value)
+            {
+                lastTickTime = 0;
+                deltaTime = FixedTimeStep.Value;
+            }
+            else
+            {
+                lastTickTime += deltaTime;
+                return;
+            }
+        }
+
         Task.Run(async () =>
         {
             var comps = Predicate == null

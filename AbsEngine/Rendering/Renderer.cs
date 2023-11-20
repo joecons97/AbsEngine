@@ -29,7 +29,7 @@ public static class Renderer
 
         var trans = cam.Entity.Transform;
 
-        var viewMat = Matrix4X4.CreateLookAt(trans.LocalPosition, trans.LocalPosition + trans.Forward, trans.Up);
+        Matrix4X4.Invert(trans.WorldMatrix, out var viewMat);
         var winX = (float)game.Window.FramebufferSize.X;
         var winY = (float)game.Window.FramebufferSize.Y;
         var projMat = Matrix4X4.CreatePerspectiveFieldOfView(cam.FieldOfView * AbsMaths.DEG_2_RAD,
