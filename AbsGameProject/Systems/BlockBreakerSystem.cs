@@ -41,7 +41,7 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
             {
                 output.Chunk.SetBlock((int)output.BlockPosition.X, (int)output.BlockPosition.Y, (int)output.BlockPosition.Z, null);
 
-                output.Chunk.RebuildMesh();
+                output.Chunk.RebuildMeshAsync();
             }
         }
     }

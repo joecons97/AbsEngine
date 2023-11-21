@@ -130,21 +130,27 @@ namespace AbsGameProject.Terrain
             VoxelData[x, y, z] = BlockRegistry.GetBlockIndex(block);
         }
 
-        public void RebuildMesh()
-         {
+        public async Task RebuildMeshAsync()
+        {
             if (_updatesSinceLastRebuild.Any(x => x.X >= WIDTH - 16))
-                RightNeighbour?.RebuildMesh();
+                RightNeighbour?.RebuildMeshAsync();
 
             if (_updatesSinceLastRebuild.Any(x => x.X <= 0))
-                LeftNeighbour?.RebuildMesh();
+                LeftNeighbour?.RebuildMeshAsync();
 
             if (_updatesSinceLastRebuild.Any(x => x.Z >= WIDTH - 16))
-                NorthNeighbour?.RebuildMesh();
+                NorthNeighbour?.RebuildMeshAsync();
 
             if (_updatesSinceLastRebuild.Any(x => x.Z <= 0))
-                SouthNeighbour?.RebuildMesh();
+                SouthNeighbour?.RebuildMeshAsync();
 
             _updatesSinceLastRebuild.Clear();
+
+            while (RightNeighbour?.State != TerrainState.MeshGenerated ||
+                LeftNeighbour?.State != TerrainState.MeshGenerated ||
+                NorthNeighbour?.State != TerrainState.MeshGenerated ||
+                SouthNeighbour?.State != TerrainState.MeshGenerated)
+                await Task.Yield();
 
             State = TerrainState.NoiseGenerated;
         }
