@@ -19,7 +19,7 @@ namespace AbsGameProject.Terrain
 
         public override void Tick(float deltaTime)
         {
-            var mainCam = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault();
+            var mainCam = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault().Entity.Transform.Parent;
             if (mainCam == null)
                 return;
 
@@ -59,10 +59,11 @@ namespace AbsGameProject.Terrain
                         chunkComp = pool.First();
                         pool.Remove(chunkComp);
 
-                        chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
-                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         chunkComp.Renderer.Mesh = null;
                         chunkComp.Mesh = null;
+
+                        chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
+                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
 
                         activeChunks.Add(chunkComp);
                     }
@@ -70,9 +71,9 @@ namespace AbsGameProject.Terrain
                     {
                         var chunkEnt = Scene.EntityManager.CreateEntity();
                         chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>(chunkEnt.AddComponent<MeshRendererComponent>());
-                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
-
                         chunkEnt.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
+
+                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         activeChunks.Add(chunkComp);
                     }
 

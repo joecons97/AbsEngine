@@ -47,18 +47,19 @@ namespace AbsGameProject
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
             scene.RegisterSystem<TerrainMeshBuilderSystem>();
             scene.RegisterSystem<BlockBreakerSystem>();
-            scene.RegisterSystem<FlyCamSystem>();
-            //scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
+            scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
+            scene.RegisterSystem<PlayerControllerSystem>();
         }
 
         static void SetupPlayer(Scene scene)
         {
             var playerEntity = scene.EntityManager.CreateEntity("Player");
             playerEntity.Transform.LocalPosition = new Vector3D<float>(0, 50, 0);
-            var collider = playerEntity.AddComponent<BoxColliderComponent>();
-            playerEntity.AddComponent<VoxelRigidbodyComponent>();
-            collider.Min = new Vector3D<float>(-0.5f, -2, -0.5f);
-            collider.Max = new Vector3D<float>(0.5f, 0, 0.5f);
+            var collider = playerEntity.AddComponent<VoxelBoxColliderComponent>();
+            var rigidbody = playerEntity.AddComponent<VoxelRigidbodyComponent>();
+            rigidbody.Mass = 1;
+            collider.Min = new Vector3D<float>(-0.25f, 0, -0.25f);
+            collider.Max = new Vector3D<float>(0.25f, 2, 0.25f);
 
             var playerCamera = scene.EntityManager.CreateEntity("Player Camera");
             playerCamera.AddComponent<CameraComponent>();

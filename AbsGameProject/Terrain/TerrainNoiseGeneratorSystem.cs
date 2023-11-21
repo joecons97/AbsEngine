@@ -47,13 +47,13 @@ namespace AbsGameProject.Terrain
 
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                         {
-                            if (y == h)
+                            if (y == (int)h - 1)
                             {
-                                component.VoxelData[x, y, z] = 2;
+                                component.VoxelData[x, y, z] = 3;
                             }
                             else if(y < h - 1)
                             {
-                                component.VoxelData[x, y, z] = 3;
+                                component.VoxelData[x, y, z] = 2;
                             }
                             else
                                 component.VoxelData[x, y, z] = 0;

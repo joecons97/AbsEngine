@@ -1,4 +1,6 @@
-﻿using AbsGameProject.Models;
+﻿using AbsEngine.Physics;
+using AbsGameProject.Models;
+using AbsGameProject.Physics;
 
 namespace AbsGameProject.Blocks;
 
@@ -11,6 +13,8 @@ public class Block
     
     public VoxelModel? VoxelModel { get; init; }
     public CullableMesh? Mesh { get;init; }
+
+    public IVoxelShape[]? CollisionShapes { get; init; } 
 
     public static BlockBuilder New(string name, string id)
     {

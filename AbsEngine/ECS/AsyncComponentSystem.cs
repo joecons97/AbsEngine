@@ -38,7 +38,7 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
 
             await Parallel.ForEachAsync(comps, async (comp, token) =>
             {
-                await OnTickAsync(comp, Scene._deltaTime);
+                await OnTickAsync(comp, deltaTime);
             });
         });
     }

@@ -5,6 +5,7 @@ using AbsGameProject.Blocks;
 using AbsGameProject.Models;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
+using System.Diagnostics;
 using System.Linq;
 
 namespace AbsGameProject.Terrain
@@ -85,7 +86,7 @@ namespace AbsGameProject.Terrain
                                 .Select(a => a.Value.UVs)
                                 .SelectMany(x => x));
 
-                            colours.AddRange(faces
+                             colours.AddRange(faces
                                 .Select(x => x.Value.TintIndicies
                                 .Select(x => x == null
                                     ? Vector4D<float>.One

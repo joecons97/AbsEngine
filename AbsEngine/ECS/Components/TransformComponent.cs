@@ -11,6 +11,11 @@ public class TransformComponent : Component
     Vector3D<float> eulerAngles;
     Quaternion<float> quaternion = Quaternion<float>.Identity;
 
+    Vector3D<float> _worldScale;
+    Quaternion<float> _worldRotation;
+    Vector3D<float> _worldPosition;
+
+
     public TransformComponent? Parent 
     {
         get => parent; 
@@ -26,6 +31,17 @@ public class TransformComponent : Component
         }
     }
 
+    public Vector3D<float> Position 
+    { 
+        get => _worldPosition;
+        set 
+        {
+            var diff = parent != null ? parent._worldPosition : Vector3D<float>.Zero;
+
+            LocalPosition = value - diff;
+        }
+    }
+
     public Matrix4X4<float> WorldMatrix
     {
         get
@@ -38,6 +54,8 @@ public class TransformComponent : Component
             {
                 local = local * Parent.WorldMatrix;
             }
+
+            Matrix4X4.Decompose<float>(local, out _worldScale, out _worldRotation, out _worldPosition);
 
             return local;
         }
@@ -76,7 +94,7 @@ public class TransformComponent : Component
     {
         get
         {
-            return Vector3D.Normalize(Vector3D.Transform(-Vector3D<float>.UnitZ, LocalRotation));
+            return Vector3D.Normalize(Vector3D.Transform(-Vector3D<float>.UnitZ, _worldRotation));
         }
     }
 
@@ -84,7 +102,7 @@ public class TransformComponent : Component
     {
         get
         {
-            return Vector3D.Normalize(Vector3D.Transform(-Vector3D<float>.UnitX, LocalRotation));
+            return Vector3D.Normalize(Vector3D.Transform(-Vector3D<float>.UnitX, _worldRotation));
         }
     }
 

@@ -31,9 +31,9 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
 
     public void OnTick(CameraComponent component, float deltaTime)
     {
-        var t = component.Entity.Transform;
+        Debug.WriteLine(component.Entity.Transform.LocalPosition);
 
-        Debug.WriteLine(component.Entity.Transform.LocalPosition.ToString());
+        var t = component.Entity.Transform;
 
         var p = mouse.Position;
         if (lastPos == default)
@@ -59,7 +59,7 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
             velocity += t.Right * MoveSpeed * deltaTime;
         }
 
-        if(keyboard.IsKeyPressed(Key.Equal))
+        if (keyboard.IsKeyPressed(Key.Equal))
         {
             SceneCameraComponent.IsInSceneView = true;
         }

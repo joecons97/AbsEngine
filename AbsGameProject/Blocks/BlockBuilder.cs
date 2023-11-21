@@ -1,4 +1,5 @@
 ﻿using AbsGameProject.Models;
+using AbsGameProject.Physics;
 using AbsGameProject.Textures;
 
 namespace AbsGameProject.Blocks
@@ -26,6 +27,7 @@ namespace AbsGameProject.Blocks
         {
             VoxelModel? voxelModel = null;
             CullableMesh? cullableMesh = null;
+            VoxelBoundingBox[]? boundingBoxes = null;
 
             if (string.IsNullOrEmpty(_voxelModelFile) == false)
             {
@@ -38,6 +40,8 @@ namespace AbsGameProject.Blocks
                 cullableMesh = CullableMesh.TryFromVoxelMesh(voxelModel);
                 if (cullableMesh == null)
                     throw new Exception("Failed to load mesh from voxel model");
+
+                boundingBoxes = cullableMesh.CollisionBoxes.ToArray();
             }
 
             return new Block()
@@ -46,7 +50,8 @@ namespace AbsGameProject.Blocks
                 Name = _name,
                 VoxelModelFile = _voxelModelFile,
                 VoxelModel = voxelModel,
-                Mesh = cullableMesh
+                Mesh = cullableMesh,
+                CollisionShapes = boundingBoxes
             };
         }
     }

@@ -1,4 +1,5 @@
-﻿using AbsGameProject.Textures;
+﻿using AbsGameProject.Physics;
+using AbsGameProject.Textures;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Models;
@@ -24,6 +25,8 @@ public class CullableMesh
         {CullFaceDirection.All, new CullableFace() }
     };
 
+    public List<VoxelBoundingBox> CollisionBoxes { get; private set; } = new List<VoxelBoundingBox>();
+
     const int VERT_SCALE = 16;
 
     public static CullableMesh? TryFromVoxelMesh(VoxelModel voxel)
@@ -31,6 +34,13 @@ public class CullableMesh
         var mesh = new CullableMesh();
         foreach (var elem in voxel.Elements)
         {
+            var bb = new VoxelBoundingBox(
+                elem.From[0] / VERT_SCALE, elem.To[0] / VERT_SCALE,
+                elem.From[1] / VERT_SCALE, elem.To[1] / VERT_SCALE,
+                elem.From[2] / VERT_SCALE, elem.To[2] / VERT_SCALE);
+
+            mesh.CollisionBoxes.Add(bb);
+
             float lx = MathF.Min(elem.From[0], elem.To[0]) / VERT_SCALE;
             float mx = MathF.Max(elem.From[0], elem.To[0]) / VERT_SCALE;
             float ly = MathF.Min(elem.From[1], elem.To[1]) / VERT_SCALE;

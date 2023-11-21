@@ -75,7 +75,7 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
         float m = 0.1f;
 
-        t.LocalEulerAngles += new Vector3D<float>(d.Y * m, -d.X * m, 0);
+        t.LocalEulerAngles += new Vector3D<float>(d.Y * m, d.X * m, 0);
         t.LocalPosition += velocity;
     }
 

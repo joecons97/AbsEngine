@@ -21,6 +21,9 @@
     <None Update="Content\Models\Blocks\anvil.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\Models\Blocks\Player.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Models\Blocks\Grass.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -44,6 +47,9 @@
     </None>
     <None Update="Content\Shaders\Includes\TestInclude.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Shaders\BlockSelection.glsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Content\Shaders\NewSyntax.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
