@@ -1,12 +1,9 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using AbsGameProject.Models;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
-using System.Diagnostics;
-using System.Linq;
 
 namespace AbsGameProject.Terrain
 {
@@ -15,7 +12,7 @@ namespace AbsGameProject.Terrain
         private Material material;
 
         protected override Func<TerrainChunkComponent, bool>? Predicate =>
-            (x) => x.State == TerrainChunkComponent.TerrainState.NoiseGenerated && x.HasAllNeighbours;
+            (x) => x.State == TerrainChunkComponent.TerrainState.LightmapGenerated && x.HasAllNeighbours;
 
         protected override int MaxIterationsPerFrame => 1;
 
@@ -31,7 +28,7 @@ namespace AbsGameProject.Terrain
             if (component.VoxelData == null)
                 return;
 
-            component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
+            component.Mesh = null;
 
             await Task.Run(() =>
             {
@@ -78,20 +75,37 @@ namespace AbsGameProject.Terrain
                             var faces = block.Mesh.Faces
                                 .Where(x => (toCull & x.Key) != x.Key);
 
-                            vertices.AddRange(faces
-                                .Select(a => a.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)))
-                                .SelectMany(x => x));
+                            foreach (var face in faces)
+                            {
+                                byte lightmapValue = 0;
 
-                            uvs.AddRange(faces
-                                .Select(a => a.Value.UVs)
-                                .SelectMany(x => x));
+                                lightmapValue = face.Key switch
+                                {
+                                    CullFaceDirection.None => 16,
+                                    CullFaceDirection.North => component.GetLightmapValue(x, y, z + 1),
+                                    CullFaceDirection.South => component.GetLightmapValue(x, y, z - 1),
+                                    CullFaceDirection.Up => component.GetLightmapValue(x, y + 1, z),
+                                    CullFaceDirection.Down => component.GetLightmapValue(x, y - 1, z),
+                                    CullFaceDirection.West => component.GetLightmapValue(x + 1, y, z),
+                                    CullFaceDirection.East => component.GetLightmapValue(x - 1, y, z),
+                                    CullFaceDirection.All => 16,
+                                    _ => throw new NotImplementedException(),
+                                };
 
-                             colours.AddRange(faces
-                                .Select(x => x.Value.TintIndicies
-                                .Select(x => x == null
-                                    ? Vector4D<float>.One
-                                    : Vector4D<float>.UnitY))
-                                .SelectMany(x => x));
+                                var light = (float)lightmapValue / 16f;
+
+                                foreach (var item in face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)))
+                                {
+                                    vertices.Add(item);
+                                }
+
+                                uvs.AddRange(face.Value.UVs);
+
+                                colours.AddRange(face.Value.TintIndicies
+                                    .Select(x => x == null
+                                        ? Vector4D<float>.One * light
+                                        : Vector4D<float>.UnitY * light));
+                            }
                         }
                     }
                 }
@@ -105,6 +119,8 @@ namespace AbsGameProject.Terrain
 
                 component.Mesh = mesh;
             });
+
+            component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
 
             bool ShouldRenderFace(int x, int y, int z)
             {

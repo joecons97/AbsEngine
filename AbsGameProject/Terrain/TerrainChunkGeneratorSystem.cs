@@ -1,6 +1,7 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using Silk.NET.Maths;
+using System.ComponentModel;
 
 namespace AbsGameProject.Terrain
 {
@@ -63,7 +64,10 @@ namespace AbsGameProject.Terrain
                         chunkComp.Mesh = null;
 
                         chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
+                        chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                        chunkComp.VoxelData = null;
+                        chunkComp.ResetLightmap();
 
                         activeChunks.Add(chunkComp);
                     }
@@ -72,8 +76,10 @@ namespace AbsGameProject.Terrain
                         var chunkEnt = Scene.EntityManager.CreateEntity();
                         chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>(chunkEnt.AddComponent<MeshRendererComponent>());
                         chunkEnt.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
-
+                        chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                        chunkComp.ResetLightmap();
+
                         activeChunks.Add(chunkComp);
                     }
 
@@ -89,7 +95,7 @@ namespace AbsGameProject.Terrain
                     x.Entity.Transform.LocalPosition - mainCam.Entity.Transform.LocalPosition)
                 < 0))
             {
-                if (!pool.Contains(chunk))
+                if (!pool.Contains(chunk) && chunk.State == TerrainChunkComponent.TerrainState.MeshGenerated)
                 {
                     if (chunk.NorthNeighbour != null)
                     {

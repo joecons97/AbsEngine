@@ -6,6 +6,8 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
     protected virtual int MaxIterationsPerFrame => int.MaxValue;
     protected virtual float? FixedTimeStep => null;
 
+    private List<T> _componentsInProgress = new List<T>();
+
     float lastTickTime = 0;
 
     protected AsyncComponentSystem(Scene scene) : base(scene)
@@ -38,7 +40,14 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
 
             await Parallel.ForEachAsync(comps, async (comp, token) =>
             {
-                await OnTickAsync(comp, deltaTime);
+                if (_componentsInProgress.Contains(comp) == false)
+                {
+                    _componentsInProgress.Add(comp);
+
+                    await OnTickAsync(comp, deltaTime);
+
+                    _componentsInProgress.Remove(comp);
+                }
             });
         });
     }

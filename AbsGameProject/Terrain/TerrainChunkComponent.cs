@@ -3,6 +3,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using Silk.NET.Maths;
+using System.Diagnostics;
 
 namespace AbsGameProject.Terrain
 {
@@ -15,12 +16,17 @@ namespace AbsGameProject.Terrain
         {
             None,
             NoiseGenerated,
+            LightmapGenerated,
             MeshConstructed,
             MeshGenerated
         }
 
         public TerrainState State { get; set; } = TerrainState.None;
+
+        public byte[,]? Heightmap { get; set; }
         public ushort[,,]? VoxelData { get; set; }
+        public byte[,,]? Lightmap { get; set; }
+
         public Mesh? Mesh { get; set; }
         public MeshRendererComponent Renderer { get; set; }
 
@@ -37,6 +43,21 @@ namespace AbsGameProject.Terrain
 
         private List<Vector3D<float>> _updatesSinceLastRebuild = new List<Vector3D<float>>();
 
+        public void ResetLightmap()
+        {
+            Lightmap = new byte[TerrainChunkComponent.WIDTH, TerrainChunkComponent.HEIGHT, TerrainChunkComponent.WIDTH];
+            //for(int x = 0; x < TerrainChunkComponent.WIDTH; x++)
+            //{
+            //    for(int z = 0; z < TerrainChunkComponent.WIDTH; z++)
+            //    {
+            //        for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
+            //        {
+            //            Lightmap[x, y, z] = 16;
+            //        }
+            //    }
+            //}
+        }
+
         public ushort GetBlockId(int x, int y, int z)
         {
             if (VoxelData == null)
@@ -45,7 +66,12 @@ namespace AbsGameProject.Terrain
             if (x <= -1)
             {
                 if (LeftNeighbour != null)
+                {
+                    if (LeftNeighbour.VoxelData == null)
+                        Debug.WriteLine("LeftNeighbour VoxelData is null!", "Warning");
+
                     return LeftNeighbour.GetBlockId(WIDTH + x, y, z);
+                }
 
                 return 0;
             }
@@ -53,7 +79,12 @@ namespace AbsGameProject.Terrain
             if (x >= WIDTH)
             {
                 if (RightNeighbour != null)
+                {
+                    if (RightNeighbour.VoxelData == null)
+                        Debug.WriteLine("RightNeighbour VoxelData is null!", "Warning");
+
                     return RightNeighbour.GetBlockId(x - WIDTH, y, z);
+                }
 
                 return 0;
             }
@@ -61,7 +92,12 @@ namespace AbsGameProject.Terrain
             if (z <= -1)
             {
                 if (SouthNeighbour != null)
+                {
+                    if (SouthNeighbour.VoxelData == null)
+                        Debug.WriteLine("SouthNeighbour VoxelData is null!", "Warning");
+
                     return SouthNeighbour.GetBlockId(x, y, WIDTH + z);
+                }
 
                 return 0;
             }
@@ -69,7 +105,12 @@ namespace AbsGameProject.Terrain
             if (z >= WIDTH)
             {
                 if (NorthNeighbour != null)
+                {
+                    if (NorthNeighbour.VoxelData == null)
+                        Debug.WriteLine("NorthNeighbour VoxelData is null!", "Warning");
+
                     return NorthNeighbour.GetBlockId(x, y, z - WIDTH);
+                }
 
                 return 0;
             }
@@ -128,6 +169,117 @@ namespace AbsGameProject.Terrain
                 return;
 
             VoxelData[x, y, z] = BlockRegistry.GetBlockIndex(block);
+        }
+
+        public byte GetLightmapValue(int x, int y, int z)
+        {
+            if (Lightmap == null)
+                return 0;
+
+            if (x <= -1)
+            {
+                if (LeftNeighbour != null)
+                {
+                    return LeftNeighbour.GetLightmapValue(WIDTH + x, y, z);
+                }
+
+                return 0;
+            }
+
+            if (x >= WIDTH)
+            {
+                if (RightNeighbour != null)
+                {
+                    return RightNeighbour.GetLightmapValue(x - WIDTH, y, z);
+                }
+
+                return 0;
+            }
+
+            if (z <= -1)
+            {
+                if (SouthNeighbour != null)
+                {
+                    return SouthNeighbour.GetLightmapValue(x, y, WIDTH + z);
+                }
+
+                return 0;
+            }
+
+            if (z >= WIDTH)
+            {
+                if (NorthNeighbour != null)
+                {
+                    return NorthNeighbour.GetLightmapValue(x, y, z - WIDTH);
+                }
+
+                return 0;
+            }
+
+            if (y < 0 || y > HEIGHT - 1)
+                return 0;
+
+            return Lightmap[x, y, z];
+        }
+
+        public byte GetHeight(int x, int z)
+        {
+            if (Heightmap == null)
+                return 0;
+
+            if (x <= -1)
+            {
+                if (LeftNeighbour != null)
+                {
+                    if (LeftNeighbour.Heightmap == null)
+                        Debug.WriteLine("LeftNeighbour Heightmap is null!", "Warning");
+
+                    return LeftNeighbour.GetHeight(WIDTH + x, z);
+                }
+
+                return 0;
+            }
+
+            if (x >= WIDTH)
+            {
+                if (RightNeighbour != null)
+                {
+                    if (RightNeighbour.Heightmap == null)
+                        Debug.WriteLine("RightNeighbour Heightmap is null!", "Warning");
+
+                    return RightNeighbour.GetHeight(x - WIDTH, z);
+                }
+
+                return 0;
+            }
+
+            if (z <= -1)
+            {
+                if (SouthNeighbour != null)
+                {
+                    if (SouthNeighbour.Heightmap == null)
+                        Debug.WriteLine("SouthNeighbour Heightmap is null!", "Warning");
+
+                    return SouthNeighbour.GetHeight(x, WIDTH + z);
+                }
+
+                return 0;
+            }
+
+            if (z >= WIDTH)
+            {
+                if (NorthNeighbour != null)
+                {
+                    if (NorthNeighbour.Heightmap == null)
+                        Debug.WriteLine("NorthNeighbour Heightmap is null!", "Warning");
+
+                    return NorthNeighbour.GetHeight(x, z - WIDTH);
+                }
+
+                return 0;
+            }
+
+            return Heightmap[x, z];
         }
 
         public async Task RebuildMeshAsync()

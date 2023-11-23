@@ -30,6 +30,7 @@ namespace AbsGameProject.Terrain
             {
                 var trans = component.Entity.Transform;
                 component.VoxelData = new ushort[TerrainChunkComponent.WIDTH, TerrainChunkComponent.HEIGHT, TerrainChunkComponent.WIDTH];
+                component.Heightmap = new byte[TerrainChunkComponent.WIDTH, TerrainChunkComponent.WIDTH];
                 for (int x = 0; x < TerrainChunkComponent.WIDTH; x++)
                 {
                     for (int z = 0; z < TerrainChunkComponent.WIDTH; z++)
@@ -45,6 +46,7 @@ namespace AbsGameProject.Terrain
                         h *= amplitude;
                         h /= 1.75f;
 
+                        component.Heightmap[x, z] = (byte)h;
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                         {
                             if (y == (int)h - 1)

@@ -44,6 +44,7 @@ namespace AbsGameProject
 
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
+            scene.RegisterSystem<TerrainLightmapGenerator>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
             scene.RegisterSystem<TerrainMeshBuilderSystem>();
             scene.RegisterSystem<BlockBreakerSystem>();
