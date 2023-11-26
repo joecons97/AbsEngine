@@ -36,7 +36,7 @@ namespace AbsGameProject.Terrain
                 renderer.Material = material;
             }
 
-            component.State = TerrainChunkComponent.TerrainState.MeshGenerated;
+            component.State = TerrainChunkComponent.TerrainState.Done;
         }
     }
 }

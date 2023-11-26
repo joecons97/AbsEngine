@@ -1,18 +1,17 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using Silk.NET.Maths;
-using System.ComponentModel;
 
 namespace AbsGameProject.Terrain
 {
     public class TerrainChunkGeneratorSystem : AbsEngine.ECS.System
     {
-        int radius = 15;
+        const int RADIUS = 15;
         float lastX;
         float lastZ;
         bool hasBeenInitialised = false;
 
-        List<TerrainChunkComponent> pool = new List<TerrainChunkComponent>();
+        readonly List<TerrainChunkComponent> pool = new();
 
         public TerrainChunkGeneratorSystem(Scene scene) : base(scene)
         {
@@ -20,7 +19,7 @@ namespace AbsGameProject.Terrain
 
         public override void Tick(float deltaTime)
         {
-            var mainCam = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault().Entity.Transform.Parent;
+            var mainCam = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).First().Entity.Transform.Parent;
             if (mainCam == null)
                 return;
 
@@ -36,9 +35,9 @@ namespace AbsGameProject.Terrain
             hasBeenInitialised = true;
             var activeChunks = new List<TerrainChunkComponent>();
 
-            for (int x = -(radius / 2); x < (radius / 2); x++)
+            for (int x = -(RADIUS / 2); x < (RADIUS / 2); x++)
             {
-                for (int z = -(radius / 2); z < (radius / 2); z++)
+                for (int z = -(RADIUS / 2); z < (RADIUS / 2); z++)
                 {
                     int xF = roundedX + (x * TerrainChunkComponent.WIDTH);
                     int zF = roundedZ + (z * TerrainChunkComponent.WIDTH);
@@ -50,6 +49,7 @@ namespace AbsGameProject.Terrain
                     {
                         HandleNeighbours(chunk.First(), xF, zF);
                         activeChunks.AddRange(chunk);
+
                         continue;
                     }
 
@@ -67,7 +67,6 @@ namespace AbsGameProject.Terrain
                         chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         chunkComp.VoxelData = null;
-                        chunkComp.ResetLightmap();
 
                         activeChunks.Add(chunkComp);
                     }
@@ -78,7 +77,6 @@ namespace AbsGameProject.Terrain
                         chunkEnt.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
                         chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                        chunkComp.ResetLightmap();
 
                         activeChunks.Add(chunkComp);
                     }
@@ -95,7 +93,7 @@ namespace AbsGameProject.Terrain
                     x.Entity.Transform.LocalPosition - mainCam.Entity.Transform.LocalPosition)
                 < 0))
             {
-                if (!pool.Contains(chunk) && chunk.State == TerrainChunkComponent.TerrainState.MeshGenerated)
+                if (!pool.Contains(chunk) && chunk.State == TerrainChunkComponent.TerrainState.Done)
                 {
                     if (chunk.NorthNeighbour != null)
                     {
@@ -152,12 +150,12 @@ namespace AbsGameProject.Terrain
                 (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH) ?? chunkComp.SouthNeighbour;
 
             chunkComp.LeftNeighbour = neighbours
-                .FirstOrDefault(x => 
+                .FirstOrDefault(x =>
                 (int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
                 (int)x.Entity.Transform.LocalPosition.Z == zF) ?? chunkComp.LeftNeighbour;
 
             chunkComp.RightNeighbour = neighbours
-                .FirstOrDefault(x => 
+                .FirstOrDefault(x =>
                 (int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
                 (int)x.Entity.Transform.LocalPosition.Z == zF) ?? chunkComp.RightNeighbour;
 

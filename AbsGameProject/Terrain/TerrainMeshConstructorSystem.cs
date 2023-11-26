@@ -9,10 +9,10 @@ namespace AbsGameProject.Terrain
 {
     public class TerrainMeshConstructorSystem : AsyncComponentSystem<TerrainChunkComponent>
     {
-        private Material material;
+        private readonly Material material;
 
         protected override Func<TerrainChunkComponent, bool>? Predicate =>
-            (x) => x.State == TerrainChunkComponent.TerrainState.LightmapGenerated && x.HasAllNeighbours;
+            (x) => x.State == TerrainChunkComponent.TerrainState.NoiseGenerated && x.HasAllNeighbours;
 
         protected override int MaxIterationsPerFrame => 1;
 
@@ -50,7 +50,7 @@ namespace AbsGameProject.Terrain
 
                             var blockIndex = state;
                             var block = BlockRegistry.GetBlock(blockIndex);
-                            if (block?.Mesh == null) continue;
+                            if (block.Mesh == null) continue;
 
                             CullFaceDirection toCull = CullFaceDirection.None;
 
@@ -77,42 +77,22 @@ namespace AbsGameProject.Terrain
 
                             foreach (var face in faces)
                             {
-                                byte lightmapValue = 0;
-
-                                lightmapValue = face.Key switch
-                                {
-                                    CullFaceDirection.None => 16,
-                                    CullFaceDirection.North => component.GetLightmapValue(x, y, z + 1),
-                                    CullFaceDirection.South => component.GetLightmapValue(x, y, z - 1),
-                                    CullFaceDirection.Up => component.GetLightmapValue(x, y + 1, z),
-                                    CullFaceDirection.Down => component.GetLightmapValue(x, y - 1, z),
-                                    CullFaceDirection.West => component.GetLightmapValue(x + 1, y, z),
-                                    CullFaceDirection.East => component.GetLightmapValue(x - 1, y, z),
-                                    CullFaceDirection.All => 16,
-                                    _ => throw new NotImplementedException(),
-                                };
-
-                                var light = (float)lightmapValue / 16f;
-
-                                foreach (var item in face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)))
-                                {
-                                    vertices.Add(item);
-                                }
+                                vertices.AddRange(face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)));
 
                                 uvs.AddRange(face.Value.UVs);
 
                                 colours.AddRange(face.Value.TintIndicies
                                     .Select(x => x == null
-                                        ? Vector4D<float>.One * light
-                                        : Vector4D<float>.UnitY * light));
+                                        ? Vector4D<float>.One
+                                        : Vector4D<float>.UnitY));
                             }
                         }
                     }
                 }
 
                 mesh.Positions = vertices.ToArray();
-                mesh.Normals = new Vector3D<float>[0];
-                mesh.Tangents = new Vector3D<float>[0];
+                mesh.Normals = Array.Empty<Vector3D<float>>();
+                mesh.Tangents = Array.Empty<Vector3D<float>>();
                 mesh.Colours = colours.ToArray();
                 mesh.Uvs = uvs.ToArray();
                 mesh.UseTriangles = false;

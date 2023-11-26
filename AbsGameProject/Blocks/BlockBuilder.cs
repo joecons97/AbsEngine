@@ -8,6 +8,8 @@ namespace AbsGameProject.Blocks
     {
         string _name;
         string _id;
+        int _opacity;
+        int _light;
 
         string? _voxelModelFile;
 
@@ -15,11 +17,24 @@ namespace AbsGameProject.Blocks
         {
             _name = name;
             _id = id;
+            _opacity = 1;
         }
 
         public BlockBuilder WithVoxelModel(string voxelModelFile)
         {
             _voxelModelFile = voxelModelFile;
+            return this;
+        }
+
+        public BlockBuilder WithLight(int light)
+        {
+            _light = light;
+            return this;
+        }
+
+        public BlockBuilder WithOpacity(int opacity)
+        {
+            _opacity = opacity;
             return this;
         }
 
@@ -51,7 +66,9 @@ namespace AbsGameProject.Blocks
                 VoxelModelFile = _voxelModelFile,
                 VoxelModel = voxelModel,
                 Mesh = cullableMesh,
-                CollisionShapes = boundingBoxes
+                CollisionShapes = boundingBoxes,
+                Opacity = _opacity,
+                Light = _light,
             };
         }
     }

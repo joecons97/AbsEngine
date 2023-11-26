@@ -90,10 +90,7 @@ public class VoxelBoundingBox : BoundingBox, IVoxelShape
                 if (id == 0)
                     return false;
 
-                Block? block = BlockRegistry.GetBlock(id);
-                if (block == null)
-                    return false;
-
+                Block block = BlockRegistry.GetBlock(id);
                 if (block.CollisionShapes != null)
                 {
                     return block.CollisionShapes.Any(x =>

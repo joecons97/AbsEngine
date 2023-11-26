@@ -11,15 +11,20 @@ public static class BlockRegistry
         _blocks.Add(block.Id, block);
     }
 
-    public static Block? GetBlock(string id)
+    public static Block GetBlock(string id)
     {
-        if (!_blocks.ContainsKey(id)) { return null; }
+        if (!_blocks.ContainsKey(id)) { throw new KeyNotFoundException($"Block {id} not found in registry!"); }
 
         return _blocks[id];
     }
-    public static Block? GetBlock(int index)
+    public static Block GetBlock(int index)
     {
-        return _blocks.ElementAtOrDefault(index - 1).Value;
+        var block = _blocks.ElementAtOrDefault(index).Value;
+
+        if(block == null)
+            throw new KeyNotFoundException($"Block at index {index} not found in registry!");
+
+        return block;
     }
 
     public static ushort GetBlockIndex(Block? block)

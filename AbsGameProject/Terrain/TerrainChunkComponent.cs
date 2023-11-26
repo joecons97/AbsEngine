@@ -16,16 +16,17 @@ namespace AbsGameProject.Terrain
         {
             None,
             NoiseGenerated,
-            LightmapGenerated,
             MeshConstructed,
-            MeshGenerated
+            MeshGenerated,
+            Done
         }
 
         public TerrainState State { get; set; } = TerrainState.None;
 
+        public bool IsAwaitingRebuild { get; set; }
+
         public byte[,]? Heightmap { get; set; }
         public ushort[,,]? VoxelData { get; set; }
-        public byte[,,]? Lightmap { get; set; }
 
         public Mesh? Mesh { get; set; }
         public MeshRendererComponent Renderer { get; set; }
@@ -41,21 +42,11 @@ namespace AbsGameProject.Terrain
         public TerrainChunkComponent? NorthNeighbour;
         public TerrainChunkComponent? SouthNeighbour;
 
-        private List<Vector3D<float>> _updatesSinceLastRebuild = new List<Vector3D<float>>();
+        private readonly List<Vector3D<float>> _updatesSinceLastRebuild = new();
 
-        public void ResetLightmap()
+        public static bool IsPositionInBounds(Vector3D<float> pos)
         {
-            Lightmap = new byte[TerrainChunkComponent.WIDTH, TerrainChunkComponent.HEIGHT, TerrainChunkComponent.WIDTH];
-            //for(int x = 0; x < TerrainChunkComponent.WIDTH; x++)
-            //{
-            //    for(int z = 0; z < TerrainChunkComponent.WIDTH; z++)
-            //    {
-            //        for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
-            //        {
-            //            Lightmap[x, y, z] = 16;
-            //        }
-            //    }
-            //}
+            return pos.X >= 0 && pos.X < WIDTH && pos.Y >= 0 && pos.Y < HEIGHT && pos.Z >= 0 && pos.Z < WIDTH;
         }
 
         public ushort GetBlockId(int x, int y, int z)
@@ -121,8 +112,17 @@ namespace AbsGameProject.Terrain
             return VoxelData[x, y, z];
         }
 
-        public void SetBlock(int x, int y, int z, Block? block, bool isRecursed = false)
+        public Block GetBlock(int x, int y, int z)
         {
+            var id = GetBlockId(x, y, z);
+            return BlockRegistry.GetBlock(id);
+        }
+
+        public void SetBlock(int x, int y, int z, Block block, bool isRecursed = false)
+        {
+            if (block == null)
+                throw new ArgumentNullException("block");
+
             if (VoxelData == null)
                 return;
 
@@ -168,58 +168,8 @@ namespace AbsGameProject.Terrain
             if (y < 0 || y > HEIGHT - 1)
                 return;
 
+            CalculateHeightmapAtPos(x, z);
             VoxelData[x, y, z] = BlockRegistry.GetBlockIndex(block);
-        }
-
-        public byte GetLightmapValue(int x, int y, int z)
-        {
-            if (Lightmap == null)
-                return 0;
-
-            if (x <= -1)
-            {
-                if (LeftNeighbour != null)
-                {
-                    return LeftNeighbour.GetLightmapValue(WIDTH + x, y, z);
-                }
-
-                return 0;
-            }
-
-            if (x >= WIDTH)
-            {
-                if (RightNeighbour != null)
-                {
-                    return RightNeighbour.GetLightmapValue(x - WIDTH, y, z);
-                }
-
-                return 0;
-            }
-
-            if (z <= -1)
-            {
-                if (SouthNeighbour != null)
-                {
-                    return SouthNeighbour.GetLightmapValue(x, y, WIDTH + z);
-                }
-
-                return 0;
-            }
-
-            if (z >= WIDTH)
-            {
-                if (NorthNeighbour != null)
-                {
-                    return NorthNeighbour.GetLightmapValue(x, y, z - WIDTH);
-                }
-
-                return 0;
-            }
-
-            if (y < 0 || y > HEIGHT - 1)
-                return 0;
-
-            return Lightmap[x, y, z];
         }
 
         public byte GetHeight(int x, int z)
@@ -282,29 +232,42 @@ namespace AbsGameProject.Terrain
             return Heightmap[x, z];
         }
 
-        public async Task RebuildMeshAsync()
+        public void RebuildMesh()
         {
-            if (_updatesSinceLastRebuild.Any(x => x.X >= WIDTH - 16))
-                RightNeighbour?.RebuildMeshAsync();
+            lock (_updatesSinceLastRebuild)
+            {
+                if (_updatesSinceLastRebuild.Any(x => x.X >= WIDTH - 16))
+                    RightNeighbour?.RebuildMesh();
 
-            if (_updatesSinceLastRebuild.Any(x => x.X <= 0))
-                LeftNeighbour?.RebuildMeshAsync();
+                if (_updatesSinceLastRebuild.Any(x => x.X <= 0))
+                    LeftNeighbour?.RebuildMesh();
 
-            if (_updatesSinceLastRebuild.Any(x => x.Z >= WIDTH - 16))
-                NorthNeighbour?.RebuildMeshAsync();
+                if (_updatesSinceLastRebuild.Any(x => x.Z >= WIDTH - 16))
+                    NorthNeighbour?.RebuildMesh();
 
-            if (_updatesSinceLastRebuild.Any(x => x.Z <= 0))
-                SouthNeighbour?.RebuildMeshAsync();
+                if (_updatesSinceLastRebuild.Any(x => x.Z <= 0))
+                    SouthNeighbour?.RebuildMesh();
 
-            _updatesSinceLastRebuild.Clear();
+                _updatesSinceLastRebuild.Clear();
+            }
+            IsAwaitingRebuild = true;
+        }
 
-            while (RightNeighbour?.State != TerrainState.MeshGenerated ||
-                LeftNeighbour?.State != TerrainState.MeshGenerated ||
-                NorthNeighbour?.State != TerrainState.MeshGenerated ||
-                SouthNeighbour?.State != TerrainState.MeshGenerated)
-                await Task.Yield();
+        private void CalculateHeightmapAtPos(int x, int z)
+        {
+            if (Heightmap == null)
+                throw new InvalidOperationException("Cannot CalculateHeightmapAtPos because heightmap has not been initialised!");
 
-            State = TerrainState.NoiseGenerated;
+            for (int y = HEIGHT - 1; y > 0; y--)
+            {
+                var blockId = GetBlockId(x, y, z);
+                var block = BlockRegistry.GetBlock(blockId);
+                if (block.Opacity > 0)
+                {
+                    Heightmap[x, z] = (byte)y;
+                    break;
+                }
+            }
         }
 
         public TerrainChunkComponent(MeshRendererComponent renderer)

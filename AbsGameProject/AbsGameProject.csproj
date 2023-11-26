@@ -30,7 +30,10 @@
     <None Update="Content\Models\Blocks\Dirt.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Models\Blocks\Cube.json">
+    <None Update="Content\Models\Blocks\Glowstone.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Models\Blocks\Stone.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Content\Models\Blocks\Stairs.json">
@@ -62,6 +65,9 @@
     </None>
     <None Update="Content\Textures\Blocks\dirt.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Textures\Blocks\glowstone.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Content\Textures\Blocks\grass_side.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

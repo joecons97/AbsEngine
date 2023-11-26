@@ -14,9 +14,12 @@ public class Block
     public VoxelModel? VoxelModel { get; init; }
     public CullableMesh? Mesh { get;init; }
 
+    public int Opacity { get; init; }
+    public int Light { get; init; }
+
     public IVoxelShape[]? CollisionShapes { get; init; } 
 
-    public static BlockBuilder New(string name, string id)
+    public static BlockBuilder New(string id, string name)
     {
         return new BlockBuilder(name, id);
     }
