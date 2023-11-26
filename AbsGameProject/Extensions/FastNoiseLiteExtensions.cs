@@ -1,4 +1,4 @@
-﻿using AbsGameProject.Terrain;
+﻿using AbsGameProject.Maths.Noise;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Extensions;

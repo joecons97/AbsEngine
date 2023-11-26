@@ -1,11 +1,10 @@
 ﻿using AbsEngine;
 using AbsEngine.Exceptions;
 using AbsGameProject.Blocks;
-using AbsGameProject.Terrain;
+using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
-using System.Diagnostics;
 
-namespace AbsGameProject.Maths;
+namespace AbsGameProject.Maths.Physics;
 
 public struct RayVoxelOut
 {
@@ -47,12 +46,12 @@ public static class ChunkPhysics
     {
         var chunkPos = position.ToChunkPosition();
 
-        return (position - chunkPos);
+        return position - chunkPos;
     }
 
     public static Vector3D<float> ToChunkSpaceFloored(this Vector3D<float> position)
     {
-        var final = ToChunkSpace(position);
+        var final = position.ToChunkSpace();
 
         var pos = new Vector3D<float>((float)Math.Floor(final.X), (float)Math.Floor(final.Y), (float)Math.Floor(final.Z));
         return pos;
@@ -70,8 +69,8 @@ public static class ChunkPhysics
 
         while (distTravelled < distance)
         {
-            var chunkPos = ToChunkPosition(curPos);
-            var pos = (Vector3D<int>)ToChunkSpaceFloored(curPos);
+            var chunkPos = curPos.ToChunkPosition();
+            var pos = (Vector3D<int>)curPos.ToChunkSpaceFloored();
 
             foreach (var scene in Game.Instance.ActiveScenes)
             {
@@ -83,7 +82,7 @@ public static class ChunkPhysics
 
                 if (chunk != null && chunk.VoxelData != null)
                 {
-                    var blockId = chunk.GetBlockId((int)pos.X, (int)pos.Y, (int)pos.Z);
+                    var blockId = chunk.GetBlockId(pos.X, pos.Y, pos.Z);
                     var block = BlockRegistry.GetBlock(blockId);
 
                     if (blockId != 0)
@@ -94,8 +93,8 @@ public static class ChunkPhysics
 
                         op.Chunk = chunk;
 
-                        op.PlacementPosition = ToChunkSpaceFloored(lastPos);
-                        op.PlacementChunk = ToChunkPosition(lastPos);
+                        op.PlacementPosition = lastPos.ToChunkSpaceFloored();
+                        op.PlacementChunk = lastPos.ToChunkPosition();
 
                         output = op;
                         return true;

@@ -1,8 +1,9 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
+using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
 
-namespace AbsGameProject.Terrain
+namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainChunkGeneratorSystem : AbsEngine.ECS.System
     {
@@ -23,8 +24,8 @@ namespace AbsGameProject.Terrain
             if (mainCam == null)
                 return;
 
-            var roundedX = ((int)MathF.Floor(mainCam.Entity.Transform.LocalPosition.X / TerrainChunkComponent.WIDTH)) * TerrainChunkComponent.WIDTH;
-            var roundedZ = ((int)MathF.Floor(mainCam.Entity.Transform.LocalPosition.Z / TerrainChunkComponent.WIDTH)) * TerrainChunkComponent.WIDTH;
+            var roundedX = (int)MathF.Floor(mainCam.Entity.Transform.LocalPosition.X / TerrainChunkComponent.WIDTH) * TerrainChunkComponent.WIDTH;
+            var roundedZ = (int)MathF.Floor(mainCam.Entity.Transform.LocalPosition.Z / TerrainChunkComponent.WIDTH) * TerrainChunkComponent.WIDTH;
 
             if (hasBeenInitialised && roundedX == lastX && roundedZ == lastZ)
                 return;
@@ -35,12 +36,12 @@ namespace AbsGameProject.Terrain
             hasBeenInitialised = true;
             var activeChunks = new List<TerrainChunkComponent>();
 
-            for (int x = -(RADIUS / 2); x < (RADIUS / 2); x++)
+            for (int x = -(RADIUS / 2); x < RADIUS / 2; x++)
             {
-                for (int z = -(RADIUS / 2); z < (RADIUS / 2); z++)
+                for (int z = -(RADIUS / 2); z < RADIUS / 2; z++)
                 {
-                    int xF = roundedX + (x * TerrainChunkComponent.WIDTH);
-                    int zF = roundedZ + (z * TerrainChunkComponent.WIDTH);
+                    int xF = roundedX + x * TerrainChunkComponent.WIDTH;
+                    int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
 
                     var chunk = Scene.EntityManager.GetComponents<TerrainChunkComponent>(x =>
                         x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF);
@@ -127,17 +128,17 @@ namespace AbsGameProject.Terrain
         {
             var neighbours = Scene.EntityManager
                 .GetComponents<TerrainChunkComponent>(x =>
-                ((int)x.Entity.Transform.LocalPosition.X == xF &&
-                (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH) ||
+                (int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH ||
 
-                ((int)x.Entity.Transform.LocalPosition.X == xF &&
-                (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH) ||
+                (int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH ||
 
-                ((int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
-                (int)x.Entity.Transform.LocalPosition.Z == zF) ||
+                (int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF ||
 
-                ((int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
-                (int)x.Entity.Transform.LocalPosition.Z == zF));
+                (int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF);
 
             chunkComp.NorthNeighbour = neighbours
                 .FirstOrDefault(x =>

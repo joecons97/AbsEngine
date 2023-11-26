@@ -5,7 +5,7 @@ using AbsGameProject.Blocks;
 using Silk.NET.Maths;
 using System.Diagnostics;
 
-namespace AbsGameProject.Terrain
+namespace AbsGameProject.Components.Terrain
 {
     public class TerrainChunkComponent : Component
     {

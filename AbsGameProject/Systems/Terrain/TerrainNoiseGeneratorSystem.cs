@@ -1,8 +1,10 @@
 ﻿using AbsEngine.ECS;
+using AbsGameProject.Components.Terrain;
 using AbsGameProject.Extensions;
+using AbsGameProject.Maths.Noise;
 using Silk.NET.Maths;
 
-namespace AbsGameProject.Terrain
+namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainNoiseGeneratorSystem : ComponentSystem<TerrainChunkComponent>
     {
@@ -14,7 +16,7 @@ namespace AbsGameProject.Terrain
         private float lacunarity = 2;
         private float persistence = 0.5f;
 
-        protected override Func<TerrainChunkComponent, bool>? Predicate => ((x) => x.State == TerrainChunkComponent.TerrainState.None);
+        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None;
         protected override int MaxIterationsPerFrame => 1;
         protected override bool UseParallel => true;
 
@@ -42,7 +44,7 @@ namespace AbsGameProject.Terrain
                             persistence,
                             lacunarity);
 
-                        h = (h / 2) + 1;
+                        h = h / 2 + 1;
                         h *= amplitude;
                         h /= 1.75f;
 
@@ -53,11 +55,11 @@ namespace AbsGameProject.Terrain
                             {
                                 component.VoxelData[x, y, z] = 3;
                             }
-                            else if(y < h - 1 && y > h - 4)
+                            else if (y < h - 1 && y > h - 4)
                             {
                                 component.VoxelData[x, y, z] = 2;
                             }
-                            else if(y < h - 4)
+                            else if (y < h - 4)
                             {
                                 component.VoxelData[x, y, z] = 1;
                             }

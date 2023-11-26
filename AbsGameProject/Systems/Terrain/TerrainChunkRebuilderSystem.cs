@@ -1,6 +1,7 @@
 ﻿using AbsEngine.ECS;
+using AbsGameProject.Components.Terrain;
 
-namespace AbsGameProject.Terrain;
+namespace AbsGameProject.Systems.Terrain;
 
 internal class TerrainChunkRebuilderSystem : ComponentSystem<TerrainChunkComponent>
 {

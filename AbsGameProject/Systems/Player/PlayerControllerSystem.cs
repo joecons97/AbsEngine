@@ -1,15 +1,14 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
-using AbsGameProject.Maths;
+using AbsGameProject.Components.Player;
+using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
-using AbsGameProject.Terrain;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using System.Diagnostics;
 using System.Numerics;
 
-namespace AbsGameProject.Player;
+namespace AbsGameProject.Systems.Player;
 
 public class PlayerControllerSystem : AbsEngine.ECS.System
 {
@@ -43,7 +42,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
     private void _keyboard_KeyDown(IKeyboard arg1, Key arg2, int arg3)
     {
-        if(arg2 == Key.Space && _playerController.IsGrounded)
+        if (arg2 == Key.Space && _playerController.IsGrounded)
             _playerController.VoxelRigidbody.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY);
     }
 
@@ -60,7 +59,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
         var velocity = new Vector3D<float>(0, _playerController.VoxelRigidbody.Velocity.Y, 0);
 
-        var pos = _playerController.Entity.Transform.Position + (Vector3D<float>.UnitY * 0.1f);
+        var pos = _playerController.Entity.Transform.Position + Vector3D<float>.UnitY * 0.1f;
         _playerController.IsGrounded = ChunkPhysics.CastVoxel(pos, -Vector3D<float>.UnitY, 0.2f, out var _);
 
         if (_keyboard.IsKeyPressed(Key.W))

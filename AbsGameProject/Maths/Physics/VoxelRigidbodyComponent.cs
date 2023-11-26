@@ -1,9 +1,8 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components.Physics;
-using AbsEngine.Physics;
 using Silk.NET.Maths;
 
-namespace AbsGameProject.Physics;
+namespace AbsGameProject.Maths.Physics;
 
 public class VoxelRigidbodyComponent : Component
 {
@@ -13,7 +12,7 @@ public class VoxelRigidbodyComponent : Component
     public bool UseGravity { get; set; } = true;
     public float Mass { get; set; } = 1.0f;
     public float Drag { get; set; } = 0.0f;
-    public IVoxelShape? Shape { get; set; } 
+    public IVoxelShape? Shape { get; set; }
 
     public override void OnStart()
     {

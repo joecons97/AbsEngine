@@ -1,4 +1,4 @@
-﻿using AbsGameProject.Physics;
+﻿using AbsGameProject.Maths.Physics;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
 
@@ -11,7 +11,7 @@ public class CullableMesh
         public List<Vector3D<float>> Positions = new();
         public List<Vector3D<float>> Normals = new();
         public List<Vector2D<float>> UVs = new();
-        public List<int?> TintIndicies = new(); 
+        public List<int?> TintIndicies = new();
     }
 
     public Dictionary<CullFaceDirection, CullableFace> Faces { get; private set; } = new()
@@ -60,8 +60,8 @@ public class CullableMesh
                 var tex = facePair.Value.Texture;
                 var coords = TextureAtlas.BlockLocations[tex];
                 var uvs = new Rectangle<float>(
-                    (coords.Origin.X / (float)TextureAtlas.Size), 
-                    (coords.Origin.Y / (float)TextureAtlas.Size), 
+                    (coords.Origin.X / (float)TextureAtlas.Size),
+                    (coords.Origin.Y / (float)TextureAtlas.Size),
                     (coords.Size.X / (float)TextureAtlas.Size),
                     (coords.Size.Y / (float)TextureAtlas.Size));
 

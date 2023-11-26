@@ -52,7 +52,7 @@ using System.Runtime.CompilerServices;
 // Switch between using floats or doubles for input position
 using FNLfloat = System.Single;
 
-namespace AbsGameProject.Terrain;
+namespace AbsGameProject.Maths.Noise;
 
 //using FNLfloat = System.Double;
 

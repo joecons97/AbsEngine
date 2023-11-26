@@ -1,8 +1,8 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
-using AbsGameProject.Physics;
+using AbsGameProject.Maths.Physics;
 
-namespace AbsGameProject.Player
+namespace AbsGameProject.Components.Player
 {
     public class PlayerControllerComponent : Component
     {
@@ -24,7 +24,7 @@ namespace AbsGameProject.Player
         {
             CameraEntityTransform = Entity.Transform.GetChild("Player Camera");
             CameraEntityTransform.LocalPosition = new Silk.NET.Maths.Vector3D<float>(0, 1.8f, 0);
-            VoxelRigidbody = Entity.GetComponent<VoxelRigidbodyComponent>();    
+            VoxelRigidbody = Entity.GetComponent<VoxelRigidbodyComponent>();
         }
     }
 }

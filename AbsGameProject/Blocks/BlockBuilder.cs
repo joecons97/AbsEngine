@@ -1,5 +1,5 @@
-﻿using AbsGameProject.Models;
-using AbsGameProject.Physics;
+﻿using AbsGameProject.Maths.Physics;
+using AbsGameProject.Models;
 using AbsGameProject.Textures;
 
 namespace AbsGameProject.Blocks

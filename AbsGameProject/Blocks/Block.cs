@@ -1,6 +1,6 @@
 ﻿using AbsEngine.Physics;
+using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
-using AbsGameProject.Physics;
 
 namespace AbsGameProject.Blocks;
 

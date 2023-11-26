@@ -1,15 +1,13 @@
 ﻿using AbsEngine;
 using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
-using AbsEngine.ECS.Components.Physics;
 using AbsEngine.ECS.Extensions;
-using AbsEngine.ECS.Systems;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
-using AbsGameProject.Physics;
-using AbsGameProject.Player;
-using AbsGameProject.Systems;
-using AbsGameProject.Terrain;
+using AbsGameProject.Components.Player;
+using AbsGameProject.Maths.Physics;
+using AbsGameProject.Systems.Player;
+using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
 

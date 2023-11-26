@@ -1,11 +1,12 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
+using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
 
-namespace AbsGameProject.Terrain
+namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainMeshConstructorSystem : AsyncComponentSystem<TerrainChunkComponent>
     {

@@ -1,12 +1,10 @@
 ﻿using AbsEngine;
 using AbsEngine.Physics;
 using AbsGameProject.Blocks;
-using AbsGameProject.Maths;
-using AbsGameProject.Terrain;
+using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
-using System.Diagnostics;
 
-namespace AbsGameProject.Physics;
+namespace AbsGameProject.Maths.Physics;
 
 public class VoxelBoundingBox : BoundingBox, IVoxelShape
 {
@@ -54,7 +52,7 @@ public class VoxelBoundingBox : BoundingBox, IVoxelShape
             var posInChunk = (pos).ToChunkSpaceFloored();
             return DoPos(chunkPosition, posInChunk);
         }
-        bool TopBackRight() 
+        bool TopBackRight()
         {
             var pos = body.Entity.Transform.LocalPosition + new Vector3D<float>(Max.X, Max.Y, Min.Z) + direction;
             var chunkPosition = (pos).ToChunkPosition();
@@ -80,7 +78,7 @@ public class VoxelBoundingBox : BoundingBox, IVoxelShape
         {
             var chunk = Game.Instance?.ActiveScenes
                 .SelectMany(x =>
-                    x.EntityManager.GetComponents<TerrainChunkComponent>(x => 
+                    x.EntityManager.GetComponents<TerrainChunkComponent>(x =>
                         x.Entity.Transform.LocalPosition.X == chunkPosition.X && x.Entity.Transform.LocalPosition.Z == chunkPosition.Z))
                 .FirstOrDefault();
 

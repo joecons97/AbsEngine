@@ -1,8 +1,7 @@
 ﻿using AbsEngine.ECS;
 using Silk.NET.Maths;
-using System.Diagnostics;
 
-namespace AbsGameProject.Physics;
+namespace AbsGameProject.Maths.Physics;
 
 public class VoxelRigidbodySimulationSystem : ComponentSystem<VoxelRigidbodyComponent>
 {
@@ -21,7 +20,7 @@ public class VoxelRigidbodySimulationSystem : ComponentSystem<VoxelRigidbodyComp
 
         var normVelocity = Vector3D.Normalize(component.Velocity);
 
-        if(component.UseGravity)
+        if (component.UseGravity)
             component.Velocity += new Vector3D<float>(0, Gravity * deltaTime, 0);
 
         if (component.Shape != null)

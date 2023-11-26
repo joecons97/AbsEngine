@@ -3,12 +3,11 @@ using AbsEngine.ECS.Components;
 using AbsEngine.IO;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
-using AbsGameProject.Maths;
-using AbsGameProject.Player;
+using AbsGameProject.Components.Player;
+using AbsGameProject.Maths.Physics;
 using Silk.NET.Maths;
-using System.Diagnostics;
 
-namespace AbsGameProject.Systems;
+namespace AbsGameProject.Systems.Player;
 
 public class BlockBreakerSystem : AbsEngine.ECS.System
 {
@@ -71,7 +70,7 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
         }
         else
         {
-            debugCube.Transform.Position = Silk.NET.Maths.Vector3D<float>.Zero;
+            debugCube.Transform.Position = Vector3D<float>.Zero;
         }
     }
 }

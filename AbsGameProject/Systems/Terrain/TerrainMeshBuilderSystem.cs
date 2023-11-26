@@ -1,9 +1,10 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
+using AbsGameProject.Components.Terrain;
 using AbsGameProject.Textures;
 
-namespace AbsGameProject.Terrain
+namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainMeshBuilderSystem : ComponentSystem<TerrainChunkComponent>
     {
