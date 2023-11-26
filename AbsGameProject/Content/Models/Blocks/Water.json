@@ -1,0 +1,21 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"water": "Content/Textures/Blocks/water_overlay.png"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "water", "cullface": "north"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "water", "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "water", "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "water", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "water", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "water", "cullface": "down"}
+			}
+		}
+	],
+	"display": {}
+}
