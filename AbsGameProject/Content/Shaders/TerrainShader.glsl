@@ -48,7 +48,7 @@ struct v2f
 
     void main()
     {
-        vec4 col = texture2D(uAtlas, vertData.uvs.yx);
+        vec4 col = texture(uAtlas, vertData.uvs.yx);
 
         if(col.a < 0.5)
             discard;

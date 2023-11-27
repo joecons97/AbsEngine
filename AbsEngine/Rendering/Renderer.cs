@@ -40,14 +40,6 @@ public static class Renderer
 
     internal static void CompleteFrame()
     {
-        if(_fpsTime > 0.5f)
-        {
-            _fps = 1.0f/Game.Instance!.DeltaTime;
-            _fpsTime = 0;
-        }
-
-        _fpsTime += Game.Instance!.DeltaTime;
-
         _culledDrawCalls = 0;
         _drawCalls = 0;
 
@@ -98,6 +90,14 @@ public static class Renderer
 
         if (SceneCameraComponent.IsInSceneView)
         {
+            if (_fpsTime > 0.5f)
+            {
+                _fps = 1.0f / Game.Instance!.DeltaTime;
+                _fpsTime = 0;
+            }
+
+            _fpsTime += Game.Instance!.DeltaTime;
+
             ImGui.Begin("Renderer");
 
             ImGui.Value("FPS", _fps);

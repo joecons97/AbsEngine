@@ -51,9 +51,6 @@
     <None Update="Content\Models\Teapot.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Shaders\Includes\TestInclude.glsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Content\Shaders\BlockSelection.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

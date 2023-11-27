@@ -81,6 +81,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         }
         if (_keyboard.IsKeyPressed(Key.Equal))
         {
+            _mouse.Cursor.CursorMode = CursorMode.Normal;
             SceneCameraComponent.IsInSceneView = true;
         }
 
@@ -92,6 +93,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         if (_playerController.CameraEntityTransform == null)
             return;
 
+        _mouse.Cursor.CursorMode = CursorMode.Disabled;
         var pos = _mouse.Position;
         if (_lastMousePos == default)
             _lastMousePos = pos;
