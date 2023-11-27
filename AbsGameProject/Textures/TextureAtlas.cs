@@ -30,8 +30,9 @@ namespace AbsGameProject.Textures
             _tex = new Vector4D<byte>?[size * size * 4];
 
             AtlasTexture = new Texture();
-            AtlasTexture.WrapMode = TextureWrapMode.ClampToEdge;
-            AtlasTexture.MinFilter = TextureMinFilter.Nearest;
+            AtlasTexture.SetMaxMips(3);
+            AtlasTexture.WrapMode = TextureWrapMode.Repeat;
+            AtlasTexture.MinFilter = TextureMinFilter.NearestMipmapNearest;
             AtlasTexture.MagFilter = TextureMagFilter.Nearest;
             AtlasTexture.PixelFormat = Silk.NET.OpenGL.PixelFormat.Rgba;
         }

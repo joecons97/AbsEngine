@@ -1,0 +1,21 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"sand": "Content/Textures/Blocks/sand.png"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "sand", "cullface": "north"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "sand", "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "sand", "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "sand", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "sand", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "sand", "cullface": "down"}
+			}
+		}
+	],
+	"display": {}
+}

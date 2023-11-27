@@ -32,7 +32,9 @@ namespace AbsGameProject
             BlockRegistry.AddBlock(Block.New("dirt", "Dirt").WithVoxelModel("Content/Models/Blocks/Dirt.json").Build());
             BlockRegistry.AddBlock(Block.New("grass", "Grass").WithVoxelModel("Content/Models/Blocks/Grass.json").Build());
             BlockRegistry.AddBlock(Block.New("light", "Light").WithLight(15).WithVoxelModel("Content/Models/Blocks/Glowstone.json").Build());
-            BlockRegistry.AddBlock(Block.New("water", "Water").WithTransparency(true, true).WithVoxelModel("Content/Models/Blocks/Water.json").Build());
+            BlockRegistry.AddBlock(Block.New("water", "Water").
+                WithTransparency(true, true).WithVoxelModel("Content/Models/Blocks/Water.json").Build());
+            BlockRegistry.AddBlock(Block.New("sand", "Sand").WithVoxelModel("Content/Models/Blocks/Sand.json").Build());
 
             TextureAtlas.Build();
 

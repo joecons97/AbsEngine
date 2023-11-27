@@ -58,11 +58,17 @@ namespace AbsGameProject.Systems.Terrain
                         {
                             if (y == (int)h - 1)
                             {
-                                component.VoxelData[x, y, z] = 3;
+                                if (y <= 51)
+                                    component.VoxelData[x, y, z] = 6;
+                                else
+                                    component.VoxelData[x, y, z] = 3;
                             }
                             else if (y < h - 1 && y > h - 4)
                             {
-                                component.VoxelData[x, y, z] = 2;
+                                if (y <= 51)
+                                    component.VoxelData[x, y, z] = 6;
+                                else
+                                    component.VoxelData[x, y, z] = 2;
                             }
                             else if (y < h - 4)
                             {
@@ -70,7 +76,7 @@ namespace AbsGameProject.Systems.Terrain
                             }
                             else
                             {
-                                if (y <= 51)
+                                if (y <= 50)
                                     component.VoxelData[x, y, z] = 5;
                                 else
                                     component.VoxelData[x, y, z] = 0;

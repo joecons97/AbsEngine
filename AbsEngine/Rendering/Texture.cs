@@ -158,6 +158,9 @@ public class Texture : IDisposable
     public void SetPixels(byte[] pixels, int width, int height)
         => _backendTexture.LoadFromPixels(pixels, width, height);
 
+    public void SetMaxMips(int maxMips)
+        => _backendTexture.SetMaxMips(maxMips);
+
     internal IBackendTexture GetBackendTexture()
         => _backendTexture;
 
