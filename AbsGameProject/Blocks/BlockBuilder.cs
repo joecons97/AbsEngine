@@ -10,6 +10,8 @@ namespace AbsGameProject.Blocks
         string _id;
         int _opacity;
         int _light;
+        bool _transparent;
+        bool _cullSelf;
 
         string? _voxelModelFile;
 
@@ -23,6 +25,13 @@ namespace AbsGameProject.Blocks
         public BlockBuilder WithVoxelModel(string voxelModelFile)
         {
             _voxelModelFile = voxelModelFile;
+            return this;
+        }
+
+        public BlockBuilder WithTransparency(bool transparency, bool cullSelf = false)
+        {
+            _transparent = transparency;
+            _cullSelf = cullSelf;
             return this;
         }
 
@@ -69,6 +78,8 @@ namespace AbsGameProject.Blocks
                 CollisionShapes = boundingBoxes,
                 Opacity = _opacity,
                 Light = _light,
+                IsTransparent = _transparent,
+                TransparentCullSelf = _cullSelf
             };
         }
     }

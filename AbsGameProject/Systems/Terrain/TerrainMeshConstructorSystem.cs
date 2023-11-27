@@ -34,10 +34,15 @@ namespace AbsGameProject.Systems.Terrain
             await Task.Run(() =>
             {
                 var mesh = new Mesh();
+                var transparentMesh = new Mesh();
 
                 var vertices = new List<Vector3D<float>>();
                 var colours = new List<Vector4D<float>>();
                 var uvs = new List<Vector2D<float>>();
+
+                var transparentVertices = new List<Vector3D<float>>();
+                var transparentColours = new List<Vector4D<float>>();
+                var transparentUvs = new List<Vector2D<float>>();
 
                 for (int x = 0; x < TerrainChunkComponent.WIDTH; x++)
                 {
@@ -55,22 +60,22 @@ namespace AbsGameProject.Systems.Terrain
 
                             CullFaceDirection toCull = CullFaceDirection.None;
 
-                            if (ShouldRenderFace(x, y, z + 1) == false)
+                            if (ShouldRenderFace(x, y, z + 1, blockIndex) == false)
                                 toCull |= CullFaceDirection.North;
 
-                            if (ShouldRenderFace(x, y, z - 1) == false)
+                            if (ShouldRenderFace(x, y, z - 1, blockIndex) == false)
                                 toCull |= CullFaceDirection.South;
 
-                            if (ShouldRenderFace(x, y + 1, z) == false)
+                            if (ShouldRenderFace(x, y + 1, z, blockIndex) == false)
                                 toCull |= CullFaceDirection.Up;
 
-                            if (ShouldRenderFace(x, y - 1, z) == false)
+                            if (ShouldRenderFace(x, y - 1, z, blockIndex) == false)
                                 toCull |= CullFaceDirection.Down;
 
-                            if (ShouldRenderFace(x + 1, y, z) == false)
+                            if (ShouldRenderFace(x + 1, y, z, blockIndex) == false)
                                 toCull |= CullFaceDirection.West;
 
-                            if (ShouldRenderFace(x - 1, y, z) == false)
+                            if (ShouldRenderFace(x - 1, y, z, blockIndex) == false)
                                 toCull |= CullFaceDirection.East;
 
                             var faces = block.Mesh.Faces
@@ -78,14 +83,28 @@ namespace AbsGameProject.Systems.Terrain
 
                             foreach (var face in faces)
                             {
-                                vertices.AddRange(face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)));
+                                if (block.Id == "water")
+                                {
+                                    transparentVertices.AddRange(face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)));
 
-                                uvs.AddRange(face.Value.UVs);
+                                    transparentUvs.AddRange(face.Value.UVs);
 
-                                colours.AddRange(face.Value.TintIndicies
-                                    .Select(x => x == null
-                                        ? Vector4D<float>.One
-                                        : Vector4D<float>.UnitY));
+                                    transparentColours.AddRange(face.Value.TintIndicies
+                                        .Select(x => x == null
+                                            ? Vector4D<float>.One
+                                            : Vector4D<float>.UnitY));
+                                }
+                                else
+                                {
+                                    vertices.AddRange(face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)));
+
+                                    uvs.AddRange(face.Value.UVs);
+
+                                    colours.AddRange(face.Value.TintIndicies
+                                        .Select(x => x == null
+                                            ? Vector4D<float>.One
+                                            : Vector4D<float>.UnitY));
+                                }
                             }
                         }
                     }
@@ -98,60 +117,38 @@ namespace AbsGameProject.Systems.Terrain
                 mesh.Uvs = uvs.ToArray();
                 mesh.UseTriangles = false;
 
+                transparentMesh.Positions = transparentVertices.ToArray();
+                transparentMesh.Normals = Array.Empty<Vector3D<float>>();
+                transparentMesh.Tangents = Array.Empty<Vector3D<float>>();
+                transparentMesh.Colours = transparentColours.ToArray();
+                transparentMesh.Uvs = transparentUvs.ToArray();
+                transparentMesh.UseTriangles = false;
+
                 component.Mesh = mesh;
+                component.WaterMesh = transparentMesh;
             });
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
 
-            bool ShouldRenderFace(int x, int y, int z)
+            bool ShouldRenderFace(int x, int y, int z, int workingBlockId)
             {
-                if (x <= -1)
-                {
-                    x = TerrainChunkComponent.WIDTH + x;
+                var blockId = component.GetBlockId(x, y, z);
+                if (blockId == 0)
+                    return true;
 
-                    if (component.LeftNeighbour?.VoxelData != null)
-                        return component.LeftNeighbour.VoxelData[x, y, z] == 0;
+                var block = BlockRegistry.GetBlock(blockId);
+                if (block.IsTransparent)
+                {
+                    if (blockId != workingBlockId)
+                        return true;
+
+                    if (block.TransparentCullSelf)
+                        return false;
 
                     return true;
                 }
 
-                if (x >= TerrainChunkComponent.WIDTH)
-                {
-                    x = x - TerrainChunkComponent.WIDTH;
-
-                    if (component.RightNeighbour?.VoxelData != null)
-                        return component.RightNeighbour.VoxelData[x, y, z] == 0;
-
-                    return true;
-                }
-
-                if (z <= -1)
-                {
-                    z = TerrainChunkComponent.WIDTH + z;
-
-                    if (component.SouthNeighbour?.VoxelData != null)
-                        return component.SouthNeighbour.VoxelData[x, y, z] == 0;
-
-                    return true;
-                }
-
-                if (z >= TerrainChunkComponent.WIDTH)
-                {
-                    z = z - TerrainChunkComponent.WIDTH;
-
-                    if (component.NorthNeighbour?.VoxelData != null)
-                        return component.NorthNeighbour.VoxelData[x, y, z] == 0;
-
-                    return true;
-                }
-
-                if (y <= 0 || y >= TerrainChunkComponent.HEIGHT - 1)
-                    return false;
-
-                if (component.VoxelData == null)
-                    return false;
-
-                return component.VoxelData[x, y, z] == 0;
+                return false;
             }
         }
     }

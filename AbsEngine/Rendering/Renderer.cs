@@ -25,7 +25,7 @@ public class RenderJob
 
 public static class Renderer
 {
-    private static readonly Queue<RenderJob> renderQueue = new Queue<RenderJob>();
+    private static readonly List<RenderJob> renderQueue = new List<RenderJob>();
 
     private static float _fps = 0;
     private static int _drawCalls = 0;
@@ -35,7 +35,8 @@ public static class Renderer
 
     public static void Render(Mesh mesh, Material material, Matrix4X4<float> trs, BoundingBox? boundingBox = null)
     {
-        renderQueue.Enqueue(new RenderJob(mesh, material, trs, boundingBox));
+        int pos = Math.Min(renderQueue.Count, material.Shader.GetBackendShader().GetRenderQueuePosition());
+        renderQueue.Insert(pos, new RenderJob(mesh, material, trs, boundingBox));
     }
 
     internal static void CompleteFrame()
@@ -68,7 +69,8 @@ public static class Renderer
         while (renderQueue.Count > 0)
         {
             _drawCalls++;
-            var r = renderQueue.Dequeue();
+            var r = renderQueue.First();
+            renderQueue.RemoveAt(0);
 
             if (r.BoundingBox != null && !frustum.Intersects(r.BoundingBox))
             {

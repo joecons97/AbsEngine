@@ -15,6 +15,8 @@ internal interface IBackendShader : IDisposable
     public void SetVector(string name, Vector4D<float> value);
     public void SetMatrix(string name, Matrix4X4<float> value);
     public void SetTexture(string name, IBackendTexture texture);
+
+    public int GetRenderQueuePosition();
 }
 
 public class Shader : IDisposable

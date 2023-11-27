@@ -9,6 +9,10 @@ internal class OpenGLShader : IBackendShader
     private readonly GL _gl;
     private List<string> _samplers = new();
     private TriangleFace? _culling = TriangleFace.Back;
+    private bool _isTransparent = false;
+    private int _renderQueuePos = 0;
+    private BlendingFactor _blendSrcFactor = BlendingFactor.SrcColor;
+    private BlendingFactor _blendDstFactor = BlendingFactor.OneMinusSrcColor;
 
     public OpenGLShader()
     {
@@ -28,6 +32,17 @@ internal class OpenGLShader : IBackendShader
         else
         {
             _gl.Disable(EnableCap.CullFace);
+        }
+
+        if (_isTransparent)
+        {
+            _gl.Enable(EnableCap.Blend);
+            _gl.BlendEquation(BlendEquationModeEXT.FuncAdd);
+            _gl.BlendFunc(_blendSrcFactor, _blendDstFactor);
+        }
+        else
+        {
+            _gl.Disable(EnableCap.Blend);
         }
 
         _gl.UseProgram(_handle);
@@ -188,6 +203,37 @@ internal class OpenGLShader : IBackendShader
                         _ => TriangleFace.Back
                     };
                     break;
+                case "blending":
+                    var srcStr = param.Split(":")[0].ToLower();
+                    var dstStr = param.Split(":")[1].ToLower();
+
+                    BlendingFactor srcBlendingFactor = default;
+                    BlendingFactor dstBlendingFactor = default;
+
+                    if (!Enum.TryParse(srcStr, true, out srcBlendingFactor))
+                        throw new InvalidDataException($"Invalid blending type: {srcStr}");
+
+                    if (!Enum.TryParse(dstStr, true, out dstBlendingFactor))
+                        throw new InvalidDataException($"Invalid blending type: {dstStr}");
+
+                    _blendSrcFactor = srcBlendingFactor;
+                    _blendDstFactor = dstBlendingFactor;
+
+                    break;
+                case "queue":
+
+                    if (param.ToLower() == "transparent")
+                    {
+                        _isTransparent = true;
+                        _renderQueuePos = 1000;
+                    }
+                    else
+                    {
+                        if(!int.TryParse(param, out _renderQueuePos))
+                            throw new InvalidDataException($"Invalid render queue position: {param}");
+                    }
+
+                    break;
             }
         }
     }
@@ -204,5 +250,10 @@ internal class OpenGLShader : IBackendShader
         }
 
         return handle;
+    }
+
+    public int GetRenderQueuePosition()
+    {
+        return _isTransparent ? 1000 : 0;
     }
 }

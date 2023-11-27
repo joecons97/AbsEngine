@@ -30,8 +30,10 @@ namespace AbsGameProject.Components.Terrain
         public ushort[,,]? VoxelData { get; set; }
 
         public Mesh? Mesh { get; set; }
+        public Mesh? WaterMesh { get; set; }
         public BoundingBox? BoundingBox { get; set; }
         public MeshRendererComponent Renderer { get; set; }
+        public MeshRendererComponent WaterRenderer {  get; set; }
 
         public bool HasAllNeighbours =>
             LeftNeighbour != null && LeftNeighbour.State != TerrainState.None &&
@@ -45,6 +47,13 @@ namespace AbsGameProject.Components.Terrain
         public TerrainChunkComponent? SouthNeighbour;
 
         private readonly List<Vector3D<float>> _updatesSinceLastRebuild = new();
+
+        public override void OnStart()
+        {
+            var waterEntity = Entity.Scene.EntityManager.CreateEntity("Water");
+            waterEntity.Transform.Parent = Entity.Transform;
+            WaterRenderer = waterEntity.AddComponent<MeshRendererComponent>();
+        }
 
         public static bool IsPositionInBounds(Vector3D<float> pos)
         {

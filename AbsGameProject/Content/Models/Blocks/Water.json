@@ -1,7 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"water": "Content/Textures/Blocks/water_overlay.png"
+		"water": "Content/Textures/Blocks/water_still.png"
 	},
 	"elements": [
 		{
