@@ -25,14 +25,10 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
         inputContext = scene.Game.InputContext;
         mouse = inputContext.Mice.First();
         keyboard = inputContext.Keyboards.First();
-
-        mouse.Cursor.CursorMode = CursorMode.Disabled;
     }
 
     public void OnTick(CameraComponent component, float deltaTime)
     {
-        Debug.WriteLine(component.Entity.Transform.LocalPosition);
-
         var t = component.Entity.Transform;
 
         var p = mouse.Position;

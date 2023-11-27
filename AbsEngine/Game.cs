@@ -1,8 +1,11 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.IO;
 using AbsEngine.Rendering;
+using AbsEngine.Rendering.OpenGL;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using Silk.NET.OpenGL;
+using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 
 namespace AbsEngine;
@@ -31,6 +34,8 @@ public class Game
 
     private WindowOptions _windowOptions;
     private IWindow _window;
+
+    private ImGuiController? _imGuiController;
 
     private Queue<IDisposable> _queueForDisposal = new Queue<IDisposable>();
 
@@ -65,6 +70,14 @@ public class Game
             Graphics = IGraphics.Create(_window, gfxApi);
             InputContext = _window.CreateInput();
 
+            if (gfxApi == GraphicsAPIs.OpenGL)
+            {
+                _imGuiController = new ImGuiController(
+                    ((OpenGLGraphics)Graphics).Gl, // load OpenGL
+                    _window, // pass in our window
+                    InputContext // create an input context
+                );
+            }
             Graphics.SetActiveDepthTest(true);
 
             ShaderLoader.ScanShaders();
@@ -90,6 +103,8 @@ public class Game
                 item.Tick((float)dt);
             }
 
+            _imGuiController?.Update((float)dt);
+
             OnUpdate?.Invoke(dt);
         };
 
@@ -99,6 +114,7 @@ public class Game
 
             Renderer.CompleteFrame();
 
+            _imGuiController?.Render();
             OnRender?.Invoke(dt);
         };
 

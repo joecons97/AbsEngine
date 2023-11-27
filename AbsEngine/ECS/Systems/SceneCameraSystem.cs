@@ -12,6 +12,8 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
     IMouse mouse;
     IKeyboard keyboard;
 
+    bool canMove;
+
     public float MoveSpeed { get; private set; } = 15;
 
     protected override Func<SceneCameraComponent, bool>? Predicate => (x) =>
@@ -25,7 +27,30 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
         mouse = inputContext.Mice.First();
         keyboard = inputContext.Keyboards.First();
 
-        mouse.Cursor.CursorMode = CursorMode.Disabled;
+        mouse.MouseDown += Mouse_MouseDown;
+        mouse.MouseUp += Mouse_MouseUp;
+    }
+
+    private void Mouse_MouseUp(IMouse arg1, MouseButton arg2)
+    {
+        if (!SceneCameraComponent.IsInSceneView) return;
+
+        if (arg2 == MouseButton.Right)
+        {
+            mouse.Cursor.CursorMode = CursorMode.Normal;
+            canMove = false;
+        }
+    }
+
+    private void Mouse_MouseDown(IMouse arg1, MouseButton arg2)
+    {
+        if (!SceneCameraComponent.IsInSceneView) return;
+
+        if (arg2 == MouseButton.Right)
+        {
+            mouse.Cursor.CursorMode = CursorMode.Disabled;
+            canMove = true;
+        }
     }
 
     public void OnTick(SceneCameraComponent component, float deltaTime)
@@ -38,31 +63,25 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
         Vector3D<float> velocity = new Vector3D<float>();
 
-        if (keyboard.IsKeyPressed(Key.W))
+        if (canMove)
         {
-            velocity += t.Forward * MoveSpeed * deltaTime;
-        }
-        else if (keyboard.IsKeyPressed(Key.S))
-        {
-            velocity += t.Forward * -MoveSpeed * deltaTime;
-        }
+            if (keyboard.IsKeyPressed(Key.W))
+            {
+                velocity += t.Forward * MoveSpeed * deltaTime;
+            }
+            else if (keyboard.IsKeyPressed(Key.S))
+            {
+                velocity += t.Forward * -MoveSpeed * deltaTime;
+            }
 
-        if (keyboard.IsKeyPressed(Key.D))
-        {
-            velocity += t.Right * -MoveSpeed * deltaTime;
-        }
-        else if (keyboard.IsKeyPressed(Key.A))
-        {
-            velocity += t.Right * MoveSpeed * deltaTime;
-        }
-
-        if(keyboard.IsKeyPressed(Key.Equal))
-        {
-            SceneCameraComponent.IsInSceneView = true;
-        }
-        else if (keyboard.IsKeyPressed(Key.Minus))
-        {
-            SceneCameraComponent.IsInSceneView = false;
+            if (keyboard.IsKeyPressed(Key.D))
+            {
+                velocity += t.Right * -MoveSpeed * deltaTime;
+            }
+            else if (keyboard.IsKeyPressed(Key.A))
+            {
+                velocity += t.Right * MoveSpeed * deltaTime;
+            }
         }
 
         if (keyboard.IsKeyPressed(Key.Minus))
@@ -75,14 +94,19 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
         float m = 0.1f;
 
-        t.LocalEulerAngles += new Vector3D<float>(d.Y * m, d.X * m, 0);
-        t.LocalPosition += velocity;
+        if (canMove)
+        {
+            t.LocalEulerAngles += new Vector3D<float>(d.Y * m, d.X * m, 0);
+            t.LocalPosition += velocity;
+        }
     }
 
     public override Task OnTickAsync(SceneCameraComponent component, float deltaTime)
     {
-        if(SceneCameraComponent.IsInSceneView)
+        if (SceneCameraComponent.IsInSceneView)
+        {
             OnTick(component, deltaTime);
+        }
 
         return Task.CompletedTask;
     }
