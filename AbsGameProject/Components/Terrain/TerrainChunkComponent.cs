@@ -1,5 +1,6 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
+using AbsEngine.Physics;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using Silk.NET.Maths;
@@ -29,6 +30,7 @@ namespace AbsGameProject.Components.Terrain
         public ushort[,,]? VoxelData { get; set; }
 
         public Mesh? Mesh { get; set; }
+        public BoundingBox? BoundingBox { get; set; }
         public MeshRendererComponent Renderer { get; set; }
 
         public bool HasAllNeighbours =>

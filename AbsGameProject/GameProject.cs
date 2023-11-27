@@ -56,7 +56,7 @@ namespace AbsGameProject
         static void SetupPlayer(Scene scene)
         {
             var playerEntity = scene.EntityManager.CreateEntity("Player");
-            playerEntity.Transform.LocalPosition = new Vector3D<float>(0, 50, 0);
+            playerEntity.Transform.LocalPosition = new Vector3D<float>(0, 100, 0);
             var collider = playerEntity.AddComponent<VoxelBoxColliderComponent>();
             var rigidbody = playerEntity.AddComponent<VoxelRigidbodyComponent>();
             rigidbody.Mass = 1;

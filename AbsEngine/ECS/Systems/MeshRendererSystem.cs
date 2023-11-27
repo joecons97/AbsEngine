@@ -18,6 +18,6 @@ public class MeshRendererSystem : ComponentSystem<MeshRendererComponent>
 
         var world = trans.WorldMatrix;
 
-        Renderer.Render(component.Mesh, component.Material, world);
+        Renderer.Render(component.Mesh, component.Material, world, component.BoundingBox);
     }
 }

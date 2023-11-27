@@ -1,4 +1,5 @@
 ﻿using Silk.NET.Maths;
+using System.Numerics;
 
 namespace AbsEngine.Physics;
 
@@ -20,12 +21,12 @@ public class BoundingBox : IShape
 
     public BoundingBox Transform(Vector3D<float> translation, Vector3D<float> scale)
     {
-        return new BoundingBox(Min.X + translation.X * scale.X,
-                                Max.X + translation.X * scale.X,
-                                Min.Y + translation.Y * scale.Y,
-                                Max.Y + translation.Y * scale.Y,
-                                Min.Z + translation.Z * scale.Z,
-                                Max.Z + translation.Z * scale.Z);
+        return new BoundingBox((Min.X + translation.X) * scale.X,
+                               (Max.X + translation.X) * scale.X,
+                               (Min.Y + translation.Y) * scale.Y,
+                               (Max.Y + translation.Y) * scale.Y,
+                               (Min.Z + translation.Z) * scale.Z,
+                               (Max.Z + translation.Z) * scale.Z);
     }
 
     public bool Intersects(IShape shape, Vector3D<float> position)
@@ -56,5 +57,62 @@ public class BoundingBox : IShape
                 offset.Y + Max.Y >= position.Y &&
                 offset.Z + Min.Z <= position.Z &&
                 offset.Z + Max.Z >= position.Z);
+    }
+
+    public void Intersects(Plane<float> plane, out PlaneIntersectionType result)
+    {
+        Vector3 positiveVertex;
+        Vector3 negativeVertex;
+
+        if (plane.Normal.X >= 0)
+        {
+            positiveVertex.X = Max.X;
+            negativeVertex.X = Min.X;
+        }
+        else
+        {
+            positiveVertex.X = Min.X;
+            negativeVertex.X = Max.X;
+        }
+
+        if (plane.Normal.Y >= 0)
+        {
+            positiveVertex.Y = Max.Y;
+            negativeVertex.Y = Min.Y;
+        }
+        else
+        {
+            positiveVertex.Y = Min.Y;
+            negativeVertex.Y = Max.Y;
+        }
+
+        if (plane.Normal.Z >= 0)
+        {
+            positiveVertex.Z = Max.Z;
+            negativeVertex.Z = Min.Z;
+        }
+        else
+        {
+            positiveVertex.Z = Min.Z;
+            negativeVertex.Z = Max.Z;
+        }
+
+        // Inline Vector3.Dot(plane.Normal, negativeVertex) + plane.D;
+        var distance = plane.Normal.X * negativeVertex.X + plane.Normal.Y * negativeVertex.Y + plane.Normal.Z * negativeVertex.Z + plane.Distance;
+        if (distance > 0)
+        {
+            result = PlaneIntersectionType.Front;
+            return;
+        }
+
+        // Inline Vector3.Dot(plane.Normal, positiveVertex) + plane.D;
+        distance = plane.Normal.X * positiveVertex.X + plane.Normal.Y * positiveVertex.Y + plane.Normal.Z * positiveVertex.Z + plane.Distance;
+        if (distance < 0)
+        {
+            result = PlaneIntersectionType.Back;
+            return;
+        }
+
+        result = PlaneIntersectionType.Intersecting;
     }
 }

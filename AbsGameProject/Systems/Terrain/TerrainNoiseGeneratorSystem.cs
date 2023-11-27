@@ -1,4 +1,5 @@
 ﻿using AbsEngine.ECS;
+using AbsEngine.Physics;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Extensions;
 using AbsGameProject.Maths.Noise;
@@ -30,6 +31,8 @@ namespace AbsGameProject.Systems.Terrain
         {
             _ = Task.Run(() =>
             {
+                var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
+                var maxY = 0;
                 var trans = component.Entity.Transform;
                 component.VoxelData = new ushort[TerrainChunkComponent.WIDTH, TerrainChunkComponent.HEIGHT, TerrainChunkComponent.WIDTH];
                 component.Heightmap = new byte[TerrainChunkComponent.WIDTH, TerrainChunkComponent.WIDTH];
@@ -46,6 +49,9 @@ namespace AbsGameProject.Systems.Terrain
 
                         h = h / 2 + 1;
                         h *= amplitude;
+
+                        if (h > maxY)
+                            maxY = (int)h;
 
                         component.Heightmap[x, z] = (byte)h;
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
@@ -72,6 +78,11 @@ namespace AbsGameProject.Systems.Terrain
                         }
                     }
                 }
+
+                maxY = Math.Min(maxY + 32, TerrainChunkComponent.HEIGHT);
+                bb.Max = new Vector3D<float>(TerrainChunkComponent.WIDTH, maxY, TerrainChunkComponent.WIDTH);
+                component.BoundingBox = bb;
+
                 component.State = TerrainChunkComponent.TerrainState.NoiseGenerated;
             });
         }

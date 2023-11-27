@@ -1,17 +1,34 @@
 ﻿using AbsEngine.ECS.Components;
 using AbsEngine.Exceptions;
 using AbsEngine.Maths;
+using AbsEngine.Physics;
 using Silk.NET.Maths;
 
 namespace AbsEngine.Rendering;
 
+public class RenderJob
+{
+    public Mesh Mesh { get; set; }
+    public Material Material { get; set; }
+    public Matrix4X4<float> WorldMatrix { get; set; }   
+    public BoundingBox? BoundingBox { get; set; }
+
+    public RenderJob(Mesh mesh, Material material, Matrix4X4<float> worldMatrix, BoundingBox? boundingBox)
+    {
+        Mesh = mesh;
+        Material = material;
+        WorldMatrix = worldMatrix;
+        BoundingBox = boundingBox;
+    }
+}
+
 public static class Renderer
 {
-    private static readonly Queue<(Mesh, Material, Matrix4X4<float>)> renderQueue = new Queue<(Mesh, Material, Matrix4X4<float>)>();
+    private static readonly Queue<RenderJob> renderQueue = new Queue<RenderJob>();
 
-    public static void Render(Mesh mesh, Material material, Matrix4X4<float> trs)
+    public static void Render(Mesh mesh, Material material, Matrix4X4<float> trs, BoundingBox? boundingBox = null)
     {
-        renderQueue.Enqueue((mesh, material, trs));
+        renderQueue.Enqueue(new RenderJob(mesh, material, trs, boundingBox));
     }
 
     internal static void CompleteFrame()
@@ -36,21 +53,25 @@ public static class Renderer
         winX / winY, cam.NearClipPlane, cam.FarClipPlane);
 
         var vpMat = viewMat * projMat;
+        var frustum = new Frustum(vpMat);
 
         while (renderQueue.Count > 0)
         {
             var r = renderQueue.Dequeue();
 
-            r.Item2.Bind();
-            r.Item1.Bind();
+            if (r.BoundingBox != null && !frustum.Intersects(r.BoundingBox))
+                continue;
 
-            r.Item2.SetMatrix("uWorldMatrix", r.Item3);
-            r.Item2.SetMatrix("uMvp", r.Item3 * vpMat);
+            r.Material.Bind();
+            r.Mesh.Bind();
 
-            if(r.Item1.UseTriangles)
-                game.Graphics.DrawElements((uint)r.Item1.Triangles.Length);
+            r.Material.SetMatrix("uWorldMatrix", r.WorldMatrix);
+            r.Material.SetMatrix("uMvp", r.WorldMatrix * vpMat);
+
+            if (r.Mesh.UseTriangles)
+                game.Graphics.DrawElements((uint)r.Mesh.Triangles.Length);
             else
-                game.Graphics.DrawArrays((uint)r.Item1.Positions.Length);
+                game.Graphics.DrawArrays((uint)r.Mesh.Positions.Length);
         }
     }
 }

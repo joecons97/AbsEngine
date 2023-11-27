@@ -3,6 +3,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Textures;
+using Silk.NET.Maths;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -35,6 +36,7 @@ namespace AbsGameProject.Systems.Terrain
             {
                 renderer.Mesh = component.Mesh;
                 renderer.Material = material;
+                renderer.BoundingBox = component.BoundingBox?.Transform(component.Entity.Transform.LocalPosition, Vector3D<float>.One);   
             }
 
             component.State = TerrainChunkComponent.TerrainState.Done;
