@@ -1,10 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AbsEngine.Rendering.OpenGL.Buffers
 {
@@ -17,7 +11,7 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
         private uint _handle;
         private GL _gl;
 
-        public VertexArrayContainer(GL gl, BufferContainer<TVertexType> vbo, BufferContainer<TIndexType> ebo)
+        public VertexArrayContainer(GL gl, BufferContainer vbo, BufferContainer ebo)
         {
             //Setting out handle and binding the VBO and EBO to this VAO.
             _gl = gl;
@@ -27,7 +21,7 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
             ebo.Bind();
         }
 
-        public VertexArrayContainer(GL gl, BufferContainer<TVertexType> vbo)
+        public VertexArrayContainer(GL gl, BufferContainer vbo)
         {
             //Setting out handle and binding the VBO and EBO to this VAO.
             _gl = gl;

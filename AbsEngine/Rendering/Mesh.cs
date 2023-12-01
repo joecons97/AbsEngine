@@ -14,6 +14,7 @@ internal interface IBackendMesh : IDisposable
 
     public void Build();
     public void Bind();
+    void BuildVertexBuffer<T>(Span<T> vertices) where T : unmanaged;
 }
 
 public class Mesh : IDisposable
@@ -24,22 +25,37 @@ public class Mesh : IDisposable
     public Vector3D<float>[] Normals { get => _backendMesh.Normals; set => _backendMesh.Normals = value; }
     public Vector3D<float>[] Tangents { get => _backendMesh.Tangents; set => _backendMesh.Tangents = value; }
     public Vector2D<float>[] Uvs { get => _backendMesh.Uvs; set => _backendMesh.Uvs = value; }
+    public VertexAttributeDescriptor[]? VertexAttributeDescriptors { get; set; }
     public bool UseTriangles { get; set; } = true;
     public bool HasBeenBuilt { get; private set; }
 
     private readonly IBackendMesh _backendMesh = null!;
+    private int _vertexBufferDataLength = 0;
+
+    public int VertexCount => VertexAttributeDescriptors == null ? Positions.Length : _vertexBufferDataLength;
 
     public Mesh()
     {
         switch (Game.Instance!.Graphics.GraphicsAPIs)
         {
             case GraphicsAPIs.OpenGL:
-                _backendMesh = new OpenGLMesh();
+                _backendMesh = new OpenGLMesh(this);
                 break;
             case GraphicsAPIs.D3D11:
                 _backendMesh = null!;
                 throw new NotImplementedException();
         }
+    }
+
+    public void SetVertexBufferLayout(VertexAttributeDescriptor[]? vertexAttributes)
+    {
+        VertexAttributeDescriptors = vertexAttributes;
+    }
+
+    public void SetVertexBufferData<T>(Span<T> verts) where T : unmanaged
+    {
+        _vertexBufferDataLength = verts.Length;
+        _backendMesh.BuildVertexBuffer(verts);
     }
 
     public void Build()

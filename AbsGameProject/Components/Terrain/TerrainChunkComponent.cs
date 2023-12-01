@@ -3,6 +3,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Physics;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
+using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
 using System.Diagnostics;
 
@@ -23,6 +24,9 @@ namespace AbsGameProject.Components.Terrain
         }
 
         public TerrainState State { get; set; } = TerrainState.None;
+
+        public List<TerrainVertex> TerrainVertices { get; set; }
+        public List<TerrainVertex> WaterVertices { get; set; }
 
         public bool IsAwaitingRebuild { get; set; }
 

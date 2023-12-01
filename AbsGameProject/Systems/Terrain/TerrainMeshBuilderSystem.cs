@@ -1,9 +1,9 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
+using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -33,17 +33,20 @@ namespace AbsGameProject.Systems.Terrain
             if (component.Mesh == null || component.WaterMesh == null || component.Mesh.HasBeenBuilt)
                 return;
 
+            component.Mesh.SetVertexBufferData(CollectionsMarshal.AsSpan(component.TerrainVertices));
             component.Mesh.Build();
+
+            component.WaterMesh.SetVertexBufferData(CollectionsMarshal.AsSpan(component.WaterVertices));
             component.WaterMesh.Build();
 
             if (component.Renderer != null)
             {
                 component.Renderer.Mesh = component.Mesh;
                 component.Renderer.Material = terrainMaterial;
-                component.Renderer.BoundingBox = component.BoundingBox?.Transform(component.Entity.Transform.LocalPosition, Vector3D<float>.One);   
+                component.Renderer.BoundingBox = component.BoundingBox?.Transform(component.Entity.Transform.LocalPosition, Vector3D<float>.One);
             }
 
-            if(component.WaterRenderer != null)
+            if (component.WaterRenderer != null)
             {
                 component.WaterRenderer.Mesh = component.WaterMesh;
                 component.WaterRenderer.Material = waterMaterial;

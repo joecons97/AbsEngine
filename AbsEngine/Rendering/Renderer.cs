@@ -87,7 +87,7 @@ public static class Renderer
             if (r.Mesh.UseTriangles)
                 game.Graphics.DrawElements((uint)r.Mesh.Triangles.Length);
             else
-                game.Graphics.DrawArrays((uint)r.Mesh.Positions.Length);
+                game.Graphics.DrawArrays((uint)r.Mesh.VertexCount);
         }
 
         if (SceneCameraComponent.IsInSceneView)

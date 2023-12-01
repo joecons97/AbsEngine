@@ -5,9 +5,19 @@ using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
+using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems.Terrain
 {
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TerrainVertex
+    {
+        public Vector3D<short> position;
+        public Vector4D<short> colour;
+        public Vector2D<Half> uv;
+    }
+
     public class TerrainMeshConstructorSystem : AsyncComponentSystem<TerrainChunkComponent>
     {
         private readonly Material material;
@@ -17,11 +27,20 @@ namespace AbsGameProject.Systems.Terrain
 
         protected override int MaxIterationsPerFrame => 1;
 
+        private VertexAttributeDescriptor[] vertexLayout;
+
         public TerrainMeshConstructorSystem(Scene scene) : base(scene)
         {
             material = new Material("TerrainShader");
             if (TextureAtlas.AtlasTexture != null)
                 material.SetTexture("uAtlas", TextureAtlas.AtlasTexture);
+
+            vertexLayout = new VertexAttributeDescriptor[]
+            {
+                new VertexAttributeDescriptor(VertexAttributeFormat.SInt16, 3),
+                new VertexAttributeDescriptor(VertexAttributeFormat.SInt16, 4),
+                new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
+            };
         }
 
         public override async Task OnTickAsync(TerrainChunkComponent component, float deltaTime)
@@ -33,8 +52,14 @@ namespace AbsGameProject.Systems.Terrain
 
             await Task.Run(() =>
             {
+                component.TerrainVertices = new List<TerrainVertex>();
+                component.WaterVertices = new List<TerrainVertex>();
+
                 var mesh = new Mesh();
+                mesh.SetVertexBufferLayout(vertexLayout);
+
                 var transparentMesh = new Mesh();
+                transparentMesh.SetVertexBufferLayout(vertexLayout);
 
                 var vertices = new List<Vector3D<float>>();
                 var colours = new List<Vector4D<float>>();
@@ -85,43 +110,51 @@ namespace AbsGameProject.Systems.Terrain
                             {
                                 if (block.Id == "water")
                                 {
-                                    transparentVertices.AddRange(face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)));
-
-                                    transparentUvs.AddRange(face.Value.UVs);
-
-                                    transparentColours.AddRange(face.Value.TintIndicies
-                                        .Select(x => x == null
+                                    for (var i = 0; i < face.Value.Positions.Count; i++)
+                                    {
+                                        var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                        var uv = face.Value.UVs[i];
+                                        var col = face.Value.TintIndicies[i] == null
                                             ? Vector4D<float>.One
-                                            : Vector4D<float>.UnitY));
+                                            : Vector4D<float>.UnitY;
+
+                                        var vert = new TerrainVertex()
+                                        {
+                                            position = (Vector3D<short>)pos,
+                                            colour = (Vector4D<short>)col,
+                                            uv = (Vector2D<Half>)uv
+                                        };
+
+                                        component.WaterVertices.Add(vert);
+                                    }
                                 }
                                 else
                                 {
-                                    vertices.AddRange(face.Value.Positions.Select(v => v + new Vector3D<float>(x, y, z)));
+                                    for (var i = 0; i < face.Value.Positions.Count; i++)
+                                    {
+                                        var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                        var uv = face.Value.UVs[i];
+                                        var col = face.Value.TintIndicies[i] == null 
+                                            ? Vector4D<float>.One 
+                                            : Vector4D<float>.UnitY;
 
-                                    uvs.AddRange(face.Value.UVs);
+                                        var vert = new TerrainVertex()
+                                        {
+                                            position = (Vector3D<short>)pos,
+                                            colour = (Vector4D<short>)col,
+                                            uv = (Vector2D<Half>)uv
+                                        };
 
-                                    colours.AddRange(face.Value.TintIndicies
-                                        .Select(x => x == null
-                                            ? Vector4D<float>.One
-                                            : Vector4D<float>.UnitY));
+                                        component.TerrainVertices.Add(vert);
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                mesh.Positions = vertices.ToArray();
-                mesh.Normals = Array.Empty<Vector3D<float>>();
-                mesh.Tangents = Array.Empty<Vector3D<float>>();
-                mesh.Colours = colours.ToArray();
-                mesh.Uvs = uvs.ToArray();
                 mesh.UseTriangles = false;
 
-                transparentMesh.Positions = transparentVertices.ToArray();
-                transparentMesh.Normals = Array.Empty<Vector3D<float>>();
-                transparentMesh.Tangents = Array.Empty<Vector3D<float>>();
-                transparentMesh.Colours = transparentColours.ToArray();
-                transparentMesh.Uvs = transparentUvs.ToArray();
                 transparentMesh.UseTriangles = false;
 
                 component.Mesh = mesh;
