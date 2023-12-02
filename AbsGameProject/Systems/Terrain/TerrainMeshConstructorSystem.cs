@@ -108,45 +108,25 @@ namespace AbsGameProject.Systems.Terrain
 
                             foreach (var face in faces)
                             {
-                                if (block.Id == "water")
+                                for (var i = 0; i < face.Value.Positions.Count; i++)
                                 {
-                                    for (var i = 0; i < face.Value.Positions.Count; i++)
+                                    var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                    var uv = face.Value.UVs[i];
+                                    var col = face.Value.TintIndicies[i] == null
+                                        ? Vector4D<float>.One
+                                        : Vector4D<float>.UnitY;
+
+                                    var vert = new TerrainVertex()
                                     {
-                                        var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
-                                        var uv = face.Value.UVs[i];
-                                        var col = face.Value.TintIndicies[i] == null
-                                            ? Vector4D<float>.One
-                                            : Vector4D<float>.UnitY;
+                                        position = (Vector3D<short>)pos,
+                                        colour = (Vector4D<short>)col,
+                                        uv = (Vector2D<Half>)uv
+                                    };
 
-                                        var vert = new TerrainVertex()
-                                        {
-                                            position = (Vector3D<short>)pos,
-                                            colour = (Vector4D<short>)col,
-                                            uv = (Vector2D<Half>)uv
-                                        };
-
+                                    if (block.Id == "water")
                                         component.WaterVertices.Add(vert);
-                                    }
-                                }
-                                else
-                                {
-                                    for (var i = 0; i < face.Value.Positions.Count; i++)
-                                    {
-                                        var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
-                                        var uv = face.Value.UVs[i];
-                                        var col = face.Value.TintIndicies[i] == null 
-                                            ? Vector4D<float>.One 
-                                            : Vector4D<float>.UnitY;
-
-                                        var vert = new TerrainVertex()
-                                        {
-                                            position = (Vector3D<short>)pos,
-                                            colour = (Vector4D<short>)col,
-                                            uv = (Vector2D<Half>)uv
-                                        };
-
+                                    else
                                         component.TerrainVertices.Add(vert);
-                                    }
                                 }
                             }
                         }
