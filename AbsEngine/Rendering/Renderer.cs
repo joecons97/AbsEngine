@@ -84,9 +84,9 @@ public static class Renderer
             r.Material.SetMatrix("uWorldMatrix", r.WorldMatrix);
             r.Material.SetMatrix("uMvp", r.WorldMatrix * vpMat);
 
-            if (r.Mesh.UseTriangles)
+            if (r.Mesh.UseTriangles && r.Mesh.Triangles.Length > 0)
                 game.Graphics.DrawElements((uint)r.Mesh.Triangles.Length);
-            else
+            else if(r.Mesh.VertexCount > 0)
                 game.Graphics.DrawArrays((uint)r.Mesh.VertexCount);
         }
 
