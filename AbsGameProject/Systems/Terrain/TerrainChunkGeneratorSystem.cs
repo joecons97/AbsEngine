@@ -63,6 +63,7 @@ namespace AbsGameProject.Systems.Terrain
 
                         chunkComp.Renderer.Mesh = null;
                         chunkComp.Mesh = null;
+                        chunkComp.WaterMesh = null;
 
                         chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
                         chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
