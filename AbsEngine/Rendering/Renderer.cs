@@ -66,6 +66,8 @@ public static class Renderer
         var vpMat = viewMat * projMat;
         var frustum = new Frustum(vpMat);
 
+        Shader.SetGlobalVector("_CameraPosition", trans.Position);
+
         while (renderQueue.Count > 0)
         {
             _drawCalls++;

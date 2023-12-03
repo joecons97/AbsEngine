@@ -3,6 +3,22 @@ using Silk.NET.Maths;
 
 namespace AbsEngine.Rendering;
 
+internal enum GlobalShaderVariableType
+{
+    Int,
+    Uint,
+    Float,
+    Vector3,
+    Vector4,
+    Matrix
+}
+
+internal struct GlobalShaderVariable
+{
+    public GlobalShaderVariableType Type;
+    public object Value;
+}
+
 internal interface IBackendShader : IDisposable
 {
     public void Bind();
@@ -22,6 +38,8 @@ internal interface IBackendShader : IDisposable
 public class Shader : IDisposable
 {
     private IBackendShader _backendShader = null!;
+
+    internal static Dictionary<string, GlobalShaderVariable> _globalVariables = new Dictionary<string, GlobalShaderVariable>();
 
     public Shader()
     {
@@ -51,7 +69,6 @@ public class Shader : IDisposable
 
     ~Shader() => Dispose();
 
-
     public void SetInt(string name, int value)
         => _backendShader?.SetInt(name, value);
     public void SetUint(string name, uint value)
@@ -64,4 +81,25 @@ public class Shader : IDisposable
         => _backendShader?.SetMatrix(name, value);
     public void SetTexture(string name, Texture texture)
         => _backendShader.SetTexture(name, texture.GetBackendTexture());
+
+    public static void SetGlobalGlobalInt(string name, int value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Int);
+    public static void SetGlobalUint(string name, uint value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Uint);
+    public static void SetGlobalFloat(string name, float value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Float);
+    public static void SetGlobalVector(string name, Vector4D<float> value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector4);
+    public static void SetGlobalVector(string name, Vector3D<float> value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector3);
+    public static void SetGlobalMatrix(string name, Matrix4X4<float> value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Matrix);
+    
+    static void SetGlobalGlobalVariable(string name, object value, GlobalShaderVariableType type)
+    {
+        if(_globalVariables.ContainsKey(name))
+            _globalVariables[name] = new GlobalShaderVariable() { Type = type, Value = value };
+        else
+            _globalVariables.Add(name, new GlobalShaderVariable() { Type = type, Value = value });
+    }
 }

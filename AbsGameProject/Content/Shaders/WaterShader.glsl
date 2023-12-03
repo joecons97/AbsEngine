@@ -42,12 +42,21 @@ struct v2f
 
     uniform sampler2D uAtlas;
 
+    uniform vec3 _CameraPosition;
+
     out vec4 FragColor;
 
     void main()
     {
         vec2 uv = vertData.uvs.yx;
         vec4 col = texture(uAtlas, uv);
+
+        vec3 viewDir = normalize(_CameraPosition - vertData.worldPos.xyz);
+        float fresnel = 1 - clamp(dot(vec3(0,1,0), viewDir), 0, 1);
+
+        fresnel *= 1.5;
+
+        col.a = mix(col.a, 1, fresnel);
 
         FragColor = col;
     }

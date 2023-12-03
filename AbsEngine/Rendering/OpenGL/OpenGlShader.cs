@@ -8,6 +8,7 @@ internal class OpenGLShader : IBackendShader
     private readonly uint _handle;
     private readonly GL _gl;
     private List<string> _samplers = new();
+    private List<string> _uniforms = new();
     private TriangleFace? _culling = TriangleFace.Back;
     private bool _isTransparent = false;
     private int _renderQueuePos = 0;
@@ -43,6 +44,50 @@ internal class OpenGLShader : IBackendShader
         else
         {
             _gl.Disable(EnableCap.Blend);
+        }
+
+        foreach (var globalVariable in Shader._globalVariables)
+        {
+            if (_uniforms.Contains(globalVariable.Key))
+            {
+                int location = _gl.GetUniformLocation(_handle, globalVariable.Key);
+                if (location == -1)
+                    continue;
+
+                switch (globalVariable.Value.Type)
+                {
+                    case GlobalShaderVariableType.Int:
+                        _gl.Uniform1(location, (int)globalVariable.Value.Value);
+                        break;
+                    case GlobalShaderVariableType.Uint:
+                        _gl.Uniform1(location, (uint)globalVariable.Value.Value);
+                        break;
+                    case GlobalShaderVariableType.Float:
+                        _gl.Uniform1(location, (float)globalVariable.Value.Value);
+                        break;
+                    case GlobalShaderVariableType.Vector4:
+                        unsafe
+                        {
+                            Vector4D<float> value = (Vector4D<float>)globalVariable.Value.Value;
+                            _gl.Uniform4(location, 1, (float*)&value);
+                        }
+                        break;
+                    case GlobalShaderVariableType.Vector3:
+                        unsafe
+                        {
+                            Vector3D<float> value = (Vector3D<float>)globalVariable.Value.Value;
+                            _gl.Uniform3(location, 1, (float*)&value);
+                        }
+                        break;
+                    case GlobalShaderVariableType.Matrix:
+                        unsafe
+                        {
+                            Matrix4X4<float> value = (Matrix4X4<float>)globalVariable.Value.Value;
+                            _gl.UniformMatrix4(location, 1, false, (float*)&value);
+                        }
+                        break;
+                }
+            }
         }
 
         _gl.UseProgram(_handle);
@@ -121,7 +166,7 @@ internal class OpenGLShader : IBackendShader
 
     public void SetTexture(string name, IBackendTexture texture)
     {
-        if(texture is OpenGLTexture tex)
+        if (texture is OpenGLTexture tex)
         {
             var unit = _samplers.IndexOf(name);
             if (unit == -1)
@@ -146,7 +191,7 @@ internal class OpenGLShader : IBackendShader
         _gl.ProgramUniform1(_handle, location, value);
     }
 
-    public void SetVector(string name, Vector4D<float> value)   
+    public void SetVector(string name, Vector4D<float> value)
     {
         int location = _gl.GetUniformLocation(_handle, name);
         if (location == -1)
@@ -163,7 +208,7 @@ internal class OpenGLShader : IBackendShader
     private void GetUniforms(string shader)
     {
         var allLines = shader.Replace("\r", "").Split("\n").ToList();
-        var samplers = allLines.Where(x => x.Contains("uniform sampler"));
+        var samplers = allLines.Where(x => x.Contains("uniform"));
         foreach (var item in samplers)
         {
             var line = item.Trim();
@@ -171,8 +216,10 @@ internal class OpenGLShader : IBackendShader
             var type = split[1];
             var name = split[2].Replace(";", "");
 
-            if (!_samplers.Contains(name))
+            if (type.StartsWith("sampler") && !_samplers.Contains(name))
                 _samplers.Add(name);
+            else if (!_uniforms.Contains(name))
+                _uniforms.Add(name);
         }
     }
 
@@ -180,7 +227,7 @@ internal class OpenGLShader : IBackendShader
     {
         var allLines = shader.Replace("\r", "").Split("\n").ToList();
         var directives = allLines.Where(x => x.Contains("#define"));
-        foreach(var item in directives)
+        foreach (var item in directives)
         {
             var directive = item.Trim().ToLower();
             var split = directive.Split(" ");
@@ -229,7 +276,7 @@ internal class OpenGLShader : IBackendShader
                     }
                     else
                     {
-                        if(!int.TryParse(param, out _renderQueuePos))
+                        if (!int.TryParse(param, out _renderQueuePos))
                             throw new InvalidDataException($"Invalid render queue position: {param}");
                     }
 
