@@ -67,6 +67,8 @@ public static class Renderer
         var frustum = new Frustum(vpMat);
 
         Shader.SetGlobalVector("_CameraPosition", trans.Position);
+        Shader.SetGlobalFloat("_Time", Game.Instance!.Time);
+        Shader.SetGlobalFloat("_DeltaTime", Game.Instance!.DeltaTime);
 
         while (renderQueue.Count > 0)
         {
@@ -105,6 +107,7 @@ public static class Renderer
             ImGui.Begin("Renderer");
 
             ImGui.Value("FPS", _fps);
+            ImGui.Value("Time", Game.Instance!.Time);
             ImGui.Value("Total Draw Calls", _drawCalls);
             ImGui.Value("Draw Calls", _drawCalls - _culledDrawCalls);
             ImGui.Value("Culled Draw Calls", _culledDrawCalls);
