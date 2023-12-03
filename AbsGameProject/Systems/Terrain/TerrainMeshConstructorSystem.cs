@@ -10,11 +10,11 @@ using System.Runtime.InteropServices;
 namespace AbsGameProject.Systems.Terrain
 {
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct TerrainVertex
     {
-        public Vector3D<short> position;
-        public Vector4D<short> colour;
+        public Vector3D<byte> position;
+        public Vector4D<byte> colour;
         public Vector2D<Half> uv;
     }
 
@@ -37,8 +37,8 @@ namespace AbsGameProject.Systems.Terrain
 
             vertexLayout = new VertexAttributeDescriptor[]
             {
-                new VertexAttributeDescriptor(VertexAttributeFormat.SInt16, 3),
-                new VertexAttributeDescriptor(VertexAttributeFormat.SInt16, 4),
+                new VertexAttributeDescriptor(VertexAttributeFormat.SInt8, 3),
+                new VertexAttributeDescriptor(VertexAttributeFormat.SInt8, 4),
                 new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
             };
         }
@@ -118,8 +118,8 @@ namespace AbsGameProject.Systems.Terrain
 
                                     var vert = new TerrainVertex()
                                     {
-                                        position = (Vector3D<short>)pos,
-                                        colour = (Vector4D<short>)col,
+                                        position = (Vector3D<byte>)pos,
+                                        colour = (Vector4D<byte>)col,
                                         uv = (Vector2D<Half>)uv
                                     };
 
