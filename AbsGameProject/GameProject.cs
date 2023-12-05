@@ -9,6 +9,7 @@ using AbsGameProject.Maths.Physics;
 using AbsGameProject.Systems.Player;
 using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
+using ImGuiNET;
 using Silk.NET.Maths;
 
 namespace AbsGameProject
@@ -36,6 +37,10 @@ namespace AbsGameProject
                 WithTransparency(true, true).WithVoxelModel("Content/Models/Blocks/Water.json").Build());
             BlockRegistry.AddBlock(Block.New("sand", "Sand").WithVoxelModel("Content/Models/Blocks/Sand.json").Build());
 
+            BlockRegistry.AddBlock(Block.New("log_oak", "Oak Log").WithVoxelModel("Content/Models/Blocks/Log.json").Build());
+            BlockRegistry.AddBlock(Block.New("leaves_oak", "Oak Leaves").
+                WithTransparency(true, true).WithVoxelModel("Content/Models/Blocks/Leaves.json").Build());
+
             TextureAtlas.Build();
 
             var scene = Scene.Load();
@@ -48,6 +53,7 @@ namespace AbsGameProject
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainChunkRebuilderSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
+            scene.RegisterSystem<TerrainDecoratorSystem>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
             scene.RegisterSystem<TerrainMeshBuilderSystem>();
             scene.RegisterSystem<BlockBreakerSystem>();

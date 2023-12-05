@@ -4,6 +4,7 @@ using AbsEngine.Rendering;
 using AbsGameProject.Components.Player;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
+using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using System.Numerics;
@@ -17,6 +18,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
     Vector2 _lastMousePos;
     IMouse _mouse;
     IKeyboard _keyboard;
+    bool showDebug;
 
     MeshRendererComponent _playerRenderer;
 
@@ -44,10 +46,22 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
     {
         if (arg2 == Key.Space && _playerController.IsGrounded)
             _playerController.VoxelRigidbody.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY);
+
+        if (arg2 == Key.F3)
+            showDebug = !showDebug;
     }
 
     public override void Tick(float deltaTime)
     {
+        if (showDebug)
+        {
+            ImGui.Begin("Player");
+            ImGui.LabelText("World Position", _playerController.Entity.Transform.Position.ToString());
+            ImGui.LabelText("Chunk Position", _playerController.Entity.Transform.Position.ToChunkPosition().ToString());
+            ImGui.LabelText("Chunk Space", _playerController.Entity.Transform.Position.ToChunkSpaceFloored().ToString());
+            ImGui.End();
+        }
+
         _playerRenderer.IsEnabled = !SceneCameraComponent.IsInSceneView;
 
         if (SceneCameraComponent.IsInSceneView)

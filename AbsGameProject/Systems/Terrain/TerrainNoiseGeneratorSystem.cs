@@ -1,8 +1,10 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.Physics;
+using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Extensions;
 using AbsGameProject.Maths.Noise;
+using AbsGameProject.Structures;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Systems.Terrain
@@ -31,6 +33,9 @@ namespace AbsGameProject.Systems.Terrain
         {
             _ = Task.Run(() =>
             {
+                Random random = new Random();
+                List<KeyValuePair<Vector3D<float>, Decorator>> structures = new List<KeyValuePair<Vector3D<float>, Decorator>>();
+
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
                 var maxY = 0;
                 var trans = component.Entity.Transform;
@@ -78,8 +83,6 @@ namespace AbsGameProject.Systems.Terrain
                             {
                                 if (y <= 50)
                                     component.VoxelData[x, y, z] = 5;
-                                else
-                                    component.VoxelData[x, y, z] = 0;
                             }
                         }
                     }
@@ -94,3 +97,4 @@ namespace AbsGameProject.Systems.Terrain
         }
     }
 }
+

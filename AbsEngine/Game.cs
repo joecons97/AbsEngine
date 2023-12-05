@@ -105,9 +105,9 @@ public class Game
                 item.Tick((float)dt);
             }
 
-            _imGuiController?.Update((float)dt);
-
             OnUpdate?.Invoke(dt);
+
+            _imGuiController?.Update((float)dt);
         };
 
         _window.Render += (dt) =>
@@ -116,8 +116,9 @@ public class Game
 
             Renderer.CompleteFrame();
 
-            _imGuiController?.Render();
             OnRender?.Invoke(dt);
+
+            _imGuiController?.Render();
         };
 
         _window.FramebufferResize += (s) =>
@@ -133,7 +134,10 @@ public class Game
 
     public void QueueDisposable(IDisposable disposable)
     {
-        if (!_queueForDisposal.Contains(disposable))
-            _queueForDisposal.Enqueue(disposable);
+        lock (_queueForDisposal)
+        {
+            if (!_queueForDisposal.Contains(disposable))
+                _queueForDisposal.Enqueue(disposable);
+        }
     }
 }

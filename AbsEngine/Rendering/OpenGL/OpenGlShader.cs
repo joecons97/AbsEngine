@@ -301,6 +301,6 @@ internal class OpenGLShader : IBackendShader
 
     public int GetRenderQueuePosition()
     {
-        return _isTransparent ? 1000 : 0;
+        return _renderQueuePos;
     }
 }

@@ -14,6 +14,7 @@ internal class OpenGLGraphics : IGraphics
     public OpenGLGraphics(IWindow window, GraphicsAPIs graphicsAPIs)
     {
         Gl = window.CreateOpenGL();
+
         GraphicsAPIs = graphicsAPIs;
     }
 

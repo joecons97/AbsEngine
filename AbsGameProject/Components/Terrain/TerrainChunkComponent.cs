@@ -18,6 +18,7 @@ namespace AbsGameProject.Components.Terrain
         {
             None,
             NoiseGenerated,
+            Decorated,
             MeshConstructed,
             MeshGenerated,
             Done
@@ -37,13 +38,21 @@ namespace AbsGameProject.Components.Terrain
         public Mesh? WaterMesh { get; set; }
         public BoundingBox? BoundingBox { get; set; }
         public MeshRendererComponent Renderer { get; set; }
-        public MeshRendererComponent WaterRenderer {  get; set; }
+        public MeshRendererComponent WaterRenderer { get; set; }
 
-        public bool HasAllNeighbours =>
-            LeftNeighbour != null && LeftNeighbour.State != TerrainState.None &&
-            RightNeighbour != null && RightNeighbour.State != TerrainState.None &&
-            NorthNeighbour != null && NorthNeighbour.State != TerrainState.None &&
-            SouthNeighbour != null && SouthNeighbour.State != TerrainState.None;
+        public bool IsReadyForDecoration =>
+            State == TerrainState.NoiseGenerated &&
+            LeftNeighbour != null && LeftNeighbour.State >= TerrainState.NoiseGenerated &&
+            RightNeighbour != null && RightNeighbour.State >= TerrainState.NoiseGenerated &&
+            NorthNeighbour != null && NorthNeighbour.State >= TerrainState.NoiseGenerated &&
+            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
+
+        public bool IsReadyForMeshGeneration =>
+            State == TerrainState.Decorated &&
+            LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
+            RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
+            NorthNeighbour != null && NorthNeighbour.State >= TerrainState.Decorated &&
+            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated;
 
         public TerrainChunkComponent? LeftNeighbour;
         public TerrainChunkComponent? RightNeighbour;
@@ -51,6 +60,11 @@ namespace AbsGameProject.Components.Terrain
         public TerrainChunkComponent? SouthNeighbour;
 
         private readonly List<Vector3D<float>> _updatesSinceLastRebuild = new();
+
+        public TerrainChunkComponent(MeshRendererComponent renderer)
+        {
+            Renderer = renderer;
+        }
 
         public override void OnStart()
         {
@@ -133,7 +147,7 @@ namespace AbsGameProject.Components.Terrain
             return BlockRegistry.GetBlock(id);
         }
 
-        public void SetBlock(int x, int y, int z, Block block, bool isRecursed = false)
+        public void SetBlock(int x, int y, int z, Block block, bool isRecursed = false, bool logChange = true)
         {
             if (block == null)
                 throw new ArgumentNullException("block");
@@ -141,7 +155,7 @@ namespace AbsGameProject.Components.Terrain
             if (VoxelData == null)
                 return;
 
-            if (isRecursed == false)
+            if (isRecursed == false && logChange)
             {
                 var vec3 = new Vector3D<float>(x, y, z);
                 if (_updatesSinceLastRebuild.Contains(vec3) == false)
@@ -151,40 +165,50 @@ namespace AbsGameProject.Components.Terrain
             if (x <= -1)
             {
                 if (LeftNeighbour != null)
+                {
                     LeftNeighbour.SetBlock(WIDTH + x, y, z, block, true);
-
+                    LeftNeighbour.RebuildMesh();
+                }
                 return;
             }
 
             if (x >= WIDTH)
             {
                 if (RightNeighbour != null)
+                {
                     RightNeighbour.SetBlock(x - WIDTH, y, z, block, true);
-
+                    RightNeighbour.RebuildMesh();
+                }
                 return;
             }
 
             if (z <= -1)
             {
                 if (SouthNeighbour != null)
+                {
                     SouthNeighbour.SetBlock(x, y, WIDTH + z, block, true);
-
+                    SouthNeighbour.RebuildMesh();
+                }
                 return;
             }
 
             if (z >= WIDTH)
             {
                 if (NorthNeighbour != null)
+                {
                     NorthNeighbour.SetBlock(x, y, z - WIDTH, block, true);
-
+                    NorthNeighbour.RebuildMesh();
+                }
                 return;
             }
 
             if (y < 0 || y > HEIGHT - 1)
                 return;
 
-            CalculateHeightmapAtPos(x, z);
             VoxelData[x, y, z] = BlockRegistry.GetBlockIndex(block);
+
+            CalculateHeightmapAtPos(x, z);
+            RebuildMesh();
         }
 
         public byte GetHeight(int x, int z)
@@ -283,11 +307,6 @@ namespace AbsGameProject.Components.Terrain
                     break;
                 }
             }
-        }
-
-        public TerrainChunkComponent(MeshRendererComponent renderer)
-        {
-            Renderer = renderer;
         }
     }
 }

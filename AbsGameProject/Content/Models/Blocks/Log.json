@@ -1,0 +1,22 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"log_oak": "Content/Textures/Blocks/log_oak.png",
+		"log_oak_top": "Content/Textures/Blocks/log_oak_top.png"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "log_oak", "cullface": "north"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "log_oak", "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "log_oak", "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "log_oak", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "log_oak_top", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "log_oak_top", "cullface": "down"}
+			}
+		}
+	],
+	"display": {}
+}

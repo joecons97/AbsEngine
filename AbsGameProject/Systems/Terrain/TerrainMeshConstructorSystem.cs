@@ -22,8 +22,7 @@ namespace AbsGameProject.Systems.Terrain
     {
         private readonly Material material;
 
-        protected override Func<TerrainChunkComponent, bool>? Predicate =>
-            (x) => x.State == TerrainChunkComponent.TerrainState.NoiseGenerated && x.HasAllNeighbours;
+        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.IsReadyForMeshGeneration;
 
         protected override int MaxIterationsPerFrame => 1;
 
