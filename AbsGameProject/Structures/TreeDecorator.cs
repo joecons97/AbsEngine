@@ -11,7 +11,10 @@ internal class TreeDecorator : Decorator
     public int RandomHeightOffset { get; }
     public int LeavesRadius { get; }
 
+    //TODO Change
     Random random;
+
+    Block _dirtBlock;
 
     public TreeDecorator(Block trunk, Block leaves, int trunkHeight, int leavesRadius, int randomHeightOffset)
     {
@@ -20,6 +23,8 @@ internal class TreeDecorator : Decorator
         TrunkHeight = trunkHeight;
         LeavesRadius = leavesRadius;
         RandomHeightOffset = randomHeightOffset;
+
+        _dirtBlock = BlockRegistry.GetBlock("dirt");
 
         random = new Random();
     }
@@ -61,6 +66,8 @@ internal class TreeDecorator : Decorator
         {
             chunk.SetBlock(x, y + i, z, Trunk, logChange: false);
         }
+
+        chunk.SetBlock(x, y - 1, z, _dirtBlock, logChange: false);
 
         return Task.CompletedTask;
     }
