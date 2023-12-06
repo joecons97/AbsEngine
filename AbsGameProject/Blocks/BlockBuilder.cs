@@ -12,6 +12,7 @@ namespace AbsGameProject.Blocks
         int _light;
         bool _transparent;
         bool _cullSelf;
+        bool _noCollision;
 
         string? _voxelModelFile;
 
@@ -28,9 +29,9 @@ namespace AbsGameProject.Blocks
             return this;
         }
 
-        public BlockBuilder WithTransparency(bool transparency, bool cullSelf = false)
+        public BlockBuilder WithTransparency(bool cullSelf = false)
         {
-            _transparent = transparency;
+            _transparent = true;
             _cullSelf = cullSelf;
             return this;
         }
@@ -47,11 +48,17 @@ namespace AbsGameProject.Blocks
             return this;
         }
 
+        public BlockBuilder WithNoCollision()
+        {
+            _noCollision = true;
+            return this;
+        }
+
         public Block Build()
         {
             VoxelModel? voxelModel = null;
             CullableMesh? cullableMesh = null;
-            VoxelBoundingBox[]? boundingBoxes = null;
+            VoxelBoundingBox[] boundingBoxes = null;
 
             if (string.IsNullOrEmpty(_voxelModelFile) == false)
             {
@@ -65,7 +72,10 @@ namespace AbsGameProject.Blocks
                 if (cullableMesh == null)
                     throw new Exception("Failed to load mesh from voxel model");
 
-                boundingBoxes = cullableMesh.CollisionBoxes.ToArray();
+                if(_noCollision == false)
+                    boundingBoxes = cullableMesh.CollisionBoxes.ToArray();
+                else
+                    boundingBoxes = Array.Empty<VoxelBoundingBox>();
             }
 
             return new Block()

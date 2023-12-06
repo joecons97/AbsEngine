@@ -14,11 +14,18 @@ namespace AbsGameProject.Components.Player
         public float CurrentLookUp = 0;
 
         public float LookSensitivity = 0.1f;
-        public float WalkSpeed = 5;
-        public float RunSpeed = 2;
+        public float WalkSpeed = 4;
+        public float RunSpeed = 6;
         public float JumpStrength = 8;
 
+        public bool IsInWater;
+        public bool IsFeetInWater;
+        public float WaterWalkSpeed = 2f;
+        public float WaterRiseSpeed = 30f;
+        public float WaterDrag = 15;
+
         public bool IsGrounded = true;
+        public bool CanJumpFromWater = false;
 
         public override void OnStart()
         {

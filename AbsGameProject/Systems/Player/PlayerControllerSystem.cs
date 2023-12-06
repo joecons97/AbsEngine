@@ -2,11 +2,12 @@
 using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Player;
+using AbsGameProject.Components.Terrain;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
-using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.Maths;
+using System.Diagnostics;
 using System.Numerics;
 
 namespace AbsGameProject.Systems.Player;
@@ -18,7 +19,6 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
     Vector2 _lastMousePos;
     IMouse _mouse;
     IKeyboard _keyboard;
-    bool showDebug;
 
     MeshRendererComponent _playerRenderer;
 
@@ -45,23 +45,13 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
     private void _keyboard_KeyDown(IKeyboard arg1, Key arg2, int arg3)
     {
         if (arg2 == Key.Space && _playerController.IsGrounded)
-            _playerController.VoxelRigidbody.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY);
-
-        if (arg2 == Key.F3)
-            showDebug = !showDebug;
+        {
+            _playerController.VoxelRigidbody?.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY);
+        }
     }
 
     public override void Tick(float deltaTime)
     {
-        if (showDebug)
-        {
-            ImGui.Begin("Player");
-            ImGui.LabelText("World Position", _playerController.Entity.Transform.Position.ToString());
-            ImGui.LabelText("Chunk Position", _playerController.Entity.Transform.Position.ToChunkPosition().ToString());
-            ImGui.LabelText("Chunk Space", _playerController.Entity.Transform.Position.ToChunkSpaceFloored().ToString());
-            ImGui.End();
-        }
-
         _playerRenderer.IsEnabled = !SceneCameraComponent.IsInSceneView;
 
         if (SceneCameraComponent.IsInSceneView)
@@ -71,27 +61,39 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
         var t = _playerController.Entity.Transform;
 
-        var velocity = new Vector3D<float>(0, _playerController.VoxelRigidbody.Velocity.Y, 0);
+        var velocity = new Vector3D<float>(0, _playerController.VoxelRigidbody?.Velocity.Y ?? 0, 0);
 
-        var pos = _playerController.Entity.Transform.Position + Vector3D<float>.UnitY * 0.1f;
-        _playerController.IsGrounded = ChunkPhysics.CastVoxel(pos, -Vector3D<float>.UnitY, 0.2f, out var _);
+        var chunk = TerrainChunkComponent.GetAt(Scene, _playerController.Entity.Transform.Position);
+        if (chunk != null)
+        {
+            var chunkSpacePos = _playerController.Entity.Transform.Position.ToChunkSpaceFloored();
+            var block = chunk.GetBlock((int)chunkSpacePos.X, (int)chunkSpacePos.Y + 1, (int)chunkSpacePos.Z);
+            var feetBlock = chunk.GetBlock((int)chunkSpacePos.X, (int)chunkSpacePos.Y, (int)chunkSpacePos.Z);
+
+            _playerController.IsInWater = block.Id == "water";
+            _playerController.IsFeetInWater = feetBlock.Id == "water";
+        }
+
+        _playerController.VoxelRigidbody.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
+
+        var speed = _playerController.IsFeetInWater ? _playerController.WaterWalkSpeed : _playerController.WalkSpeed;
 
         if (_keyboard.IsKeyPressed(Key.W))
         {
-            velocity += t.Forward * _playerController.WalkSpeed;
+            velocity += t.Forward * speed;
         }
         else if (_keyboard.IsKeyPressed(Key.S))
         {
-            velocity += t.Forward * -_playerController.WalkSpeed;
+            velocity += t.Forward * -speed;
         }
 
         if (_keyboard.IsKeyPressed(Key.D))
         {
-            velocity += t.Right * -_playerController.WalkSpeed;
+            velocity += t.Right * -speed;
         }
         else if (_keyboard.IsKeyPressed(Key.A))
         {
-            velocity += t.Right * _playerController.WalkSpeed;
+            velocity += t.Right * speed;
         }
         if (_keyboard.IsKeyPressed(Key.Equal))
         {
@@ -100,6 +102,35 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         }
 
         _playerController.VoxelRigidbody.Velocity = velocity;
+
+        if((_playerController.IsInWater || _playerController.IsGrounded) && !_playerController.CanJumpFromWater)
+        {
+            _playerController.CanJumpFromWater = true;
+        }
+
+        if (!_playerController.IsInWater)
+        {
+            var pos = _playerController.Entity.Transform.Position + Vector3D<float>.UnitY * 0.5f;
+            _playerController.IsGrounded = ChunkPhysics.CastVoxel(pos, -Vector3D<float>.UnitY, .65f, out var _);
+
+            if (_keyboard.IsKeyPressed(Key.Space)
+                && _playerController.IsFeetInWater && velocity.Y > 0 
+                && _playerController.CanJumpFromWater && _playerController.IsGrounded == false)
+            {
+                _playerController.CanJumpFromWater = false;
+                _playerController.VoxelRigidbody?.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY * 2);
+            }
+        }
+        else
+        {
+            _playerController.IsGrounded = false;
+
+            if (_keyboard.IsKeyPressed(Key.Space))
+            {
+                _playerController.VoxelRigidbody.AddForce(_playerController.WaterRiseSpeed * Vector3D<float>.UnitY);
+            }
+        }
+
     }
 
     void MouseLook()

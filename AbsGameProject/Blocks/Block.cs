@@ -20,7 +20,7 @@ public class Block
     public bool IsTransparent { get; init; }
     public bool TransparentCullSelf { get; init; }
 
-    public IVoxelShape[]? CollisionShapes { get; init; } 
+    public IVoxelShape[] CollisionShapes { get; init; } 
 
     public static BlockBuilder New(string id, string name)
     {

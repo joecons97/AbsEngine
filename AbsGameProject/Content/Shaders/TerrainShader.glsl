@@ -44,7 +44,7 @@ struct v2f
     {
         vec4 col = texture(uAtlas, vertData.uvs.yx);
 
-        if(col.a < 0.1)
+        if(col.a < 0.05)
             discard;
 
         FragColor = vertData.vertexColour * col;

@@ -3,6 +3,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Physics;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
+using AbsGameProject.Maths.Physics;
 using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
 using System.Diagnostics;
@@ -64,6 +65,13 @@ namespace AbsGameProject.Components.Terrain
         public TerrainChunkComponent(MeshRendererComponent renderer)
         {
             Renderer = renderer;
+        }
+
+        public static TerrainChunkComponent? GetAt(Scene scene, Vector3D<float> worldPos)
+        {
+            var chunkPos = worldPos.ToChunkPosition();
+
+            return scene.EntityManager.GetComponents<TerrainChunkComponent>(x => x.Entity.Transform.Position == chunkPos).FirstOrDefault();
         }
 
         public override void OnStart()
