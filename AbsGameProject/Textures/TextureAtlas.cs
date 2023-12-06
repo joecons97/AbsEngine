@@ -98,6 +98,7 @@ namespace AbsGameProject.Textures
             }).SelectMany(x => x).ToArray();
 
             AtlasTexture.SetPixels(_finalTex, Size, Size);
+            AtlasTexture.Update();
         }
     }
 }

@@ -29,7 +29,7 @@ public class Mesh : IDisposable
     public bool UseTriangles { get; set; } = true;
     public bool HasBeenBuilt { get; private set; }
 
-    private readonly IBackendMesh _backendMesh = null!;
+    internal readonly IBackendMesh _backendMesh = null!;
     private int _vertexBufferDataLength = 0;
 
     public int VertexCount => VertexAttributeDescriptors == null ? Positions.Length : _vertexBufferDataLength;

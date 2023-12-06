@@ -170,7 +170,7 @@ internal class OpenGLShader : IBackendShader
         {
             var unit = _samplers.IndexOf(name);
             if (unit == -1)
-                throw new IndexOutOfRangeException($"The texture uniform {name} could not be found");
+                return;
 
             _gl.ActiveTexture(TextureUnit.Texture0 + unit);
             tex.Bind();
@@ -272,7 +272,7 @@ internal class OpenGLShader : IBackendShader
                     if (param.ToLower() == "transparent")
                     {
                         _isTransparent = true;
-                        _renderQueuePos = 1000;
+                        _renderQueuePos = Renderer.TRANSPARENT_QUEUE_POSITION;
                     }
                     else
                     {

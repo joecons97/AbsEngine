@@ -14,6 +14,8 @@ public static class TextureLoader
         var backend = texture.GetBackendTexture();
         backend.LoadFromResult(result);
         texture.ApplyBackendTexture(backend);
+        texture.Update();
+
 
         return texture;
     }

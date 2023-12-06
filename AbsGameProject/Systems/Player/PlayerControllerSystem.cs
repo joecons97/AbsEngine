@@ -52,7 +52,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
     public override void Tick(float deltaTime)
     {
-        _playerRenderer.IsEnabled = !SceneCameraComponent.IsInSceneView;
+        _playerRenderer.IsEnabled = SceneCameraComponent.IsInSceneView;
 
         if (SceneCameraComponent.IsInSceneView)
             return;

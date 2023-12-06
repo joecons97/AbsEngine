@@ -16,6 +16,7 @@ namespace AbsGameProject
 {
     public class GameProject
     {
+        static RenderTexture rt;
         public static void Main()
         {
             var game = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));

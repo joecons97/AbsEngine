@@ -39,24 +39,50 @@ struct v2f
 #ifdef FRAG
 
     in v2f vertData;
+    
+    uniform sampler2D _DepthMap;
+    uniform vec3 _CameraPosition;
+    uniform float _NearClipPlane;
+    uniform float _FarClipPlane;
 
     uniform sampler2D uAtlas;
-
-    uniform vec3 _CameraPosition;
+    uniform float uWaterDepth = 0.1;
 
     out vec4 FragColor;
+
+    float depthToLinear(float depth, float nearPlane, float farPlane)
+    {
+	    return 2.0 * nearPlane * farPlane / (farPlane + nearPlane - (2.0 * depth - 1.0) * (farPlane - nearPlane));
+    }
+
+    float GetDepth(float exponent)
+    {
+        vec2 texSize = textureSize(_DepthMap, 0);
+        vec2 uvs = gl_FragCoord.xy / texSize;
+        float depth = texture(_DepthMap, uvs).r;
+
+        float waterDepth = depthToLinear(depth, _NearClipPlane, _FarClipPlane);
+
+        float waterDist = depthToLinear(gl_FragCoord.z, _NearClipPlane, _FarClipPlane);
+
+        float totalDepth = waterDepth - waterDist;
+
+        return exp(-totalDepth * exponent);
+    }
 
     void main()
     {
         vec2 uv = vertData.uvs.yx;
         vec4 col = texture(uAtlas, uv);
 
-        vec3 viewDir = normalize(_CameraPosition - vertData.worldPos.xyz);
-        float fresnel = 1 - clamp(dot(vec3(0,1,0), viewDir), 0, 1);
+        //Maybe re-add later
 
-        fresnel *= 1.5;
+        //vec3 viewDir = normalize(_CameraPosition - vertData.worldPos.xyz);
+        //float fresnel = 1 - clamp(dot(vec3(0,1,0), viewDir), 0, 1);
 
-        col.a = mix(col.a, 1, fresnel);
+        //fresnel *= 1.5;
+
+        col.a = mix(col.a, 1, 1 - GetDepth(uWaterDepth));
 
         FragColor = col;
     }

@@ -1,5 +1,7 @@
-﻿using Silk.NET.OpenGL;
+﻿using Assimp;
+using Silk.NET.OpenGL;
 using StbImageSharp;
+using System.Xml.Linq;
 
 namespace AbsEngine.Rendering.OpenGL;
 
@@ -12,6 +14,12 @@ internal class OpenGLTexture : IBackendTexture
     private InternalFormat _format;
     private PixelFormat _pixelFormat;
     private PixelType _pixelType;
+
+    private byte[] _data = Array.Empty<byte>();
+    private uint _width = 1;
+    private uint _height = 1;
+
+    public uint Handle => _handle;
 
     public OpenGLTexture(
         TextureTarget textureTarget, InternalFormat format, PixelFormat pixelFormat,
@@ -36,33 +44,43 @@ internal class OpenGLTexture : IBackendTexture
 
     public void Bind()
     {
-        _gl.BindTexture(_textureTarget, _handle);
+        _gl.BindTexture(_textureTarget, Handle);
+    }
+
+    public void Update()
+    {
+        Bind();
+
+        _gl.TexImage2D<byte>(_textureTarget, 0, _format,
+            _width, _height,
+            0, _pixelFormat, _pixelType, _data);
+
+        GenerateMipMaps();
     }
 
     public void LoadFromResult(ImageResult imageResult)
     {
-        Bind();
-
-        _gl.TexImage2D<byte>(_textureTarget, 0, _format,
-            (uint)imageResult.Width, (uint)imageResult.Height,
-            0, _pixelFormat, _pixelType, imageResult.Data);
-
-        GenerateMipMaps();
+        _data = imageResult.Data;
+        _width = (uint)imageResult.Width;
+        _height = (uint)imageResult.Height;
     }
 
     public void LoadFromPixels(byte[] pixels, int width, int height)
     {
-        Bind();
-
-        _gl.TexImage2D<byte>(_textureTarget, 0, _format,
-            (uint)width, (uint)height,
-            0, _pixelFormat, _pixelType, pixels);
-
-        GenerateMipMaps();
+        _data = pixels;
+        _width = (uint)width;
+        _height = (uint)height;
     }
+
+    public void SetSize(int width, int height)
+    {
+        _width = (uint)width;
+        _height = (uint)height;
+    }
+
     public void Dispose()
     {
-        _gl.DeleteTexture(_handle);
+        _gl.DeleteTexture(Handle);
     }
 
     public void SetWrapMode(TextureWrapMode wrapMode)
@@ -81,8 +99,8 @@ internal class OpenGLTexture : IBackendTexture
             _ => throw new NotImplementedException()
         };
 
-        _gl.TextureParameter(_handle, TextureParameterName.TextureWrapS, (int)finalWrapMode);
-        _gl.TextureParameter(_handle, TextureParameterName.TextureWrapT, (int)finalWrapMode);
+        _gl.TextureParameter(Handle, TextureParameterName.TextureWrapS, (int)finalWrapMode);
+        _gl.TextureParameter(Handle, TextureParameterName.TextureWrapT, (int)finalWrapMode);
     }
 
     public void SetMinFilter(TextureMinFilter minFilter)
@@ -106,7 +124,7 @@ internal class OpenGLTexture : IBackendTexture
             _ => throw new NotImplementedException(),
         };
 
-        _gl.TextureParameter(_handle, TextureParameterName.TextureMinFilter, (int)finalMinFilter);
+        _gl.TextureParameter(Handle, TextureParameterName.TextureMinFilter, (int)finalMinFilter);
     }
 
     public void SetMagFilter(TextureMagFilter magFilter)
@@ -128,7 +146,7 @@ internal class OpenGLTexture : IBackendTexture
             _ => throw new NotImplementedException(),
         };
 
-        _gl.TextureParameter(_handle, TextureParameterName.TextureMagFilter, (int)finalMagFilter);
+        _gl.TextureParameter(Handle, TextureParameterName.TextureMagFilter, (int)finalMagFilter);
     }
 
     public void GenerateMipMaps()
@@ -138,8 +156,8 @@ internal class OpenGLTexture : IBackendTexture
 
     public void SetMaxMips(int maxMips)
     {
-        _gl.TextureParameter(_handle, GLEnum.TextureBaseLevel, 0);
-        _gl.TextureParameter(_handle, GLEnum.TextureMaxLevel, maxMips);
+        _gl.TextureParameter(Handle, GLEnum.TextureBaseLevel, 0);
+        _gl.TextureParameter(Handle, GLEnum.TextureMaxLevel, maxMips);
     }
 
     public void SetTextureTarget(TextureTarget textureTarget) 

@@ -37,9 +37,12 @@ internal interface IBackendShader : IDisposable
 
 public class Shader : IDisposable
 {
-    private IBackendShader _backendShader = null!;
+    internal IBackendShader _backendShader = null!;
 
     internal static Dictionary<string, GlobalShaderVariable> _globalVariables = new Dictionary<string, GlobalShaderVariable>();
+
+    public bool IsTransparent
+        => _backendShader.GetRenderQueuePosition() == Renderer.TRANSPARENT_QUEUE_POSITION;
 
     public Shader()
     {

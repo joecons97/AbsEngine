@@ -112,8 +112,6 @@ public class Game
 
         _window.Render += (dt) =>
         {
-            Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
-
             Renderer.CompleteFrame();
 
             OnRender?.Invoke(dt);

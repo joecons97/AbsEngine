@@ -1,6 +1,8 @@
 ﻿using AbsEngine.Rendering.OpenGL;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using StbImageSharp;
+using System.Numerics;
 
 namespace AbsEngine.Rendering;
 
@@ -55,6 +57,7 @@ internal interface IBackendTexture : IDisposable
 {
     public void LoadFromResult(ImageResult imageResult);
     public void LoadFromPixels(byte[] pixels, int width, int height);
+    public void SetSize(int width, int height);
     public void Bind();
     public void SetTextureTarget(TextureTarget textureTarget);
     public void SetInternalFormat(InternalFormat internalFormat);
@@ -65,11 +68,12 @@ internal interface IBackendTexture : IDisposable
     public void SetMagFilter(TextureMagFilter magFilter);
     public void SetMaxMips(int maxMips);
     public void GenerateMipMaps();
+    public void Update();
 }
 
 public class Texture : IDisposable
 {
-    private IBackendTexture _backendTexture = null!;
+    internal IBackendTexture _backendTexture = null!;
 
     private TextureTarget _textureTarget = TextureTarget.Texture2D;
     private InternalFormat _internalFormat = InternalFormat.Rgba;
@@ -97,6 +101,7 @@ public class Texture : IDisposable
 
         }
     }
+
     public PixelFormat PixelFormat
     {
         get => _pixelFormat; set
@@ -142,6 +147,8 @@ public class Texture : IDisposable
         }
     }
 
+    public Vector2D<int> Size { get; private set; }
+
     public Texture()
     {
         switch (Game.Instance!.Graphics.GraphicsAPIs)
@@ -155,11 +162,26 @@ public class Texture : IDisposable
         }
     }
 
+    public Texture(int width, int height): 
+        this()
+    {
+        SetSize(width, height);
+    }
+
     public void SetPixels(byte[] pixels, int width, int height)
         => _backendTexture.LoadFromPixels(pixels, width, height);
 
     public void SetMaxMips(int maxMips)
         => _backendTexture.SetMaxMips(maxMips);
+
+    public void SetSize(int width, int height)
+    {
+        Size = new Vector2D<int>(width, height);
+        _backendTexture.SetSize(width, height);
+    }
+
+    public void Update()
+        => _backendTexture.Update();
 
     internal IBackendTexture GetBackendTexture()
         => _backendTexture;
