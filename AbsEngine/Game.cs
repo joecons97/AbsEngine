@@ -7,6 +7,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
+using System.Collections.Concurrent;
 
 namespace AbsEngine;
 
@@ -38,7 +39,7 @@ public class Game
 
     private ImGuiController? _imGuiController;
 
-    private Queue<IDisposable> _queueForDisposal = new Queue<IDisposable>();
+    private ConcurrentQueue<IDisposable> _queueForDisposal = new ConcurrentQueue<IDisposable>();
 
     internal List<Scene> _activeScenes = new();
 
@@ -93,7 +94,13 @@ public class Game
             int count = 0;
             while (_queueForDisposal.Count > 0)
             {
-                _queueForDisposal.Dequeue()?.Dispose();
+                if(!_queueForDisposal.TryDequeue(out var elm))
+                {
+                    continue;
+                }
+
+                elm.Dispose();
+
                 count++;
 
                 if (count > MAX_DISPOSABLE_PER_FRAME)
@@ -132,10 +139,7 @@ public class Game
 
     public void QueueDisposable(IDisposable disposable)
     {
-        lock (_queueForDisposal)
-        {
-            if (!_queueForDisposal.Contains(disposable))
-                _queueForDisposal.Enqueue(disposable);
-        }
+        if (!_queueForDisposal.Contains(disposable))
+            _queueForDisposal.Enqueue(disposable);
     }
 }
