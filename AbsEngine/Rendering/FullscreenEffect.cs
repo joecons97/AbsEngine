@@ -14,7 +14,7 @@ public abstract class FullscreenEffect
         destination.Bind();
 
         material.SetTexture("_ColorMap", source.ColorTexture);
-        material.SetTexture("_DepthMap", source.ColorTexture);
+        material.SetTexture("_DepthMap", source.DepthTexture);
         material.Bind();
         Renderer.BLIT_QUAD.Bind();
 
