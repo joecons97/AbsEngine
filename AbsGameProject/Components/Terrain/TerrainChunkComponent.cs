@@ -6,6 +6,7 @@ using AbsGameProject.Blocks;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace AbsGameProject.Components.Terrain
@@ -60,7 +61,7 @@ namespace AbsGameProject.Components.Terrain
         public TerrainChunkComponent? NorthNeighbour;
         public TerrainChunkComponent? SouthNeighbour;
 
-        private readonly List<Vector3D<float>> _updatesSinceLastRebuild = new();
+        private readonly ConcurrentBag<Vector3D<float>> _updatesSinceLastRebuild = new();
 
         public TerrainChunkComponent(MeshRendererComponent renderer)
         {
@@ -281,22 +282,20 @@ namespace AbsGameProject.Components.Terrain
 
         public void RebuildMesh()
         {
-            lock (_updatesSinceLastRebuild)
-            {
-                if (_updatesSinceLastRebuild.Any(x => x.X >= WIDTH - 16))
-                    RightNeighbour?.RebuildMesh();
+            if (_updatesSinceLastRebuild.Any(x => x.X >= WIDTH - 16))
+                RightNeighbour?.RebuildMesh();
 
-                if (_updatesSinceLastRebuild.Any(x => x.X <= 0))
-                    LeftNeighbour?.RebuildMesh();
+            if (_updatesSinceLastRebuild.Any(x => x.X <= 0))
+                LeftNeighbour?.RebuildMesh();
 
-                if (_updatesSinceLastRebuild.Any(x => x.Z >= WIDTH - 16))
-                    NorthNeighbour?.RebuildMesh();
+            if (_updatesSinceLastRebuild.Any(x => x.Z >= WIDTH - 16))
+                NorthNeighbour?.RebuildMesh();
 
-                if (_updatesSinceLastRebuild.Any(x => x.Z <= 0))
-                    SouthNeighbour?.RebuildMesh();
+            if (_updatesSinceLastRebuild.Any(x => x.Z <= 0))
+                SouthNeighbour?.RebuildMesh();
 
-                _updatesSinceLastRebuild.Clear();
-            }
+            _updatesSinceLastRebuild.Clear();
+
             IsAwaitingRebuild = true;
         }
 
