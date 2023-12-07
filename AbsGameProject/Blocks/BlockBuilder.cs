@@ -58,7 +58,7 @@ namespace AbsGameProject.Blocks
         {
             VoxelModel? voxelModel = null;
             CullableMesh? cullableMesh = null;
-            VoxelBoundingBox[] boundingBoxes = null;
+            VoxelBoundingBox[] boundingBoxes = Array.Empty<VoxelBoundingBox>();
 
             if (string.IsNullOrEmpty(_voxelModelFile) == false)
             {
@@ -74,8 +74,6 @@ namespace AbsGameProject.Blocks
 
                 if(_noCollision == false)
                     boundingBoxes = cullableMesh.CollisionBoxes.ToArray();
-                else
-                    boundingBoxes = Array.Empty<VoxelBoundingBox>();
             }
 
             return new Block()

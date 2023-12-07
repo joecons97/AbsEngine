@@ -7,12 +7,12 @@ namespace AbsGameProject.Models;
 
 public class RawMesh
 {
-    public uint[] Triangles { get; set; }
-    public Vector4D<float>[] Colours { get; set; }
-    public Vector3D<float>[] Positions { get; set; }
-    public Vector3D<float>[] Normals { get; set; }
-    public Vector3D<float>[] Tangents { get; set; }
-    public Vector2D<float>[] Uvs { get; set; }
+    public uint[] Triangles { get; set; } = Array.Empty<uint>();
+    public Vector4D<float>[] Colours { get; set; } = Array.Empty<Vector4D<float>>();
+    public Vector3D<float>[] Positions { get; set; } = Array.Empty<Vector3D<float>>();
+    public Vector3D<float>[] Normals { get; set; } = Array.Empty<Vector3D<float>>();
+    public Vector3D<float>[] Tangents { get; set; } = Array.Empty<Vector3D<float>>();
+    public Vector2D<float>[] Uvs { get; set; } = Array.Empty<Vector2D<float>>();
 
     public Mesh ToMesh()
     {
@@ -159,7 +159,7 @@ public class VoxelModel
         {
             return JsonSerializer.Deserialize<VoxelModel>(file);
         }
-        catch (Exception ex)
+        catch
         {
             return null;
         }

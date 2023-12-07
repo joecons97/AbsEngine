@@ -62,6 +62,7 @@ namespace AbsGameProject.Systems.Terrain
                         pool.Remove(chunkComp);
 
                         chunkComp.Renderer.Mesh = null;
+                        chunkComp.WaterRenderer.Mesh = null;
                         chunkComp.Mesh = null;
                         chunkComp.WaterMesh = null;
 
@@ -69,8 +70,8 @@ namespace AbsGameProject.Systems.Terrain
                         chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         chunkComp.VoxelData = null;
-                        chunkComp.WaterVertices.Clear();
-                        chunkComp.TerrainVertices.Clear();
+                        chunkComp.WaterVertices?.Clear();
+                        chunkComp.TerrainVertices?.Clear();
 
 
                         activeChunks.Add(chunkComp);

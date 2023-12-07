@@ -28,8 +28,8 @@ namespace AbsGameProject.Components.Terrain
 
         public TerrainState State { get; set; } = TerrainState.None;
 
-        public List<TerrainVertex> TerrainVertices { get; set; }
-        public List<TerrainVertex> WaterVertices { get; set; }
+        public List<TerrainVertex>? TerrainVertices { get; set; } 
+        public List<TerrainVertex>? WaterVertices { get; set; }
 
         public bool IsAwaitingRebuild { get; set; }
 
@@ -40,7 +40,7 @@ namespace AbsGameProject.Components.Terrain
         public Mesh? WaterMesh { get; set; }
         public BoundingBox? BoundingBox { get; set; }
         public MeshRendererComponent Renderer { get; set; }
-        public MeshRendererComponent WaterRenderer { get; set; }
+        public MeshRendererComponent WaterRenderer { get; set; } = default!;
 
         public bool IsReadyForDecoration =>
             State == TerrainState.NoiseGenerated &&

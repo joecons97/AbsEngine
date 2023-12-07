@@ -7,7 +7,6 @@ using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace AbsGameProject.Systems.Player;
@@ -30,7 +29,13 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         _keyboard.KeyDown += _keyboard_KeyDown;
 
         var vox = VoxelModel.TryFromFile("Content/Models/Blocks/Player.json");
+        if (vox == null)
+            throw new Exception("Unable to load VoxelModel");
+
         var cullable = CullableMesh.TryFromVoxelMesh(vox);
+        if (cullable == null)
+            throw new Exception("Unable to load CullableMesh");
+
         var mesh = new Mesh();
         mesh.UseTriangles = false;
         mesh.Positions = cullable.Faces.Select(x => x.Value).SelectMany(x => x.Positions).ToArray();
@@ -74,7 +79,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
             _playerController.IsFeetInWater = feetBlock.Id == "water";
         }
 
-        _playerController.VoxelRigidbody.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
+        _playerController.VoxelRigidbody!.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
 
         var speed = _playerController.IsFeetInWater ? _playerController.WaterWalkSpeed : _playerController.WalkSpeed;
 
@@ -103,7 +108,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
         _playerController.VoxelRigidbody.Velocity = velocity;
 
-        if((_playerController.IsInWater || _playerController.IsGrounded) && !_playerController.CanJumpFromWater)
+        if ((_playerController.IsInWater || _playerController.IsGrounded) && !_playerController.CanJumpFromWater)
         {
             _playerController.CanJumpFromWater = true;
         }
@@ -114,7 +119,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
             _playerController.IsGrounded = ChunkPhysics.CastVoxel(pos, -Vector3D<float>.UnitY, .65f, out var _);
 
             if (_keyboard.IsKeyPressed(Key.Space)
-                && _playerController.IsFeetInWater && velocity.Y > 0 
+                && _playerController.IsFeetInWater && velocity.Y > 0
                 && _playerController.CanJumpFromWater && _playerController.IsGrounded == false)
             {
                 _playerController.CanJumpFromWater = false;

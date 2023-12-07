@@ -42,9 +42,9 @@ public class VoxelElementModelFace
 public class VoxelElementModel
 {
     [JsonPropertyName("from")]
-    public float[] From { get; init; }
+    public float[] From { get; init; } = Array.Empty<float>();
     [JsonPropertyName("to")]
-    public float[] To { get; init; }
+    public float[] To { get; init; } = Array.Empty<float>();
     [JsonPropertyName("faces")]
     public Dictionary<CullFaceDirection, VoxelElementModelFace> Faces { get; init; } = new();
 }

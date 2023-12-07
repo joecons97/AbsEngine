@@ -11,7 +11,7 @@ namespace AbsGameProject.Textures
     {
         static byte[]? _finalTex = null;
 
-        static Vector4D<byte>?[] _tex;
+        static Vector4D<byte>?[]? _tex;
 
         static Vector2D<int> _carat = new Vector2D<int>();
 
@@ -39,6 +39,9 @@ namespace AbsGameProject.Textures
 
         public static void InsertVoxelModel(VoxelModel model)
         {
+            if (_tex == null)
+                throw new Exception("Internal texture array _tex is null");
+
             if (model == null) return;
 
             foreach (var texture in model.Textures)
@@ -90,6 +93,12 @@ namespace AbsGameProject.Textures
 
         public static void Build()
         {
+            if (AtlasTexture == null)
+                throw new Exception("Cannot build AtlasTexture because it is null");
+
+            if (_tex == null)
+                throw new Exception("Internal texture array _tex is null");
+
             _finalTex = _tex.Select(pixel => new byte[] {
                 pixel.GetValueOrDefault().X,
                 pixel.GetValueOrDefault().Y,

@@ -7,7 +7,7 @@ namespace AbsGameProject.Components.Player
     public class PlayerControllerComponent : Component
     {
         public TransformComponent? CameraEntityTransform;
-        public VoxelRigidbodyComponent? VoxelRigidbody;
+        public VoxelRigidbodyComponent VoxelRigidbody = default!;
 
         public float MaxLookUp = 80;
         public float MinLookUp = -80;
@@ -30,8 +30,14 @@ namespace AbsGameProject.Components.Player
         public override void OnStart()
         {
             CameraEntityTransform = Entity.Transform.GetChild("Player Camera");
-            CameraEntityTransform.LocalPosition = new Silk.NET.Maths.Vector3D<float>(0, 1.8f, 0);
-            VoxelRigidbody = Entity.GetComponent<VoxelRigidbodyComponent>();
+
+            if(CameraEntityTransform != null )  
+                CameraEntityTransform.LocalPosition = new Silk.NET.Maths.Vector3D<float>(0, 1.8f, 0);
+
+            VoxelRigidbody = Entity.GetComponent<VoxelRigidbodyComponent>()!;
+
+            if (VoxelRigidbody == null)
+                throw new Exception("No VoxelRigidbodyComponent was found on the Player Entity");
         }
     }
 }
