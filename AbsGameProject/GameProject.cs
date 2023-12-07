@@ -5,6 +5,7 @@ using AbsEngine.ECS.Extensions;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using AbsGameProject.Components.Player;
+using AbsGameProject.FullscreenEffects;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Systems.Player;
 using AbsGameProject.Systems.Terrain;
@@ -16,7 +17,6 @@ namespace AbsGameProject
 {
     public class GameProject
     {
-        static RenderTexture rt;
         public static void Main()
         {
             var game = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
@@ -25,7 +25,7 @@ namespace AbsGameProject
             game.Run();
         }
 
-        private static void Instance_OnLoad()
+        private static void Instance_OnLoad(Game game)
         {
             TextureAtlas.Initialise(1024, 0);
 
@@ -63,6 +63,8 @@ namespace AbsGameProject
             scene.RegisterSystem<BlockBreakerSystem>();
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
             scene.RegisterSystem<PlayerControllerSystem>();
+
+            //game.AddEffect<Grayscale>();
         }
 
         static void SetupPlayer(Scene scene)

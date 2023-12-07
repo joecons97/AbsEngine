@@ -30,7 +30,9 @@ struct v2f
 
     void main()
     {
-        FragColor = texture(_ColorMap, vertData.uvs);
+        vec3 col = texture(_ColorMap, vertData.uvs).xyz;
+        float avg = (col.r + col.g + col.b) / 3;
+        FragColor = vec4(vec3(avg), 1);
     }
 
 #endif

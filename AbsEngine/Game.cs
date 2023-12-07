@@ -17,9 +17,9 @@ public class Game
 
     public static Game? Instance { get; private set; }
 
-    public event Action? OnLoad;
-    public event Action<double>? OnUpdate;
-    public event Action<double>? OnRender;
+    public event Action<Game>? OnLoad;
+    public event Action<double, Game>? OnUpdate;
+    public event Action<double, Game>? OnRender;
 
     public IInputContext InputContext { get; private set; } = null!;
     public IGraphics Graphics { get; private set; } = null!;
@@ -84,7 +84,7 @@ public class Game
 
             ShaderLoader.ScanShaders();
 
-            OnLoad?.Invoke();
+            OnLoad?.Invoke(this);
         };
 
         _window.Update += (dt) =>
@@ -112,7 +112,7 @@ public class Game
                 item.Tick((float)dt);
             }
 
-            OnUpdate?.Invoke(dt);
+            OnUpdate?.Invoke(dt, this);
 
             _imGuiController?.Update((float)dt);
         };
@@ -121,7 +121,7 @@ public class Game
         {
             Renderer.CompleteFrame();
 
-            OnRender?.Invoke(dt);
+            OnRender?.Invoke(dt, this);
 
             _imGuiController?.Render();
         };
@@ -142,4 +142,13 @@ public class Game
         if (!_queueForDisposal.Contains(disposable))
             _queueForDisposal.Enqueue(disposable);
     }
+
+    public void AddEffect<T>() where T : FullscreenEffect
+        => Renderer.AddEffect<T>();
+
+    public void RemoveEffect<T>() where T : FullscreenEffect
+        => Renderer.RemoveEffect<T>();
+
+    public T? GetEffect<T>() where T : FullscreenEffect
+        => Renderer.GetEffect<T>();
 }

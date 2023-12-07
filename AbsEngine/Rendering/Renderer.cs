@@ -4,6 +4,7 @@ using AbsEngine.IO;
 using AbsEngine.Maths;
 using AbsEngine.Physics;
 using ImGuiNET;
+using Microsoft.VisualBasic;
 using Silk.NET.Maths;
 
 namespace AbsEngine.Rendering;
@@ -28,11 +29,16 @@ public static class Renderer
 {
     public const int TRANSPARENT_QUEUE_POSITION = 1000;
 
+    internal static readonly Mesh BLIT_QUAD;
+
     private static readonly List<RenderJob> renderQueue = new List<RenderJob>();
+    private static readonly List<FullscreenEffect> effects = new List<FullscreenEffect>();  
+
     private static readonly RenderTexture backBufferRenderTexture;
     private static readonly RenderTexture backBufferForShaders;
+    private static readonly RenderTexture postProcessingRenderTexture;
+
     private static readonly Material backBufferMaterial;
-    private static readonly Mesh backBufferQuad;
 
     private static float _fps = 0;
     private static int _drawCalls = 0;
@@ -47,22 +53,73 @@ public static class Renderer
 
         backBufferRenderTexture = new RenderTexture(Game.Instance.Window.Size);
         backBufferForShaders = new RenderTexture(Game.Instance.Window.Size);
+        postProcessingRenderTexture = new RenderTexture(Game.Instance.Window.Size);
 
         backBufferMaterial = new Material("BackBuffer");
-        backBufferQuad = MeshLoader.LoadMesh("Engine/Meshes/Quad.fbx");
+        BLIT_QUAD = MeshLoader.LoadMesh("Engine/Meshes/Quad.fbx");
 
         Game.Instance.Window.Resize += Window_Resize;
+    }
+
+    internal static void AddEffect<T>() where T : FullscreenEffect
+    {
+        var type = typeof(T);
+        if (effects.Any(x => x.GetType() == type))
+            throw new InvalidOperationException($"Cannot add the fullscreen effect of type {type} because it has already been registered.");
+
+        var instance = (FullscreenEffect?)Activator.CreateInstance(type);
+        if (instance == null)
+            throw new Exception($"An error occurred whilst instantiating fullscreen effect of type {type}");
+
+        effects.Add(instance);
+    }
+
+    internal static void RemoveEffect<T>() where T : FullscreenEffect
+    {
+        var type = typeof(T);
+        var effect = effects.FirstOrDefault(x => x.GetType() == type);
+
+        if (effect == null)
+            throw new InvalidOperationException($"Cannot remove the fullscreen effect of type {type} because it has not been registered.");
+
+        effects.Remove(effect);
+    }
+
+    internal static T? GetEffect<T>() where T : FullscreenEffect
+    {
+        var type = typeof(T);
+        var effect = effects.FirstOrDefault(x => x.GetType() == type);
+        if(effect == null) 
+            return null;
+
+        return (T)effect;
     }
 
     private static void Window_Resize(Vector2D<int> obj)
     {
         backBufferRenderTexture.SetSize(obj);
+        backBufferForShaders.SetSize(obj);
+        postProcessingRenderTexture.SetSize(obj);
     }
 
     public static void Render(Mesh mesh, Material material, Matrix4X4<float> trs, BoundingBox? boundingBox = null)
     {
         int pos = Math.Min(renderQueue.Count, material.Shader.GetBackendShader().GetRenderQueuePosition());
         renderQueue.Insert(pos, new RenderJob(mesh, material, trs, boundingBox));
+    }
+
+    static void ClearRenderTexture(Game game, RenderTexture renderTexture)
+    {
+        renderTexture.Bind();
+        game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
+        renderTexture.UnBind();
+    }
+
+    static CameraComponent? GetActiveCamera(Game game)
+    {
+        return !SceneCameraComponent.IsInSceneView 
+            ? game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault()
+            : game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<SceneCameraComponent>().FirstOrDefault();
     }
 
     internal static void CompleteFrame()
@@ -76,21 +133,16 @@ public static class Renderer
 
         if (RenderTexture.Active != null)
         {
-            RenderTexture.Active.Bind();
-            game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
-            RenderTexture.Active.UnBind();
+            ClearRenderTexture(game, RenderTexture.Active);
+        }
+        else
+        {
+            ClearRenderTexture(game, backBufferForShaders);
+
+            ClearRenderTexture(game, backBufferRenderTexture);
         }
 
-        backBufferForShaders.Bind();
-        game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
-        backBufferForShaders.UnBind();
-
-        backBufferRenderTexture.Bind();
-        game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
-        backBufferRenderTexture.UnBind();
-
-        RenderTexture? renderTarget = null;
-
+        RenderTexture? renderTarget;
         if (RenderTexture.Active != null)
         {
             renderTarget = RenderTexture.Active;
@@ -102,23 +154,15 @@ public static class Renderer
 
         renderTarget?.Bind();
 
-        var cam = !SceneCameraComponent.IsInSceneView ?
-            game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault()
-            : game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<SceneCameraComponent>().FirstOrDefault();
+        var cam = GetActiveCamera(game);
 
         if (cam == null)
             throw new Exception("Cannot complete frame, Main camera is null");
 
+        var vpMat = cam.GetViewProjectMatrix();
+        var frustum = cam.GetFrustum();
+
         var trans = cam.Entity.Transform;
-
-        Matrix4X4.Invert(trans.WorldMatrix, out var viewMat);
-        var winX = (float)game.Window.FramebufferSize.X;
-        var winY = (float)game.Window.FramebufferSize.Y;
-        var projMat = Matrix4X4.CreatePerspectiveFieldOfView(cam.FieldOfView * AbsMaths.DEG_2_RAD,
-        winX / winY, cam.NearClipPlane, cam.FarClipPlane);
-
-        var vpMat = viewMat * projMat;
-        var frustum = new Frustum(vpMat);
 
         Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
         Shader.SetGlobalFloat("_FarClipPlane", cam.FarClipPlane);
@@ -134,7 +178,7 @@ public static class Renderer
             var r = renderQueue.First();
             renderQueue.RemoveAt(0);
 
-            if(r.Material.Shader.IsTransparent  && hasBlitToShaderBuffer == false)
+            if (r.Material.Shader.IsTransparent && hasBlitToShaderBuffer == false)
             {
                 backBufferRenderTexture.BlitTo(backBufferForShaders);
                 hasBlitToShaderBuffer = true;
@@ -166,13 +210,38 @@ public static class Renderer
 
         renderTarget?.UnBind();
 
+        var currentRt = backBufferRenderTexture;
+
+        foreach (var item in effects)
+        {
+            ClearRenderTexture(game, postProcessingRenderTexture);
+
+            item.OnRender(currentRt, postProcessingRenderTexture);
+
+            currentRt = postProcessingRenderTexture;
+        }
+
+        if(effects.Count > 0)
+            postProcessingRenderTexture.BlitTo(backBufferRenderTexture);
+
+        FinaliseRender(game);
+
+        DrawDebug();
+    }
+
+    static void FinaliseRender(Game game)
+    {
         game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
 
-        backBufferMaterial.SetTexture("uBackBuffer", backBufferRenderTexture.ColorTexture);
+        backBufferMaterial.SetTexture("_ColorMap", backBufferRenderTexture.ColorTexture);
         backBufferMaterial.Bind();
-        backBufferQuad.Bind();
-        game.Graphics.DrawElements((uint)backBufferQuad.Triangles.Length);
+        BLIT_QUAD.Bind();
 
+        game.Graphics.DrawElements((uint)BLIT_QUAD.Triangles.Length);
+    }
+
+    static void DrawDebug()
+    {
         if (SceneCameraComponent.IsInSceneView)
         {
             if (_fpsTime > 0.5f)
