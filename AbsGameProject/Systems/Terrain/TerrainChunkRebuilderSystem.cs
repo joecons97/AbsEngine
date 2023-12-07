@@ -14,6 +14,6 @@ internal class TerrainChunkRebuilderSystem : ComponentSystem<TerrainChunkCompone
     public override void OnTick(TerrainChunkComponent component, float deltaTime)
     {
         component.IsAwaitingRebuild = false;
-        component.State = TerrainChunkComponent.TerrainState.NoiseGenerated;
+        component.State = TerrainChunkComponent.TerrainState.Decorated;
     }
 }
