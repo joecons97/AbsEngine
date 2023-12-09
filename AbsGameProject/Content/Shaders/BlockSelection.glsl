@@ -16,19 +16,19 @@ struct v2f
     layout (location = 3) in vec3 vNormal;
     layout (location = 4) in vec3 vTangent;
 
-    uniform mat4 uWorldMatrix;
-    uniform mat4 uMvp;
+    uniform mat4 _WorldMatrix;
+    uniform mat4 _Mvp;
 
     out v2f vertData;
 
     void main() 
     {
          //gl_Position, is a built-in variable on all vertex shaders that will specify the position of our vertex.
-        gl_Position = uMvp * vec4(vPos, 1.0);
+        gl_Position = _Mvp * vec4(vPos, 1.0);
 
-        vertData.worldPos = uWorldMatrix * vec4(vPos, 1.0);
-        vertData.worldNormal = normalize(uWorldMatrix * vec4(vNormal, 0));
-        vertData.worldTangent = normalize(uWorldMatrix * vec4(vTangent, 0));
+        vertData.worldPos = _WorldMatrix * vec4(vPos, 1.0);
+        vertData.worldNormal = normalize(_WorldMatrix * vec4(vNormal, 0));
+        vertData.worldTangent = normalize(_WorldMatrix * vec4(vTangent, 0));
         vertData.uvs = vec2(vUvs.x, vUvs.y);
     }
 

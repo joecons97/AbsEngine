@@ -75,7 +75,10 @@
     <None Update="Content\Shaders\Post Processing\Grayscale.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Shaders\WaterShader.glsl">
+    <None Update="Content\Shaders\WaterShader.shader">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Shaders\WaterShaderOld.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Content\Shaders\TerrainShader.glsl">

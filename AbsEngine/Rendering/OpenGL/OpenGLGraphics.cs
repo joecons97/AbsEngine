@@ -11,11 +11,14 @@ internal class OpenGLGraphics : IGraphics
 
     public GraphicsAPIs GraphicsAPIs { get; }
 
+    public IShaderTranspiler ShaderTranspiler { get; }
+
     public OpenGLGraphics(IWindow window, GraphicsAPIs graphicsAPIs)
     {
         Gl = window.CreateOpenGL();
 
         GraphicsAPIs = graphicsAPIs;
+        ShaderTranspiler = new OpenGLShaderTranspiler();
     }
 
     public void ClearScreen(Color colour)

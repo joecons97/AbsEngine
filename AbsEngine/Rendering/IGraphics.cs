@@ -21,6 +21,7 @@ public interface IGraphics
     }
 
     public GraphicsAPIs GraphicsAPIs { get; }
+    public IShaderTranspiler ShaderTranspiler { get; }
 
     public void ClearScreen(Color colour);
 

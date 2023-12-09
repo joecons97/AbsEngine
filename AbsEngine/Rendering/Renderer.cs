@@ -159,11 +159,15 @@ public static class Renderer
         if (cam == null)
             throw new Exception("Cannot complete frame, Main camera is null");
 
-        var vpMat = cam.GetViewProjectMatrix();
+        var vMat = cam.GetViewMatrix();
+        var pMat = cam.GetProjectionMatrix();
+        var vpMat = vMat * pMat;
         var frustum = cam.GetFrustum();
 
         var trans = cam.Entity.Transform;
 
+        Shader.SetGlobalVector("_Resolution", (Vector2D<float>)renderTarget!.ColorTexture.Size);
+        Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
         Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
         Shader.SetGlobalFloat("_FarClipPlane", cam.FarClipPlane);
         Shader.SetGlobalVector("_CameraPosition", trans.Position);
@@ -199,8 +203,10 @@ public static class Renderer
             r.Material.Bind();
             r.Mesh.Bind();
 
-            r.Material.SetMatrix("uWorldMatrix", r.WorldMatrix);
-            r.Material.SetMatrix("uMvp", r.WorldMatrix * vpMat);
+            r.Material.SetMatrix("_WorldMatrix", r.WorldMatrix);
+            r.Material.SetMatrix("_Mvp", r.WorldMatrix * vpMat);
+            r.Material.SetMatrix("_Projection", pMat);
+            r.Material.SetMatrix("_Mv", r.WorldMatrix * vMat);
 
             if (r.Mesh.UseTriangles && r.Mesh.Triangles.Length > 0)
                 game.Graphics.DrawElements((uint)r.Mesh.Triangles.Length);

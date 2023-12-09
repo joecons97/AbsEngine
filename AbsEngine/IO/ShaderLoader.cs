@@ -24,11 +24,15 @@ public static class ShaderLoader
             throw new ArgumentException(nameof(name), $"Shader with name {name} not found.");
 
         var file = _loadedShaders[name];
-
         var shader = new Shader();
         var backend = shader.GetBackendShader();
+        var contents = "";
 
-        var contents = File.ReadAllText(file);
+        if (file.EndsWith(".shader"))
+            contents = Game.Instance?.Graphics.ShaderTranspiler.TranspileFromFile(file) ?? File.ReadAllText(file);
+        else
+            contents = File.ReadAllText(file);
+
         if (string.IsNullOrEmpty(contents) == false)
             backend.LoadFromString(contents);
         else

@@ -79,6 +79,13 @@ internal class OpenGLShader : IBackendShader
                             _gl.Uniform3(location, 1, (float*)&value);
                         }
                         break;
+                    case GlobalShaderVariableType.Vector2:
+                        unsafe
+                        {
+                            Vector2D<float> value = (Vector2D<float>)globalVariable.Value.Value;
+                            _gl.Uniform2(location, 1, (float*)&value);
+                        }
+                        break;
                     case GlobalShaderVariableType.Matrix:
                         unsafe
                         {
@@ -103,8 +110,8 @@ internal class OpenGLShader : IBackendShader
         GetUniforms(str);
         GetDirectives(ref str);
 
-        var vertProgram = "#version 420 core\n#define VERT\n" + str;
-        var fragProgram = "#version 420 core\n#define FRAG\n" + str;
+        var vertProgram = "#version 430 core\n#define VERT\n" + str;
+        var fragProgram = "#version 430 core\n#define FRAG\n" + str;
 
         //Load the individual shaders.
         uint vertex = CompileShader(ShaderType.VertexShader, vertProgram);
@@ -232,7 +239,7 @@ internal class OpenGLShader : IBackendShader
             var directive = item.Trim().ToLower();
             var split = directive.Split(" ");
             var type = split[1];
-            var param = split[2];
+            var param = split[2].TrimEnd(';');
 
             switch (type)
             {

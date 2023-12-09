@@ -81,6 +81,8 @@ namespace AbsEngine.Rendering.DirectX11
 
         public GraphicsAPIs GraphicsAPIs => GraphicsAPIs.D3D11;
 
+        public IShaderTranspiler ShaderTranspiler => throw new NotImplementedException();
+
         public unsafe void ClearScreen(Color colour)
         {
             // Obtain the framebuffer for the swapchain's backbuffer.

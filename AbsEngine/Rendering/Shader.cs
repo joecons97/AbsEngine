@@ -8,6 +8,7 @@ internal enum GlobalShaderVariableType
     Int,
     Uint,
     Float,
+    Vector2,
     Vector3,
     Vector4,
     Matrix
@@ -95,6 +96,8 @@ public class Shader : IDisposable
         => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector4);
     public static void SetGlobalVector(string name, Vector3D<float> value)
         => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector3);
+    public static void SetGlobalVector(string name, Vector2D<float> value)
+        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector2);
     public static void SetGlobalMatrix(string name, Matrix4X4<float> value)
         => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Matrix);
     

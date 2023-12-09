@@ -23,13 +23,17 @@
     <None Update="Engine\Meshes\Quad.fbx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Engine\Shaders\BackBuffer.glsl">
+    <None Update="Engine\Shaders\BackBuffer.shader">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Engine\Shaders\Includes\GLSLInc.glsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Engine\Meshes\" />
+    <Folder Include="Engine\Shaders\Includes\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
