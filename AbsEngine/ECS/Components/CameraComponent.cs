@@ -38,6 +38,9 @@ public class CameraComponent : Component
         return projMat;
     }
 
+    public Matrix4X4<float> GetViewProjectionMatrix()
+        => GetViewMatrix() * GetProjectionMatrix();
+
     public Frustum GetFrustum()
     {
         return new Frustum(GetViewMatrix() * GetProjectionMatrix());

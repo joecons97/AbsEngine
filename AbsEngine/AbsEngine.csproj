@@ -34,6 +34,8 @@
   <ItemGroup>
     <Folder Include="Engine\Meshes\" />
     <Folder Include="Engine\Shaders\Includes\" />
+    <Folder Include="Rendering\RenderCommand\LowLevel\" />
+    <Folder Include="Rendering\RenderCommand\LowLevel\OpenGL\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

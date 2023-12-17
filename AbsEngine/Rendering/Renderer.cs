@@ -1,29 +1,12 @@
 ﻿using AbsEngine.ECS.Components;
 using AbsEngine.Exceptions;
 using AbsEngine.IO;
-using AbsEngine.Maths;
 using AbsEngine.Physics;
+using AbsEngine.Rendering.RenderCommand;
 using ImGuiNET;
-using Microsoft.VisualBasic;
 using Silk.NET.Maths;
 
 namespace AbsEngine.Rendering;
-
-public class RenderJob
-{
-    public Mesh Mesh { get; set; }
-    public Material Material { get; set; }
-    public Matrix4X4<float> WorldMatrix { get; set; }
-    public BoundingBox? BoundingBox { get; set; }
-
-    public RenderJob(Mesh mesh, Material material, Matrix4X4<float> worldMatrix, BoundingBox? boundingBox)
-    {
-        Mesh = mesh;
-        Material = material;
-        WorldMatrix = worldMatrix;
-        BoundingBox = boundingBox;
-    }
-}
 
 public static class Renderer
 {
@@ -31,7 +14,7 @@ public static class Renderer
 
     internal static readonly Mesh BLIT_QUAD;
 
-    private static readonly List<RenderJob> renderQueue = new List<RenderJob>();
+    private static readonly List<IRenderCommand> renderQueue = new List<IRenderCommand>();
     private static readonly List<FullscreenEffect> effects = new List<FullscreenEffect>();  
 
     private static readonly RenderTexture backBufferRenderTexture;
@@ -104,8 +87,10 @@ public static class Renderer
 
     public static void Render(Mesh mesh, Material material, Matrix4X4<float> trs, BoundingBox? boundingBox = null)
     {
-        int pos = Math.Min(renderQueue.Count, material.Shader.GetBackendShader().GetRenderQueuePosition());
-        renderQueue.Insert(pos, new RenderJob(mesh, material, trs, boundingBox));
+        int renderPos = material.Shader.GetBackendShader().GetRenderQueuePosition();
+        int pos = Math.Min(renderQueue.Count, renderPos);
+        var drawCall = new SingleDrawRenderCommand(mesh, material, trs, boundingBox, renderPos);
+        renderQueue.Insert(pos, drawCall);
     }
 
     static void ClearRenderTexture(Game game, RenderTexture renderTexture)
@@ -159,9 +144,6 @@ public static class Renderer
         if (cam == null)
             throw new Exception("Cannot complete frame, Main camera is null");
 
-        var vMat = cam.GetViewMatrix();
-        var pMat = cam.GetProjectionMatrix();
-        var vpMat = vMat * pMat;
         var frustum = cam.GetFrustum();
 
         var trans = cam.Entity.Transform;
@@ -182,36 +164,19 @@ public static class Renderer
             var r = renderQueue.First();
             renderQueue.RemoveAt(0);
 
-            if (r.Material.Shader.IsTransparent && hasBlitToShaderBuffer == false)
+            if (r.RenderQueuePosition >= TRANSPARENT_QUEUE_POSITION && hasBlitToShaderBuffer == false)
             {
                 backBufferRenderTexture.BlitTo(backBufferForShaders);
                 hasBlitToShaderBuffer = true;
             }
 
-            if (r.BoundingBox != null && !frustum.Intersects(r.BoundingBox))
+            if(r.ShouldCull(frustum))
             {
                 _culledDrawCalls++;
                 continue;
             }
 
-            if (r.Material.Shader.IsTransparent)
-            {
-                r.Material.SetTexture("_DepthMap", backBufferForShaders.DepthTexture);
-                r.Material.SetTexture("_ColorMap", backBufferForShaders.ColorTexture);
-            }
-
-            r.Material.Bind();
-            r.Mesh.Bind();
-
-            r.Material.SetMatrix("_WorldMatrix", r.WorldMatrix);
-            r.Material.SetMatrix("_Mvp", r.WorldMatrix * vpMat);
-            r.Material.SetMatrix("_Projection", pMat);
-            r.Material.SetMatrix("_Mv", r.WorldMatrix * vMat);
-
-            if (r.Mesh.UseTriangles && r.Mesh.Triangles.Length > 0)
-                game.Graphics.DrawElements((uint)r.Mesh.Triangles.Length);
-            else if (r.Mesh.VertexCount > 0)
-                game.Graphics.DrawArrays((uint)r.Mesh.VertexCount);
+            r.Render(game.Graphics, cam, backBufferForShaders);
         }
 
         renderTarget?.UnBind();
