@@ -50,6 +50,7 @@ namespace AbsEngine.Rendering.RenderCommand
 
             Material.SetMatrix("_WorldMatrix", WorldMatrix);
             Material.SetMatrix("_Mvp", WorldMatrix * vpMat);
+            Material.SetMatrix("_Vp", vpMat);
             Material.SetMatrix("_Projection", pMat);
             Material.SetMatrix("_Mv", WorldMatrix * vMat);
 

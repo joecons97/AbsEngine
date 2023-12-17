@@ -17,7 +17,7 @@ struct v2f
     float2 uvs;
 };
 
-float4x4 _Mvp;
+float4x4 _Vp;
 float2 _Resolution;
 
 sampler2D uAtlas;
@@ -30,7 +30,7 @@ float _WaterDepth;
 v2f vert(vertIn i)
 {
     v2f vertResult;
-    vertResult.Position = mul(_Mvp, float4(i.Pos, 1.0));
+    vertResult.Position = mul(_Vp, float4(i.Pos, 1.0));
     vertResult.uvs = i.Uv;
     
     return vertResult;

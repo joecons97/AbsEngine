@@ -15,14 +15,14 @@ struct v2f
     layout (location = 2) in vec2 vUvs;
 
     uniform mat4 _WorldMatrix;
-    uniform mat4 _Mvp;
+    uniform mat4 _Vp;
 
     out v2f vertData;
 
     void main() 
     {
          //gl_Position, is a built-in variable on all vertex shaders that will specify the position of our vertex.
-        gl_Position = _Mvp * vec4(vPos, 1.0);
+        gl_Position = _Vp * vec4(vPos, 1.0);
 
         vertData.localPos = vec4(vPos, 1.0);
         vertData.worldPos = _WorldMatrix * vec4(vPos, 1.0);

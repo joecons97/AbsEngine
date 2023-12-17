@@ -109,7 +109,7 @@ namespace AbsGameProject.Systems.Terrain
                             {
                                 for (var i = 0; i < face.Value.Positions.Count; i++)
                                 {
-                                    var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                    var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z) + component.Entity.Transform.LocalPosition;
                                     var uv = face.Value.UVs[i];
                                     var col = face.Value.TintIndicies[i] == null
                                         ? Vector4D<float>.One
