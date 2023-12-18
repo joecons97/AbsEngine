@@ -17,16 +17,30 @@ namespace AbsGameProject
 {
     public class GameProject
     {
+        static bool _isFullscreen;
+
         public static void Main()
         {
             var game = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
 
             game.OnLoad += Instance_OnLoad;
+
             game.Run();
+        }
+
+        private static void GameProject_KeyDown(Silk.NET.Input.IKeyboard arg1, Silk.NET.Input.Key arg2, int arg3)
+        {
+            if(arg2 == Silk.NET.Input.Key.F11)
+            {
+                _isFullscreen = !_isFullscreen;
+                Game.Instance?.Graphics.SetFullscreen(_isFullscreen);
+            }
         }
 
         private static void Instance_OnLoad(Game game)
         {
+            game.InputContext.Keyboards.First().KeyDown += GameProject_KeyDown;
+
             TextureAtlas.Initialise(1024, 0);
 
             BlockRegistry.AddBlock(Block.New("air", "Air").WithOpacity(0).Build());
@@ -64,7 +78,7 @@ namespace AbsGameProject
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
             scene.RegisterSystem<PlayerControllerSystem>();
 
-            //game.AddEffect<Grayscale>();
+            game.AddEffect<Grayscale>();
         }
 
         static void SetupPlayer(Scene scene)
@@ -77,10 +91,11 @@ namespace AbsGameProject
             collider.Min = new Vector3D<float>(-0.25f, 0, -0.25f);
             collider.Max = new Vector3D<float>(0.25f, 2, 0.25f);
 
-            var playerCamera = scene.EntityManager.CreateEntity("Player Camera");
-            playerCamera.AddComponent<CameraComponent>();
-            playerCamera.Transform.Parent = playerEntity.Transform;
-            playerCamera.Transform.LocalPosition = Vector3D<float>.Zero;
+            var playerCameraEnt = scene.EntityManager.CreateEntity("Player Camera");
+            var camera = playerCameraEnt.AddComponent<CameraComponent>();
+            camera.FieldOfView = 90;
+            playerCameraEnt.Transform.Parent = playerEntity.Transform;
+            playerCameraEnt.Transform.LocalPosition = Vector3D<float>.Zero;
 
             playerEntity.AddComponent<PlayerControllerComponent>();
         }

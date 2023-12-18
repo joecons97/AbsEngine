@@ -2,8 +2,6 @@
 using AbsEngine.Rendering;
 using AbsGameProject.Models;
 using Silk.NET.Maths;
-using System.Drawing;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AbsGameProject.Textures
 {

@@ -1,4 +1,5 @@
-﻿using AbsEngine.Rendering.DirectX11;
+﻿using AbsEngine.Exceptions;
+using AbsEngine.Rendering.DirectX11;
 using AbsEngine.Rendering.OpenGL;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
@@ -32,4 +33,12 @@ public interface IGraphics
     public void DrawElements(uint length);
 
     public void DrawArrays(uint length);
+
+    public void SetFullscreen(bool fullscreen)
+    {
+        if (Game.Instance == null)
+            throw new GameInstanceException();
+
+        Game.Instance.Window.WindowState = fullscreen ? WindowState.Fullscreen : WindowState.Maximized;
+    }
 }

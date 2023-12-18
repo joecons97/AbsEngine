@@ -1,8 +1,6 @@
 ﻿using AbsEngine.Rendering.OpenGL.Buffers;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace AbsEngine.Rendering.OpenGL;
 
@@ -77,13 +75,13 @@ internal class OpenGLMesh : IBackendMesh
                 {
                     VertexAttribPointerType type = default;
                     bool normalised = false;
-                    
-                    switch(item.Format)
+
+                    switch (item.Format)
                     {
                         case VertexAttributeFormat.Float32:
                             type = VertexAttribPointerType.Float;
                             break;
-                        case VertexAttributeFormat.Float16: 
+                        case VertexAttributeFormat.Float16:
                             type = VertexAttribPointerType.HalfFloat;
                             break;
                         case VertexAttributeFormat.UNorm8:
@@ -145,35 +143,40 @@ internal class OpenGLMesh : IBackendMesh
             Task.Run(async () =>
             {
                 await Task.WhenAll(
-                    Task.Run(() => {
+                    Task.Run(() =>
+                    {
                         for (int i = 0; i < _positions.Length; i++)
                         {
                             Vector3D<float> pos = _positions[i];
                             pos.CopyTo(vertices, i * 3);
                         }
                     }),
-                    Task.Run(() => {
+                    Task.Run(() =>
+                    {
                         for (int i = 0; i < _colours.Length; i++)
                         {
                             Vector4D<float> col = _colours[i];
                             col.CopyTo(vertices, positionsOffset + (i * 4));
                         }
                     }),
-                    Task.Run(() => {
+                    Task.Run(() =>
+                    {
                         for (int i = 0; i < _uvs.Length; i++)
                         {
                             Vector2D<float> uv = _uvs[i];
                             uv.CopyTo(vertices, positionsOffset + coloursOffset + (i * 2));
                         }
                     }),
-                    Task.Run(() => {
+                    Task.Run(() =>
+                    {
                         for (int i = 0; i < _normals.Length; i++)
                         {
                             Vector3D<float> normal = _normals[i];
                             normal.CopyTo(vertices, positionsOffset + coloursOffset + uvsOffset + (i * 3));
                         }
                     }),
-                    Task.Run(() => {
+                    Task.Run(() =>
+                    {
                         for (int i = 0; i < _tangents.Length; i++)
                         {
                             Vector3D<float> tangent = _tangents[i];

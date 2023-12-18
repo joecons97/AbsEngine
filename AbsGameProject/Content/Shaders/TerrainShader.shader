@@ -16,13 +16,13 @@ struct v2f
     float2 Uvs;
 };
 
-float4x4 _Vp;
+float4x4 _Mvp;
 sampler2D uAtlas;
 
 v2f vert(vertIn i)
 {
     v2f vertResult;
-    vertResult.Position = mul(_Vp, float4(i.Pos, 1.0));
+    vertResult.Position = mul(_Mvp, float4(i.Pos, 1.0));
     vertResult.Uvs = i.Uv;
     vertResult.Col = i.Col;
     
@@ -33,7 +33,7 @@ float4 frag(v2f vertResult)
 {
     float4 col = tex2D(uAtlas, vertResult.Uvs.yx);
 
-    if(col.a < 0.05)
+    if(col.a < 0.01)
         discard;
 
     return vertResult.Col * col;

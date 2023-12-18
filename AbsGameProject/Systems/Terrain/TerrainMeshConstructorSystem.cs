@@ -37,7 +37,7 @@ namespace AbsGameProject.Systems.Terrain
             vertexLayout = new VertexAttributeDescriptor[]
             {
                 new VertexAttributeDescriptor(VertexAttributeFormat.SInt8, 3),
-                new VertexAttributeDescriptor(VertexAttributeFormat.SInt8, 4),
+                new VertexAttributeDescriptor(VertexAttributeFormat.UNorm8, 4),
                 new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
             };
         }
@@ -109,11 +109,11 @@ namespace AbsGameProject.Systems.Terrain
                             {
                                 for (var i = 0; i < face.Value.Positions.Count; i++)
                                 {
-                                    var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z) + component.Entity.Transform.LocalPosition;
+                                    var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);// + component.Entity.Transform.LocalPosition;
                                     var uv = face.Value.UVs[i];
                                     var col = face.Value.TintIndicies[i] == null
-                                        ? Vector4D<float>.One
-                                        : Vector4D<float>.UnitY;
+                                        ? new Vector4D<float>(255, 255, 255, 0.0f)
+                                        : new Vector4D<float>(10, 204, 66, 0.0f);
 
                                     var vert = new TerrainVertex()
                                     {

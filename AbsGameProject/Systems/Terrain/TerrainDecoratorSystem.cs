@@ -31,7 +31,7 @@ namespace AbsGameProject.Systems.Terrain
                     {
                         var y = component.GetHeight(x, z);
                         var block = component.GetBlock(x, y - 1, z);
-                        if (block.Name == "Grass" && random.NextDouble() < 0.02f)
+                        if (block.Name == "Grass" && random.NextDouble() < 0.08f)
                             decorationTasks.Add(test.DecorateAtAsync(component, x, y, z));
                     }
                 }
