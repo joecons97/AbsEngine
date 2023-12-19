@@ -4,7 +4,7 @@ using AbsEngine.Rendering;
 
 internal interface IRenderCommand
 {
-    public int RenderQueuePosition { get; set; }
+    public int RenderQueuePosition { get; }
 
     void Render(IGraphics graphics, CameraComponent camera, RenderTexture target);
 

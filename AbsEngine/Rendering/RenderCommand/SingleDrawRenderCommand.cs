@@ -10,7 +10,7 @@ namespace AbsEngine.Rendering.RenderCommand
         public Material Material { get; set; }
         public Matrix4X4<float> WorldMatrix { get; set; }
         public BoundingBox? BoundingBox { get; set; }
-        public int RenderQueuePosition { get; set; }
+        public int RenderQueuePosition { get; }
 
         public SingleDrawRenderCommand(Mesh mesh, Material material, Matrix4X4<float> worldMatrix, BoundingBox? boundingBox, int renderQueuePosition)
         {

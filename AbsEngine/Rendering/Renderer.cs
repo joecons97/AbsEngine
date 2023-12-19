@@ -93,6 +93,14 @@ public static class Renderer
         renderQueue.Insert(pos, drawCall);
     }
 
+    public static void MultiDrawRender(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material, Matrix4X4<float>[] worldMatricies)
+    {
+        int renderPos = material.Shader.GetBackendShader().GetRenderQueuePosition();
+        int pos = Math.Min(renderQueue.Count, renderPos);
+        var drawCall = new MultiDrawRenderCommand(drawBuffer, commands, material, worldMatricies);
+        renderQueue.Insert(pos, drawCall);
+    }
+
     static void ClearRenderTexture(Game game, RenderTexture renderTexture)
     {
         renderTexture.Bind();

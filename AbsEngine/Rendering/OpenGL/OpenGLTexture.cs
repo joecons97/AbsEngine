@@ -87,7 +87,6 @@ internal class OpenGLTexture : IBackendTexture
     {
         var finalWrapMode = wrapMode switch
         {
-            TextureWrapMode.LinearMipmapLinear => Silk.NET.OpenGL.TextureWrapMode.LinearMipmapLinear,
             TextureWrapMode.Repeat => Silk.NET.OpenGL.TextureWrapMode.Repeat,
             TextureWrapMode.ClampToBorder => Silk.NET.OpenGL.TextureWrapMode.ClampToBorder,
             TextureWrapMode.ClampToBorderArb => Silk.NET.OpenGL.TextureWrapMode.ClampToBorderArb,

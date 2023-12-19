@@ -110,8 +110,8 @@ internal class OpenGLShader : IBackendShader
         GetUniforms(str);
         GetDirectives(ref str);
 
-        var vertProgram = "#version 430 core\n#define VERT\n" + str;
-        var fragProgram = "#version 430 core\n#define FRAG\n" + str;
+        var vertProgram = "#version 460 core\n#define VERT\n" + str;
+        var fragProgram = "#version 460 core\n#define FRAG\n" + str;
 
         //Load the individual shaders.
         uint vertex = CompileShader(ShaderType.VertexShader, vertProgram);

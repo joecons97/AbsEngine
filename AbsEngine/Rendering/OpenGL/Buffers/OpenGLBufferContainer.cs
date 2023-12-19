@@ -1,10 +1,9 @@
 ﻿using Silk.NET.OpenGL;
-using System.ComponentModel.DataAnnotations;
 
 namespace AbsEngine.Rendering.OpenGL.Buffers
 {
-    internal class BufferContainer : IDisposable
-        
+    internal class OpenGLBufferContainer : IBackendGraphicsBuffer
+
     {
         //Our handle, buffertype and the GL instance this class will use, these are private because they have no reason to be public.
         //Most of the time you would want to abstract items to make things like this invisible.
@@ -12,7 +11,7 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
         private BufferTargetARB _bufferType;
         private GL _gl;
 
-        public unsafe BufferContainer(GL gl, BufferTargetARB bufferType) 
+        public unsafe OpenGLBufferContainer(GL gl, BufferTargetARB bufferType)
         {
             //Setting the gl instance and storing our buffer type.
             _gl = gl;
@@ -22,7 +21,7 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
             _handle = _gl.GenBuffer();
         }
 
-        public unsafe void Build<TDataType>(Span<TDataType> data) where TDataType : unmanaged
+        public unsafe void SetData<TDataType>(Span<TDataType> data) where TDataType : unmanaged
         {
             Bind();
             fixed (void* d = data)
@@ -43,7 +42,7 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
             _gl.BindBuffer(_bufferType, 0);
         }
 
-        public void Dispose()   
+        public void Dispose()
         {
             //Remember to delete our buffer.
             _gl.DeleteBuffer(_handle);

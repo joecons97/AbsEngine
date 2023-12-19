@@ -20,9 +20,9 @@ internal class OpenGLMesh : IBackendMesh
     Vector2D<float>[] _uvs;
     uint[] _triangles;
 
-    private BufferContainer? _vbo;
-    private BufferContainer? _ebo;
-    private VertexArrayContainer<float, uint>? _vao;
+    private OpenGLBufferContainer? _vbo;
+    private OpenGLBufferContainer? _ebo;
+    private OpenGLDrawBuffer? _vao;
 
     private GL _gl;
     private Mesh _mesh;
@@ -42,8 +42,8 @@ internal class OpenGLMesh : IBackendMesh
 
     public void BuildVertexBuffer<T>(Span<T> vertices) where T : unmanaged
     {
-        _vbo = new BufferContainer(_gl, BufferTargetARB.ArrayBuffer);
-        _vbo.Build(vertices);
+        _vbo = new OpenGLBufferContainer(_gl, BufferTargetARB.ArrayBuffer);
+        _vbo.SetData(vertices);
     }
 
     public void Build()
@@ -57,14 +57,14 @@ internal class OpenGLMesh : IBackendMesh
 
                 if (Triangles != null && Triangles.Length != 0)
                 {
-                    _ebo = new BufferContainer(_gl, BufferTargetARB.ElementArrayBuffer);
-                    _ebo.Build<uint>(Triangles.ToArray());
+                    _ebo = new OpenGLBufferContainer(_gl, BufferTargetARB.ElementArrayBuffer);
+                    _ebo.SetData<uint>(Triangles.ToArray());
 
-                    _vao = new VertexArrayContainer<float, uint>(_gl, _vbo, _ebo);
+                    _vao = new OpenGLDrawBuffer(_gl, _vbo, _ebo);
                 }
                 else
                 {
-                    _vao = new VertexArrayContainer<float, uint>(_gl, _vbo);
+                    _vao = new OpenGLDrawBuffer(_gl, _vbo);
                 }
 
                 uint index = 0;
@@ -193,29 +193,29 @@ internal class OpenGLMesh : IBackendMesh
 
             if (Triangles != null && Triangles.Length != 0)
             {
-                _ebo = new BufferContainer(_gl, BufferTargetARB.ElementArrayBuffer);
-                _ebo.Build<uint>(Triangles.ToArray());
+                _ebo = new OpenGLBufferContainer(_gl, BufferTargetARB.ElementArrayBuffer);
+                _ebo.SetData<uint>(Triangles.ToArray());
 
-                _vao = new VertexArrayContainer<float, uint>(_gl, _vbo, _ebo);
+                _vao = new OpenGLDrawBuffer(_gl, _vbo, _ebo);
             }
             else
             {
-                _vao = new VertexArrayContainer<float, uint>(_gl, _vbo);
+                _vao = new OpenGLDrawBuffer(_gl, _vbo);
             }
 
-            _vao.VertexAttributePointer(0, 3, VertexAttribPointerType.Float, 0, 0);
+            _vao.VertexAttributePointer<float, uint>(0, 3, VertexAttribPointerType.Float, 0, 0);
 
             if (_colours.Length > 0)
-                _vao.VertexAttributePointer(1, 4, VertexAttribPointerType.Float, 0, positionsOffset);
+                _vao.VertexAttributePointer<float, uint>(1, 4, VertexAttribPointerType.Float, 0, positionsOffset);
 
             if (_uvs.Length > 0)
-                _vao.VertexAttributePointer(2, 2, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset);
+                _vao.VertexAttributePointer<float, uint>(2, 2, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset);
 
             if (_normals.Length > 0)
-                _vao.VertexAttributePointer(3, 3, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset + uvsOffset);
+                _vao.VertexAttributePointer<float, uint>(3, 3, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset + uvsOffset);
 
             if (_tangents.Length > 0)
-                _vao.VertexAttributePointer(4, 3, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset + uvsOffset + normalsOffset);
+                _vao.VertexAttributePointer<float, uint>(4, 3, VertexAttribPointerType.Float, 0, positionsOffset + coloursOffset + uvsOffset + normalsOffset);
         }
     }
 

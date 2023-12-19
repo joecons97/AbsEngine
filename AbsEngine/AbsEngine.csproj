@@ -9,13 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Rendering\RenderCommand\LowLevel\**" />
+    <EmbeddedResource Remove="Rendering\RenderCommand\LowLevel\**" />
+    <None Remove="Rendering\RenderCommand\LowLevel\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AssimpNet" Version="4.1.0" />
-    <PackageReference Include="Silk.NET.Direct3D.Compilers" Version="2.19.0" />
-    <PackageReference Include="Silk.NET.Direct3D11" Version="2.19.0" />
-    <PackageReference Include="Silk.NET.Input" Version="2.19.0" />
-    <PackageReference Include="Silk.NET.OpenGL" Version="2.19.0" />
-    <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.19.0" />
-    <PackageReference Include="Silk.NET.Windowing" Version="2.19.0" />
+    <PackageReference Include="Silk.NET.Direct3D.Compilers" Version="2.20.0" />
+    <PackageReference Include="Silk.NET.Direct3D11" Version="2.20.0" />
+    <PackageReference Include="Silk.NET.Input" Version="2.20.0" />
+    <PackageReference Include="Silk.NET.OpenGL" Version="2.20.0" />
+    <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.20.0" />
+    <PackageReference Include="Silk.NET.Windowing" Version="2.20.0" />
     <PackageReference Include="StbImageSharp" Version="2.27.13" />
   </ItemGroup>
 
@@ -34,8 +40,6 @@
   <ItemGroup>
     <Folder Include="Engine\Meshes\" />
     <Folder Include="Engine\Shaders\Includes\" />
-    <Folder Include="Rendering\RenderCommand\LowLevel\" />
-    <Folder Include="Rendering\RenderCommand\LowLevel\OpenGL\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

@@ -75,16 +75,13 @@
     <None Update="Content\Shaders\Post Processing\Grayscale.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Shaders\WaterShader.shader">
+    <None Update="Content\Shaders\MultiDrawTest.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Shaders\WaterShaderOld.glsl">
+    <None Update="Content\Shaders\WaterShader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Shaders\TerrainShaderOld.glsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Content\Shaders\TerrainShader.Shader">
+    <None Update="Content\Shaders\TerrainShader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Content\Textures\alldownhillfromhere.PNG">

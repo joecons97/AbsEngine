@@ -18,6 +18,10 @@ struct v2f
     layout (location = 1) in vec4 vColor;
     layout (location = 2) in vec2 vUvs;
 
+    layout(std430, binding = 3) buffer ssbo1 {
+        mat4 transforms[];
+    };
+
     uniform mat4 _WorldMatrix;
     uniform mat4 _Mvp;
 

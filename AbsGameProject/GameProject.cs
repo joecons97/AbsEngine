@@ -7,6 +7,7 @@ using AbsGameProject.Blocks;
 using AbsGameProject.Components.Player;
 using AbsGameProject.FullscreenEffects;
 using AbsGameProject.Maths.Physics;
+using AbsGameProject.Systems;
 using AbsGameProject.Systems.Player;
 using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
@@ -77,8 +78,9 @@ namespace AbsGameProject
             scene.RegisterSystem<BlockBreakerSystem>();
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
             scene.RegisterSystem<PlayerControllerSystem>();
+            scene.RegisterSystem<MultiDrawTestSystem>();
 
-            game.AddEffect<Grayscale>();
+            //game.AddEffect<Grayscale>();
         }
 
         static void SetupPlayer(Scene scene)
