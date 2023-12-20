@@ -8,13 +8,20 @@ using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems;
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct MultiDrawTestBuffer
+{
+    public Matrix4X4<float> transform;
+    public Vector4D<float> color;
+}
+
 internal class MultiDrawTestSystem : AbsEngine.ECS.System
 {
     GraphicsBuffer _vertexBuffer;
     DrawBuffer _drawBuffer;
     Material _material;
     DrawArraysIndirectCommand[] _drawCommands;
-    Matrix4X4<float>[] _trs;
+    MultiDrawTestBuffer[] _buffers;
 
     public MultiDrawTestSystem(Scene scene) : base(scene)
     {
@@ -66,17 +73,21 @@ internal class MultiDrawTestSystem : AbsEngine.ECS.System
             }
         };
 
-        _trs = new Matrix4X4<float>[1]
+        _buffers = new[]
         {
-            Matrix4X4.CreateScale(Vector3D<float>.One) *
-                            Matrix4X4.CreateTranslation(new Vector3D<float>(0,100,0))
-        };
+            new MultiDrawTestBuffer()
+            {
+                transform = Matrix4X4.CreateScale(Vector3D<float>.One) *
+                                Matrix4X4.CreateTranslation(new Vector3D<float>(0,100,0)),
+                color = new Vector4D<float>(0,1,0,1)
+            }
 
+    }   ;
         _material = new Material("MultiDrawTest");
     }
 
     public override void Tick(float deltaTime)
     {
-        Renderer.MultiDrawRender(_drawBuffer, _drawCommands, _material, _trs);
+        Renderer.MultiDrawRender(_drawBuffer, _drawCommands, _material, _buffers);
     }
 }

@@ -7,6 +7,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace AbsEngine.Rendering.RenderCommand
@@ -20,10 +21,10 @@ namespace AbsEngine.Rendering.RenderCommand
         public uint baseInstance;
     }
 
-    internal class MultiDrawRenderCommand : IRenderCommand
+    internal class MultiDrawRenderCommand<T> : IRenderCommand where T : unmanaged
     {
         public Material Material { get; set; }
-        public Matrix4X4<float>[] WorldMatricies { get; set; }
+        public T[]? MaterialBuffer { get; set; }
         public DrawBuffer DrawBuffer { get; set; }
         public DrawArraysIndirectCommand[] Commands { get; }
 
@@ -32,16 +33,20 @@ namespace AbsEngine.Rendering.RenderCommand
 
         public int RenderQueuePosition => Material.Shader._backendShader.GetRenderQueuePosition();
 
-        public MultiDrawRenderCommand(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material, Matrix4X4<float>[] worldMatricies)
+        public MultiDrawRenderCommand(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material, T[] materialBuffer)
         {
             Material = material;
-            WorldMatricies = worldMatricies;
+            MaterialBuffer = materialBuffer;
             Commands = commands;
             DrawBuffer = drawBuffer;
-
-            if (Commands.Length != WorldMatricies.Length)
-                throw new Exception($"Expected WorldMatricies array length to equal Commands array length ({Commands.Length}) but received {WorldMatricies.Length}");
         }
+
+        public MultiDrawRenderCommand(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material)
+            : this(drawBuffer, commands, material, default!)
+        {
+
+        }
+        
 
         public void Render(IGraphics graphics, CameraComponent camera, RenderTexture target)
         {
@@ -66,13 +71,13 @@ namespace AbsEngine.Rendering.RenderCommand
 
             var openGl = ((OpenGLGraphics)Game.Instance.Graphics).Gl;
 
-            if(_transformsBuffer == null)
+            if(_transformsBuffer == null && MaterialBuffer != null)
             {
                 _transformsBuffer = openGl.CreateBuffer();
                 openGl.BindBuffer(GLEnum.ShaderStorageBuffer, _transformsBuffer.Value);
-                fixed (void* d = WorldMatricies)
+                fixed(void* d = MaterialBuffer)
                 {
-                    openGl.BufferData(GLEnum.ShaderStorageBuffer, (uint)(sizeof(Matrix4X4<float>) * WorldMatricies.Length), d, BufferUsageARB.StaticDraw);
+                    openGl.BufferData(GLEnum.ShaderStorageBuffer, (uint)(sizeof(T) * MaterialBuffer.Length), d, BufferUsageARB.StaticDraw);
                 }
                 openGl.BindBuffer(GLEnum.ShaderStorageBuffer, 0);
             }
@@ -100,8 +105,11 @@ namespace AbsEngine.Rendering.RenderCommand
                 Material.SetTexture("_ColorMap", target.ColorTexture);
             }
 
-            openGl.BindBufferBase(GLEnum.ShaderStorageBuffer, 3, _transformsBuffer.Value);
-
+            if (_transformsBuffer.HasValue)
+            {
+                openGl.BindBufferBase(GLEnum.ShaderStorageBuffer, 3, _transformsBuffer.Value);
+            }
+            
             var pMat = camera.GetProjectionMatrix();
             var vMat = camera.GetViewMatrix();
             var vpMat = vMat * pMat;

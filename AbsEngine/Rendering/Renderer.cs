@@ -93,11 +93,19 @@ public static class Renderer
         renderQueue.Insert(pos, drawCall);
     }
 
-    public static void MultiDrawRender(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material, Matrix4X4<float>[] worldMatricies)
+    public static void MultiDrawRender<T>(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material, T[] materialBlock) where T : unmanaged
     {
         int renderPos = material.Shader.GetBackendShader().GetRenderQueuePosition();
         int pos = Math.Min(renderQueue.Count, renderPos);
-        var drawCall = new MultiDrawRenderCommand(drawBuffer, commands, material, worldMatricies);
+        var drawCall = new MultiDrawRenderCommand<T>(drawBuffer, commands, material, materialBlock);
+        renderQueue.Insert(pos, drawCall);
+    }
+
+    public static void MultiDrawRender(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material)
+    {
+        int renderPos = material.Shader.GetBackendShader().GetRenderQueuePosition();
+        int pos = Math.Min(renderQueue.Count, renderPos);
+        var drawCall = new MultiDrawRenderCommand<int>(drawBuffer, commands, material);
         renderQueue.Insert(pos, drawCall);
     }
 

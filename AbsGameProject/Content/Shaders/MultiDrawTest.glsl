@@ -4,7 +4,13 @@ struct v2f
 {
     vec4 localPos;
     vec2 uvs;
-    vec4 vertexColour;
+    vec4 color;
+};
+
+struct multidrawBuffer
+{
+    mat4 transform;
+    vec4 color;
 };
 
 #ifdef VERT
@@ -15,7 +21,7 @@ struct v2f
 
     layout(std430, binding = 3) buffer multiDrawBuff 
     {
-        mat4 transforms[];
+        multidrawBuffer buffers[];
     };
 
     uniform mat4 _Vp;
@@ -25,12 +31,12 @@ struct v2f
     void main() 
     {
         //gl_Position, is a built-in variable on all vertex shaders that will specify the position of our vertex.
-        mat4 mvp = _Vp * transforms[gl_DrawID];
+        mat4 mvp = _Vp * buffers[gl_DrawID].transform;
         gl_Position = mvp * vec4(vPos, 1.0);
         
         vertData.localPos = vec4(vPos, 1.0);
         vertData.uvs = vec2(vUvs.x, vUvs.y);
-        vertData.vertexColour = vColor;
+        vertData.color = buffers[gl_DrawID].color;
     }
 
 #endif
@@ -46,7 +52,7 @@ struct v2f
     void main()
     {
         vec2 uv = vertData.uvs.yx;
-        vec4 col = vec4(1,0,0,1);
+        vec4 col = vertData.color;
 
         FragColor = col;
     }
