@@ -23,6 +23,8 @@ internal class MultiDrawTestSystem : AbsEngine.ECS.System
     DrawArraysIndirectCommand[] _drawCommands;
     MultiDrawTestBuffer[] _buffers;
 
+    MultiDrawRenderCommand<MultiDrawTestBuffer> _command;
+
     public MultiDrawTestSystem(Scene scene) : base(scene)
     {
         var model = VoxelModel.TryFromFile("Content/Models/Blocks/Dirt.json");
@@ -81,13 +83,14 @@ internal class MultiDrawTestSystem : AbsEngine.ECS.System
                                 Matrix4X4.CreateTranslation(new Vector3D<float>(0,100,0)),
                 color = new Vector4D<float>(0,1,0,1)
             }
-
-    }   ;
+        };
         _material = new Material("MultiDrawTest");
+
+        _command = new MultiDrawRenderCommand<MultiDrawTestBuffer>(_drawBuffer, _drawCommands, _material, _buffers);
     }
 
     public override void Tick(float deltaTime)
     {
-        Renderer.MultiDrawRender(_drawBuffer, _drawCommands, _material, _buffers);
+        Renderer.Render(_command);
     }
 }

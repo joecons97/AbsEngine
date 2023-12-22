@@ -2,7 +2,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Physics;
 using AbsEngine.Rendering;
 
-internal interface IRenderCommand
+public interface IRenderCommand
 {
     public int RenderQueuePosition { get; }
 

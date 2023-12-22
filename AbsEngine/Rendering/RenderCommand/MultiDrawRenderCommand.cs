@@ -21,7 +21,7 @@ namespace AbsEngine.Rendering.RenderCommand
         public uint baseInstance;
     }
 
-    internal class MultiDrawRenderCommand<T> : IRenderCommand where T : unmanaged
+    public class MultiDrawRenderCommand<T> : IRenderCommand where T : unmanaged
     {
         public Material Material { get; set; }
         public T[]? MaterialBuffer { get; set; }
@@ -88,7 +88,7 @@ namespace AbsEngine.Rendering.RenderCommand
                 openGl.BindBuffer(GLEnum.DrawIndirectBuffer, _drawCommandBuffer.Value);
                 fixed (void* d = Commands)
                 {
-                    openGl.BufferData(GLEnum.DrawIndirectBuffer, (uint)(sizeof(DrawArraysIndirectCommand) * Commands.Length), d, BufferUsageARB.StaticDraw);
+                    openGl.BufferData(GLEnum.DrawIndirectBuffer, (uint)(sizeof(DrawArraysIndirectCommand) * Commands.Length), d,BufferUsageARB.StaticDraw);
                 }
             }
             else
