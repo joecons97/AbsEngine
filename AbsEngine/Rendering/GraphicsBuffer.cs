@@ -55,4 +55,14 @@ public class GraphicsBuffer
 
     public void SetData<TDataType>(Span<TDataType> data) where TDataType : unmanaged
         => _backendBuffer?.SetData(data);
+
+    public void Dispose()
+    {
+        if (_backendBuffer != null)
+            Game.Instance?.QueueDisposable(_backendBuffer);
+
+        GC.SuppressFinalize(this);
+    }
+
+    ~GraphicsBuffer() => Dispose();
 }

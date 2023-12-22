@@ -65,4 +65,15 @@ public class DrawBuffer
 
     public void SetVertexAttributes(VertexAttributeDescriptor[] vertexAttributeDescriptors)
         => _backendBuffer?.SetVertexAttributes(vertexAttributeDescriptors);
+
+
+    public void Dispose()
+    {
+        if (_backendBuffer != null)
+            Game.Instance?.QueueDisposable(_backendBuffer);
+
+        GC.SuppressFinalize(this);
+    }
+
+    ~DrawBuffer() => Dispose();
 }
