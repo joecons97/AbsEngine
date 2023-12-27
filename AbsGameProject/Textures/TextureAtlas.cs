@@ -1,6 +1,6 @@
 ﻿using AbsEngine.IO;
 using AbsEngine.Rendering;
-using AbsGameProject.Models;
+using AbsGameProject.Models.Meshing;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Textures

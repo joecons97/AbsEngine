@@ -78,6 +78,12 @@
     <None Update="Content\Shaders\MultiDrawTest.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Content\Shaders\TerrainShaderMultidraw.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Shaders\WaterShaderMultidraw.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Shaders\WaterShader.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -93,25 +99,25 @@
     <None Update="Content\Textures\Blocks\glowstone.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Textures\Blocks\grass_side.png">
+    <None Update="Content\Textures\Blocks\grass_block_side.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Textures\Blocks\grass_side_overlay.png">
+    <None Update="Content\Textures\Blocks\grass_block_side_overlay.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Textures\Blocks\grass_top.png">
+    <None Update="Content\Textures\Blocks\grass_block_top.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Content\Textures\Blocks\iron_block.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Textures\Blocks\leaves_oak.png">
+    <None Update="Content\Textures\Blocks\oak_leaves.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Textures\Blocks\log_oak.png">
+    <None Update="Content\Textures\Blocks\oak_log.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Content\Textures\Blocks\log_oak_top.png">
+    <None Update="Content\Textures\Blocks\oak_log_top.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Content\Textures\Blocks\sand.png">

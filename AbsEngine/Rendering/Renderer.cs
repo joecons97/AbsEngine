@@ -6,6 +6,7 @@ using AbsEngine.Rendering.RenderCommand;
 using Assimp;
 using ImGuiNET;
 using Silk.NET.Maths;
+using System.Diagnostics;
 
 namespace AbsEngine.Rendering;
 
@@ -94,22 +95,6 @@ public static class Renderer
         renderQueue.Insert(pos, drawCall);
     }
 
-    //public static void MultiDrawRender<T>(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material, T[] materialBlock) where T : unmanaged
-    //{
-    //    int renderPos = material.Shader.GetBackendShader().GetRenderQueuePosition();
-    //    int pos = Math.Min(renderQueue.Count, renderPos);
-    //    var drawCall = new MultiDrawRenderCommand<T>(drawBuffer, commands, material, materialBlock);
-    //    renderQueue.Insert(pos, drawCall);
-    //}
-
-    //public static void MultiDrawRender(DrawBuffer drawBuffer, DrawArraysIndirectCommand[] commands, Material material)
-    //{
-    //    int renderPos = material.Shader.GetBackendShader().GetRenderQueuePosition();
-    //    int pos = Math.Min(renderQueue.Count, renderPos);
-    //    var drawCall = new MultiDrawRenderCommand<int>(drawBuffer, commands, material);
-    //    renderQueue.Insert(pos, drawCall);
-    //}
-
     public static void Render(IRenderCommand renderCommand)
     {
         int renderPos = renderCommand.RenderQueuePosition;
@@ -151,7 +136,7 @@ public static class Renderer
             ClearRenderTexture(game, backBufferRenderTexture);
         }
 
-        RenderTexture? renderTarget;
+        RenderTexture renderTarget;
         if (RenderTexture.Active != null)
         {
             renderTarget = RenderTexture.Active;
@@ -161,7 +146,7 @@ public static class Renderer
             renderTarget = backBufferRenderTexture;
         }
 
-        renderTarget?.Bind();
+        renderTarget.Bind();
 
         var cam = GetActiveCamera(game);
 
@@ -172,13 +157,7 @@ public static class Renderer
 
         var trans = cam.Entity.Transform;
 
-        Shader.SetGlobalVector("_Resolution", (Vector2D<float>)renderTarget!.ColorTexture.Size);
-        Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
-        Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
-        Shader.SetGlobalFloat("_FarClipPlane", cam.FarClipPlane);
-        Shader.SetGlobalVector("_CameraPosition", trans.Position);
-        Shader.SetGlobalFloat("_Time", Game.Instance!.Time);
-        Shader.SetGlobalFloat("_DeltaTime", Game.Instance!.DeltaTime);
+        BindDefaultUniforms(cam, renderTarget);
 
         bool hasBlitToShaderBuffer = false;
 
@@ -203,7 +182,7 @@ public static class Renderer
             r.Render(game.Graphics, cam, backBufferForShaders);
         }
 
-        renderTarget?.UnBind();
+        renderTarget.UnBind();
 
         var currentRt = backBufferRenderTexture;
 
@@ -222,6 +201,16 @@ public static class Renderer
         FinaliseRender(game);
 
         DrawDebug();
+    }
+
+    static internal void BindDefaultUniforms(CameraComponent cam, RenderTexture renderTarget)
+    {
+        Shader.SetGlobalVector("_Resolution", (Vector2D<float>)renderTarget!.ColorTexture.Size);
+        Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
+        Shader.SetGlobalFloat("_FarClipPlane", cam.FarClipPlane);
+        Shader.SetGlobalVector("_CameraPosition", cam.Entity.Transform.Position);
+        Shader.SetGlobalFloat("_Time", Game.Instance!.Time);
+        Shader.SetGlobalFloat("_DeltaTime", Game.Instance!.DeltaTime);
     }
 
     static void FinaliseRender(Game game)

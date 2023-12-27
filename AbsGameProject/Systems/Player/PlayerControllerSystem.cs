@@ -4,7 +4,7 @@ using AbsEngine.Rendering;
 using AbsGameProject.Components.Player;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Maths.Physics;
-using AbsGameProject.Models;
+using AbsGameProject.Models.Meshing;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using System.Numerics;

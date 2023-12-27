@@ -37,9 +37,19 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
             _gl.BindBuffer(_bufferType, _handle);
         }
 
+        public void BindBase(uint location)
+        {
+            _gl.BindBufferBase(_bufferType, location, _handle);
+        }
+
         public void UnBind()
         {
             _gl.BindBuffer(_bufferType, 0);
+        }
+
+        public void UnBindBase(uint location)
+        {
+            _gl.BindBufferBase(_bufferType, location, 0);
         }
 
         public void Dispose()

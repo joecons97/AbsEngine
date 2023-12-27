@@ -87,21 +87,21 @@ public class Shader : IDisposable
         => _backendShader.SetTexture(name, texture.GetBackendTexture());
 
     public static void SetGlobalGlobalInt(string name, int value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Int);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Int);
     public static void SetGlobalUint(string name, uint value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Uint);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Uint);
     public static void SetGlobalFloat(string name, float value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Float);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Float);
     public static void SetGlobalVector(string name, Vector4D<float> value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector4);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Vector4);
     public static void SetGlobalVector(string name, Vector3D<float> value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector3);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Vector3);
     public static void SetGlobalVector(string name, Vector2D<float> value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Vector2);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Vector2);
     public static void SetGlobalMatrix(string name, Matrix4X4<float> value)
-        => SetGlobalGlobalVariable(name, value, GlobalShaderVariableType.Matrix);
+        => SetGlobalVariable(name, value, GlobalShaderVariableType.Matrix);
     
-    static void SetGlobalGlobalVariable(string name, object value, GlobalShaderVariableType type)
+    static void SetGlobalVariable(string name, object value, GlobalShaderVariableType type)
     {
         if(_globalVariables.ContainsKey(name))
             _globalVariables[name] = new GlobalShaderVariable() { Type = type, Value = value };

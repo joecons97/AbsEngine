@@ -3,18 +3,17 @@
 struct v2f 
 {
     vec4 worldPos;
-    vec4 worldNormal;
     vec2 uvs;
-    vec4 worldTangent;
 };
+
+uniform float _NearClipPlane;
+uniform float _FarClipPlane;
 
 #ifdef VERT
 
     layout (location = 0) in vec3 vPos;
     layout (location = 1) in vec4 vColor;
     layout (location = 2) in vec2 vUvs;
-    layout (location = 3) in vec3 vNormal;
-    layout (location = 4) in vec3 vTangent;
 
     uniform mat4 _WorldMatrix;
     uniform mat4 _Mvp;
@@ -25,10 +24,7 @@ struct v2f
     {
          //gl_Position, is a built-in variable on all vertex shaders that will specify the position of our vertex.
         gl_Position = _Mvp * vec4(vPos, 1.0);
-
-        vertData.worldPos = _WorldMatrix * vec4(vPos, 1.0);
-        vertData.worldNormal = normalize(_WorldMatrix * vec4(vNormal, 0));
-        vertData.worldTangent = normalize(_WorldMatrix * vec4(vTangent, 0));
+        vertData.worldPos = _WorldMatrix * vec4(vPos, 1.0 + _NearClipPlane - _FarClipPlane);
         vertData.uvs = vec2(vUvs.x, vUvs.y);
     }
 

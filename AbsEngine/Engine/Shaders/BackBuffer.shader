@@ -21,7 +21,7 @@ float _Time;
 
 float4 SampleTex(float offset, float2 uv)
 {
-    uv = float2(uv.x + sin(_Time) * offset, uv.y);
+    uv = float2(uv.x, uv.y);
     return tex2D(_ColorMap, uv);
 }
 
@@ -36,5 +36,5 @@ Fragment vert(Vertex i)
 
 float4 frag(Fragment vertData)
 {
-    return SampleTex(2, vertData.Uv);
+    return SampleTex(0, vertData.Uv);
 }

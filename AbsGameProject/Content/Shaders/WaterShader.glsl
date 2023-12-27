@@ -52,6 +52,8 @@ struct v2f
     uniform sampler2D uAtlas;
     uniform float uWaterDepth = 0.1;
 
+    const vec4 waterColour = vec4(0.094, 0.605, 0.894, 1);
+
     out vec4 FragColor;
 
     float depthToLinear(float depth, float nearPlane, float farPlane)
@@ -77,7 +79,7 @@ struct v2f
     void main()
     {
         vec2 uv = vertData.uvs.yx;
-        vec4 col = texture(uAtlas, uv);
+        vec4 col = texture(uAtlas, uv) * waterColour;
 
         //Maybe re-add later
 

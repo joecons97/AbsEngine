@@ -2,8 +2,10 @@
 using AbsEngine.ECS.Components;
 using AbsEngine.Physics;
 using AbsEngine.Rendering;
+using AbsEngine.Rendering.RenderCommand;
 using AbsGameProject.Blocks;
 using AbsGameProject.Maths.Physics;
+using AbsGameProject.Models;
 using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
 using System.Collections.Concurrent;
@@ -36,11 +38,10 @@ namespace AbsGameProject.Components.Terrain
         public byte[,]? Heightmap { get; set; }
         public ushort[,,]? VoxelData { get; set; }
 
-        public Mesh? Mesh { get; set; }
-        public Mesh? WaterMesh { get; set; }
         public BoundingBox? BoundingBox { get; set; }
-        public MeshRendererComponent Renderer { get; set; }
-        public MeshRendererComponent WaterRenderer { get; set; } = default!;
+
+        public ChunkRenderJob? StoredRenderJobOpaque { get; set; }
+        public ChunkRenderJob? StoredRenderJobTransparent { get; set; }
 
         public bool IsReadyForDecoration =>
             State == TerrainState.NoiseGenerated &&
@@ -63,11 +64,6 @@ namespace AbsGameProject.Components.Terrain
 
         private readonly ConcurrentBag<Vector3D<float>> _updatesSinceLastRebuild = new();
 
-        public TerrainChunkComponent(MeshRendererComponent renderer)
-        {
-            Renderer = renderer;
-        }
-
         public static TerrainChunkComponent? GetAt(Scene scene, Vector3D<float> worldPos)
         {
             var chunkPos = worldPos.ToChunkPosition();
@@ -79,7 +75,6 @@ namespace AbsGameProject.Components.Terrain
         {
             var waterEntity = Entity.Scene.EntityManager.CreateEntity("Water");
             waterEntity.Transform.Parent = Entity.Transform;
-            WaterRenderer = waterEntity.AddComponent<MeshRendererComponent>();
         }
 
         public static bool IsPositionInBounds(Vector3D<float> pos)

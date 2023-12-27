@@ -1,7 +1,7 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"leaves_oak": "Content/Textures/Blocks/leaves_oak.png"
+		"leaves_oak": "Content/Textures/Blocks/oak_leaves.png"
 	},
 	"elements": [
 		{

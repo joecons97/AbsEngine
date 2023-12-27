@@ -67,5 +67,9 @@ namespace AbsEngine.Rendering.RenderCommand
 
             return !frustum.Intersects(BoundingBox);
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace AbsGameProject.Systems.Terrain
         private float lacunarity = 2;
         private float persistence = 0.5f;
 
+        private int waterHeight = 35;
+
         protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None;
         protected override int MaxIterationsPerFrame => 1;
         protected override bool UseParallel => true;
@@ -63,14 +65,14 @@ namespace AbsGameProject.Systems.Terrain
                         {
                             if (y == (int)h - 1)
                             {
-                                if (y <= 51)
+                                if (y <= waterHeight + 1)
                                     component.VoxelData[x, y, z] = 6;
                                 else
                                     component.VoxelData[x, y, z] = 3;
                             }
                             else if (y < h - 1 && y > h - 4)
                             {
-                                if (y <= 51)
+                                if (y <= waterHeight + 1)
                                     component.VoxelData[x, y, z] = 6;
                                 else
                                     component.VoxelData[x, y, z] = 2;
@@ -81,7 +83,7 @@ namespace AbsGameProject.Systems.Terrain
                             }
                             else
                             {
-                                if (y <= 50)
+                                if (y <= waterHeight)
                                     component.VoxelData[x, y, z] = 5;
                             }
                         }

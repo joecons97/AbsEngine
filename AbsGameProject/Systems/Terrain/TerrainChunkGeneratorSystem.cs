@@ -2,6 +2,7 @@
 using AbsEngine.ECS.Components;
 using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
+using System.ComponentModel;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -49,7 +50,7 @@ namespace AbsGameProject.Systems.Terrain
                     if (chunk.Any())
                     {
                         HandleNeighbours(chunk.First(), xF, zF);
-                        activeChunks.AddRange(chunk);
+                        activeChunks.Add(chunk.First());
 
                         continue;
                     }
@@ -61,10 +62,10 @@ namespace AbsGameProject.Systems.Terrain
                         chunkComp = pool.First();
                         pool.Remove(chunkComp);
 
-                        chunkComp.Renderer.Mesh = null;
-                        chunkComp.WaterRenderer.Mesh = null;
-                        chunkComp.Mesh = null;
-                        chunkComp.WaterMesh = null;
+                        //chunkComp.Renderer.Mesh = null;
+                        //chunkComp.WaterRenderer.Mesh = null;
+                        //chunkComp.Mesh = null;
+                        //chunkComp.WaterMesh = null;
 
                         chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
                         chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
@@ -73,13 +74,12 @@ namespace AbsGameProject.Systems.Terrain
                         chunkComp.WaterVertices?.Clear();
                         chunkComp.TerrainVertices?.Clear();
 
-
                         activeChunks.Add(chunkComp);
                     }
                     else
                     {
                         var chunkEnt = Scene.EntityManager.CreateEntity();
-                        chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>(chunkEnt.AddComponent<MeshRendererComponent>());
+                        chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>();
                         chunkEnt.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
                         chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
@@ -93,13 +93,9 @@ namespace AbsGameProject.Systems.Terrain
 
 
             foreach (var chunk in Scene.EntityManager.GetComponents<TerrainChunkComponent>()
-                .Except(activeChunks)
-                .OrderBy(x => Vector3D.Dot(
-                    mainCam.Entity.Transform.Forward,
-                    x.Entity.Transform.LocalPosition - mainCam.Entity.Transform.LocalPosition)
-                < 0))
+                .Except(activeChunks))
             {
-                if (!pool.Contains(chunk) && chunk.State == TerrainChunkComponent.TerrainState.Done)
+                if (!pool.Contains(chunk))
                 {
                     if (chunk.NorthNeighbour != null)
                     {
@@ -121,6 +117,18 @@ namespace AbsGameProject.Systems.Terrain
                         chunk.SouthNeighbour.NorthNeighbour = null;
                         chunk.SouthNeighbour = null;
                     }
+
+                    //chunk.Renderer.Mesh = null;
+                    //chunk.WaterRenderer.Mesh = null;
+                    //chunk.Mesh = null;
+                    //chunk.WaterMesh = null;
+
+                    chunk.Entity.Name = "Pooled Chunk";
+                    chunk.VoxelData = null;
+                    chunk.WaterVertices?.Clear();
+                    chunk.TerrainVertices?.Clear();
+
+                    TerrainChunkBatcherRenderer.BatchQueue.Enqueue(chunk);
 
                     pool.Add(chunk);
                 }

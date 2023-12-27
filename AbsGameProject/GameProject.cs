@@ -57,7 +57,7 @@ namespace AbsGameProject
 
             BlockRegistry.AddBlock(Block.New("log_oak", "Oak Log").
                 WithVoxelModel("Content/Models/Blocks/Log.json").Build());
-            BlockRegistry.AddBlock(Block.New("leaves_oak", "Oak Leaves").WithTransparency(true).
+            BlockRegistry.AddBlock(Block.New("leaves_oak", "Oak Leaves").WithTransparency(false).
                 WithVoxelModel("Content/Models/Blocks/Leaves.json").Build());
 
             TextureAtlas.Build();
@@ -74,11 +74,10 @@ namespace AbsGameProject
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
             scene.RegisterSystem<TerrainDecoratorSystem>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
-            scene.RegisterSystem<TerrainMeshBuilderSystem>();
             scene.RegisterSystem<BlockBreakerSystem>();
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
             scene.RegisterSystem<PlayerControllerSystem>();
-            scene.RegisterSystem<MultiDrawTestSystem>();
+            scene.RegisterSystem<TerrainChunkBatcherRenderer>();
 
             //game.AddEffect<Grayscale>();
         }

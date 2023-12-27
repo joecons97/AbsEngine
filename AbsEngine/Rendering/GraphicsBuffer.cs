@@ -8,7 +8,7 @@ namespace AbsEngine.Rendering;
 public enum GraphicsBufferType
 {
     Vertices,
-    Triangles
+    Triangles,
 }
 
 internal interface IBackendGraphicsBuffer : IDisposable

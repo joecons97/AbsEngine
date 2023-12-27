@@ -1,7 +1,7 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.Rendering;
 using AbsEngine.Rendering.RenderCommand;
-using AbsGameProject.Models;
+using AbsGameProject.Models.Meshing;
 using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
 using System.Runtime.InteropServices;

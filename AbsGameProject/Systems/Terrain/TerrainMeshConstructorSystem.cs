@@ -2,7 +2,7 @@
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
-using AbsGameProject.Models;
+using AbsGameProject.Models.Meshing;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
 using System.Runtime.InteropServices;
@@ -47,18 +47,25 @@ namespace AbsGameProject.Systems.Terrain
             if (component.VoxelData == null)
                 return;
 
-            component.Mesh = null;
+            //component.Mesh = null;
 
             await Task.Run(() =>
             {
-                component.TerrainVertices = new List<TerrainVertex>();
-                component.WaterVertices = new List<TerrainVertex>();
+                if (component.TerrainVertices == null)
+                    component.TerrainVertices = new List<TerrainVertex>();
+                else
+                    component.TerrainVertices.Clear();
 
-                var mesh = new Mesh();
-                mesh.SetVertexBufferLayout(vertexLayout);
+                if (component.WaterVertices == null)
+                    component.WaterVertices = new List<TerrainVertex>();
+                else
+                    component.WaterVertices.Clear();
 
-                var transparentMesh = new Mesh();
-                transparentMesh.SetVertexBufferLayout(vertexLayout);
+                //var mesh = new Mesh();
+                //mesh.SetVertexBufferLayout(vertexLayout);
+
+                //var transparentMesh = new Mesh();
+                //transparentMesh.SetVertexBufferLayout(vertexLayout);
 
                 var vertices = new List<Vector3D<float>>();
                 var colours = new List<Vector4D<float>>();
@@ -131,16 +138,10 @@ namespace AbsGameProject.Systems.Terrain
                         }
                     }
                 }
-
-                mesh.UseTriangles = false;
-
-                transparentMesh.UseTriangles = false;
-
-                component.Mesh = mesh;
-                component.WaterMesh = transparentMesh;
             });
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
+            TerrainChunkBatcherRenderer.BatchQueue.Enqueue(component);
 
             bool ShouldRenderFace(int x, int y, int z, int workingBlockId)
             {

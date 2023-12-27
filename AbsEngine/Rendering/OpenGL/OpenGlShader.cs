@@ -50,47 +50,43 @@ internal class OpenGLShader : IBackendShader
         {
             if (_uniforms.Contains(globalVariable.Key))
             {
-                int location = _gl.GetUniformLocation(_handle, globalVariable.Key);
-                if (location == -1)
-                    continue;
-
                 switch (globalVariable.Value.Type)
                 {
                     case GlobalShaderVariableType.Int:
-                        _gl.Uniform1(location, (int)globalVariable.Value.Value);
+                        SetInt(globalVariable.Key, (int)globalVariable.Value.Value);
                         break;
                     case GlobalShaderVariableType.Uint:
-                        _gl.Uniform1(location, (uint)globalVariable.Value.Value);
+                        SetUint(globalVariable.Key, (uint)globalVariable.Value.Value);
                         break;
                     case GlobalShaderVariableType.Float:
-                        _gl.Uniform1(location, (float)globalVariable.Value.Value);
+                        SetFloat(globalVariable.Key, (float)globalVariable.Value.Value);
                         break;
                     case GlobalShaderVariableType.Vector4:
                         unsafe
                         {
                             Vector4D<float> value = (Vector4D<float>)globalVariable.Value.Value;
-                            _gl.Uniform4(location, 1, (float*)&value);
+                            SetVector(globalVariable.Key, value);
                         }
                         break;
                     case GlobalShaderVariableType.Vector3:
                         unsafe
                         {
                             Vector3D<float> value = (Vector3D<float>)globalVariable.Value.Value;
-                            _gl.Uniform3(location, 1, (float*)&value);
+                            SetVector(globalVariable.Key, value);
                         }
                         break;
                     case GlobalShaderVariableType.Vector2:
                         unsafe
                         {
                             Vector2D<float> value = (Vector2D<float>)globalVariable.Value.Value;
-                            _gl.Uniform2(location, 1, (float*)&value);
+                            SetVector(globalVariable.Key, value);
                         }
                         break;
                     case GlobalShaderVariableType.Matrix:
                         unsafe
                         {
                             Matrix4X4<float> value = (Matrix4X4<float>)globalVariable.Value.Value;
-                            _gl.UniformMatrix4(location, 1, false, (float*)&value);
+                            SetMatrix(globalVariable.Key, value);
                         }
                         break;
                 }
@@ -209,6 +205,34 @@ internal class OpenGLShader : IBackendShader
         unsafe
         {
             _gl.ProgramUniform4(_handle, location, 1, (float*)&value);
+        }
+    }
+
+    public void SetVector(string name, Vector3D<float> value)
+    {
+        int location = _gl.GetUniformLocation(_handle, name);
+        if (location == -1)
+        {
+            return;
+        }
+
+        unsafe
+        {
+            _gl.ProgramUniform3(_handle, location, 1, (float*)&value);
+        }
+    }
+
+    public void SetVector(string name, Vector2D<float> value)
+    {
+        int location = _gl.GetUniformLocation(_handle, name);
+        if (location == -1)
+        {
+            return;
+        }
+
+        unsafe
+        {
+            _gl.ProgramUniform2(_handle, location, 1, (float*)&value);
         }
     }
 
