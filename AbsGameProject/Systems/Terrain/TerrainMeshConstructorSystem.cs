@@ -20,34 +20,18 @@ namespace AbsGameProject.Systems.Terrain
 
     public class TerrainMeshConstructorSystem : AsyncComponentSystem<TerrainChunkComponent>
     {
-        private readonly Material material;
-
         protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.IsReadyForMeshGeneration;
 
         protected override int MaxIterationsPerFrame => 1;
 
-        private VertexAttributeDescriptor[] vertexLayout;
-
         public TerrainMeshConstructorSystem(Scene scene) : base(scene)
         {
-            material = new Material("TerrainShader");
-            if (TextureAtlas.AtlasTexture != null)
-                material.SetTexture("uAtlas", TextureAtlas.AtlasTexture);
-
-            vertexLayout = new VertexAttributeDescriptor[]
-            {
-                new VertexAttributeDescriptor(VertexAttributeFormat.SInt8, 3),
-                new VertexAttributeDescriptor(VertexAttributeFormat.UNorm8, 4),
-                new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
-            };
         }
 
         public override async Task OnTickAsync(TerrainChunkComponent component, float deltaTime)
         {
-            if (component.VoxelData == null)
+             if (component.VoxelData == null)
                 return;
-
-            //component.Mesh = null;
 
             await Task.Run(() =>
             {
@@ -60,12 +44,6 @@ namespace AbsGameProject.Systems.Terrain
                     component.WaterVertices = new List<TerrainVertex>();
                 else
                     component.WaterVertices.Clear();
-
-                //var mesh = new Mesh();
-                //mesh.SetVertexBufferLayout(vertexLayout);
-
-                //var transparentMesh = new Mesh();
-                //transparentMesh.SetVertexBufferLayout(vertexLayout);
 
                 var vertices = new List<Vector3D<float>>();
                 var colours = new List<Vector4D<float>>();
@@ -141,7 +119,6 @@ namespace AbsGameProject.Systems.Terrain
             });
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
-            TerrainChunkBatcherRenderer.BatchQueue.Enqueue(component);
 
             bool ShouldRenderFace(int x, int y, int z, int workingBlockId)
             {

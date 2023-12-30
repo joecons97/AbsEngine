@@ -8,7 +8,7 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainChunkGeneratorSystem : AbsEngine.ECS.System
     {
-        const int RADIUS = 15;
+        const int RADIUS = 25;
         float lastX;
         float lastZ;
         bool hasBeenInitialised = false;
@@ -117,18 +117,6 @@ namespace AbsGameProject.Systems.Terrain
                         chunk.SouthNeighbour.NorthNeighbour = null;
                         chunk.SouthNeighbour = null;
                     }
-
-                    //chunk.Renderer.Mesh = null;
-                    //chunk.WaterRenderer.Mesh = null;
-                    //chunk.Mesh = null;
-                    //chunk.WaterMesh = null;
-
-                    chunk.Entity.Name = "Pooled Chunk";
-                    chunk.VoxelData = null;
-                    chunk.WaterVertices?.Clear();
-                    chunk.TerrainVertices?.Clear();
-
-                    TerrainChunkBatcherRenderer.BatchQueue.Enqueue(chunk);
 
                     pool.Add(chunk);
                 }

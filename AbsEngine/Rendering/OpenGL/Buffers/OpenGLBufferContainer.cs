@@ -11,6 +11,8 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
         private BufferTargetARB _bufferType;
         private GL _gl;
 
+        private BufferUsageARB _glUsage = BufferUsageARB.StaticDraw;
+
         public unsafe OpenGLBufferContainer(GL gl, BufferTargetARB bufferType)
         {
             //Setting the gl instance and storing our buffer type.
@@ -21,13 +23,37 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
             _handle = _gl.GenBuffer();
         }
 
+        public void SetUsage(GraphicsBufferUsage usage)
+        {
+            _glUsage = usage switch
+            {
+                GraphicsBufferUsage.Static => BufferUsageARB.StaticDraw,
+                GraphicsBufferUsage.Dynamic => BufferUsageARB.DynamicDraw,
+                GraphicsBufferUsage.Stream => BufferUsageARB.StaticDraw,
+                _ => throw new NotImplementedException(),
+            };
+        }
+
         public unsafe void SetData<TDataType>(Span<TDataType> data) where TDataType : unmanaged
         {
             Bind();
-            fixed (void* d = data)
-            {
-                _gl.BufferData(_bufferType, (nuint)(data.Length * sizeof(TDataType)), d, BufferUsageARB.StaticDraw);
-            }
+            _gl.BufferData<TDataType>(_bufferType, data, _glUsage);
+            UnBind();
+        }
+
+        public unsafe void SetSize<TDataType>(int size) where TDataType : unmanaged
+        {
+            Bind();
+            _gl.BufferData<TDataType>(_bufferType, (nuint)(size * sizeof(TDataType)), null, _glUsage);
+            UnBind();
+        }
+
+        public unsafe void SetSubData<TDataType>(Span<TDataType> data, int offset) where TDataType : unmanaged
+        {
+            Bind();
+
+            _gl.BufferSubData<TDataType>(_bufferType, offset * sizeof(TDataType), data);
+
             UnBind();
         }
 

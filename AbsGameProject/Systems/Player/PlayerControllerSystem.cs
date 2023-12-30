@@ -5,6 +5,7 @@ using AbsGameProject.Components.Player;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models.Meshing;
+using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using System.Numerics;
@@ -45,6 +46,15 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         _playerRenderer = _playerController.Entity.AddComponent<MeshRendererComponent>();
         _playerRenderer.Mesh = mesh;
         _playerRenderer.Material = new Material("NewSyntax");
+    }
+
+    public override void OnGui(float deltaTime)
+    {
+        ImGui.Begin("Player");
+        ImGui.Text($"Position: {_playerController.Entity.Transform.Position}");
+        ImGui.Text($"Chunk: {_playerController.Entity.Transform.Position.ToChunkPosition()}");
+        ImGui.Text($"Chunk Space: {_playerController.Entity.Transform.Position.ToChunkSpaceFloored()}");
+        ImGui.End();
     }
 
     private void _keyboard_KeyDown(IKeyboard arg1, Key arg2, int arg3)

@@ -70,6 +70,14 @@ public class Scene : IDisposable
         _hasTickBegun = false;
     }
 
+    public void OnGui(float deltaTime)
+    {
+        foreach (var system in _systems)
+        {
+            system.OnGui(deltaTime);
+        }
+    }
+
     public void RegisterSystem<T>(params object?[] ctr) where T : System
     {
         var type = typeof(T);

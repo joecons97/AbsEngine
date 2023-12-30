@@ -17,6 +17,10 @@ public abstract class System : IDisposable
     {
     }
 
+    public virtual void OnGui(float deltaTime) 
+    { 
+    }
+
     public void Dispose()
     {
         isDisposed = true;

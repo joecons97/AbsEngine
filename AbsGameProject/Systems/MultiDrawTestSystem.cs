@@ -54,7 +54,7 @@ internal class MultiDrawTestSystem : AbsEngine.ECS.System
         }
 
         _vertexBuffer = new GraphicsBuffer(GraphicsBufferType.Vertices);
-        _vertexBuffer.SetData(CollectionsMarshal.AsSpan(vertices));
+        _vertexBuffer.SetSubData(CollectionsMarshal.AsSpan(vertices), 0);
 
         _drawBuffer = new DrawBuffer(_vertexBuffer);
         _drawBuffer.SetVertexAttributes(new VertexAttributeDescriptor[]

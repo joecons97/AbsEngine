@@ -51,6 +51,13 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
                 output.Chunk.RebuildMesh();
             }
         }
+        else if(btn == Silk.NET.Input.MouseButton.Middle)
+        {
+            if (ChunkPhysics.CastVoxel(_mainCamera.Entity.Transform.Position, _mainCamera.Entity.Transform.Forward, 5, out var output))
+            {
+
+            }
+        }
         else
         {
             if (ChunkPhysics.CastVoxel(_mainCamera.Entity.Transform.Position, _mainCamera.Entity.Transform.Forward, 5, out var output))

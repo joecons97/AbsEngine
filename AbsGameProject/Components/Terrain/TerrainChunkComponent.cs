@@ -91,8 +91,8 @@ namespace AbsGameProject.Components.Terrain
             {
                 if (LeftNeighbour != null)
                 {
-                    if (LeftNeighbour.VoxelData == null)
-                        Debug.WriteLine("LeftNeighbour VoxelData is null!", "Warning");
+                    //if (LeftNeighbour.VoxelData == null)
+                    //    Debug.WriteLine("LeftNeighbour VoxelData is null!", "Warning");
 
                     return LeftNeighbour.GetBlockId(WIDTH + x, y, z);
                 }
@@ -104,8 +104,8 @@ namespace AbsGameProject.Components.Terrain
             {
                 if (RightNeighbour != null)
                 {
-                    if (RightNeighbour.VoxelData == null)
-                        Debug.WriteLine("RightNeighbour VoxelData is null!", "Warning");
+                    //if (RightNeighbour.VoxelData == null)
+                    //    Debug.WriteLine("RightNeighbour VoxelData is null!", "Warning");
 
                     return RightNeighbour.GetBlockId(x - WIDTH, y, z);
                 }
@@ -117,8 +117,8 @@ namespace AbsGameProject.Components.Terrain
             {
                 if (SouthNeighbour != null)
                 {
-                    if (SouthNeighbour.VoxelData == null)
-                        Debug.WriteLine("SouthNeighbour VoxelData is null!", "Warning");
+                    //if (SouthNeighbour.VoxelData == null)
+                    //    Debug.WriteLine("SouthNeighbour VoxelData is null!", "Warning");
 
                     return SouthNeighbour.GetBlockId(x, y, WIDTH + z);
                 }
@@ -130,8 +130,8 @@ namespace AbsGameProject.Components.Terrain
             {
                 if (NorthNeighbour != null)
                 {
-                    if (NorthNeighbour.VoxelData == null)
-                        Debug.WriteLine("NorthNeighbour VoxelData is null!", "Warning");
+                    //if (NorthNeighbour.VoxelData == null)
+                    //    Debug.WriteLine("NorthNeighbour VoxelData is null!", "Warning");
 
                     return NorthNeighbour.GetBlockId(x, y, z - WIDTH);
                 }

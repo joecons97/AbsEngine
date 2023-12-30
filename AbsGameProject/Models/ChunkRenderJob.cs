@@ -4,6 +4,7 @@ using AbsGameProject.Components.Terrain;
 using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
+using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Models;
 
@@ -15,7 +16,7 @@ public enum ChunkRenderLayer
 
 public class ChunkRenderJob
 {
-    const int MAX_CHUNKS_PER_JOB = 50;
+    const int MAX_VERTEX_COUNT = 30_000 * 20;
 
     private static readonly VertexAttributeDescriptor[] VERTEX_ATTRIBS = new VertexAttributeDescriptor[]
     {
@@ -32,7 +33,7 @@ public class ChunkRenderJob
 
     List<DrawArraysIndirectCommand> _drawCommands;
     List<Matrix4X4<float>> _worldMatrices;
-    List<TerrainVertex> _vertices;
+    int _vertexCount = 0;
 
     MultiDrawRenderCommand<Matrix4X4<float>> _interalDrawCommand;
     private List<TerrainChunkComponent> _chunks;
@@ -60,6 +61,9 @@ public class ChunkRenderJob
         _chunks = new List<TerrainChunkComponent>();
 
         _vertexBuffer = new GraphicsBuffer(GraphicsBufferType.Vertices);
+        _vertexBuffer.SetUsage(GraphicsBufferUsage.Dynamic);
+        _vertexBuffer.SetSize<TerrainVertex>(MAX_VERTEX_COUNT);
+
         _drawBuffer = new DrawBuffer(_vertexBuffer);
         _drawBuffer.SetVertexAttributes(VERTEX_ATTRIBS);
 
@@ -71,11 +75,10 @@ public class ChunkRenderJob
             _drawBuffer, _drawCommands.ToArray(),
             mat, _worldMatrices.ToArray());
 
-        _vertices = new List<TerrainVertex>();
         Layer = layer;
     }
 
-    static ChunkRenderJob()
+    public static void InitMaterials()
     {
         if (TextureAtlas.AtlasTexture != null)
         {
@@ -84,79 +87,67 @@ public class ChunkRenderJob
         }
     }
 
-    void AddDrawCommand(DrawArraysIndirectCommand cmd)
-    {
-        _drawCommands.Add(cmd);
-        _interalDrawCommand.Commands = _drawCommands.ToArray();
-    }
-
-    void RemoveDrawCommandAt(int index)
-    {
-        _drawCommands.RemoveAt(index);
-        _interalDrawCommand.Commands = _drawCommands.ToArray();
-    }
-
-    void AddMatrix(Matrix4X4<float> matrix)
-    {
-        _worldMatrices.Add(matrix);
-        _interalDrawCommand.MaterialBuffer = _worldMatrices.ToArray();
-    }
-
-    void RemoveMatrixAt(int index)
-    {
-        _worldMatrices.RemoveAt(index);
-        _interalDrawCommand.MaterialBuffer = _worldMatrices.ToArray();
-
-    }
-
     public void AddChunk(TerrainChunkComponent chunk)
     {
-        if (!HasSpace())
-            throw new Exception("ChunkRenderJob Capicity reached");
-
         if (chunk.TerrainVertices == null || chunk.WaterVertices == null)
             throw new Exception("Cannot apply unconstructed chunk to batch");
 
-        var start = _vertices.Count;
         int count = 0;
 
         switch (Layer)
         {
             case ChunkRenderLayer.Opaque:
                 if (chunk.TerrainVertices.Count == 0)
-                    return;
+                    throw new Exception("Cannot apply unconstructed chunk to batch");
+
+                count = chunk.TerrainVertices.Count;
+                if (!HasSpaceFor(count))
+                     throw new OverflowException($"ChunkRenderJob Capacity reached " +
+                        $"{_vertexCount} + {count} = {_vertexCount + count} > {MAX_VERTEX_COUNT}");
 
                 chunk.StoredRenderJobOpaque = this;
-                
-                count = chunk.TerrainVertices.Count;
-                _vertices.AddRange(chunk.TerrainVertices);
-                chunk.TerrainVertices.Clear();
+
+                _vertexBuffer.SetSubData(CollectionsMarshal.AsSpan(chunk.TerrainVertices), _vertexCount);
                 break;
             case ChunkRenderLayer.Transparent:
                 if (chunk.WaterVertices.Count == 0)
-                    return;
+                    throw new Exception("Cannot apply unconstructed chunk to batch");
+
+                count = chunk.WaterVertices.Count;
+
+                if (!HasSpaceFor(count))
+                    throw new OverflowException($"ChunkRenderJob Capacity reached " +
+                         $"{_vertexCount} + {count} = {_vertexCount + count} > {MAX_VERTEX_COUNT}");
 
                 chunk.StoredRenderJobTransparent = this;
 
-                count = chunk.WaterVertices.Count;
-                _vertices.AddRange(chunk.WaterVertices);
-                chunk.WaterVertices.Clear();
+                _vertexBuffer.SetSubData(CollectionsMarshal.AsSpan(chunk.WaterVertices), _vertexCount);
                 break;
         }
 
         var cmd = new DrawArraysIndirectCommand()
         {
-            firstVertex = (uint)start,
+            firstVertex = (uint)_vertexCount,
             instanceCount = 1,
             count = (uint)count
         };
 
+        _vertexCount += count;
+
         _chunks.Add(chunk);
-        _vertexBuffer.SetData<TerrainVertex>(_vertices.ToArray());
+        _drawCommands.Add(cmd);
+        _worldMatrices.Add(chunk.Entity.Transform.WorldMatrix);
 
-        AddDrawCommand(cmd);
+        CheckForOverlap();
+    }
 
-        AddMatrix(chunk.Entity.Transform.WorldMatrix);
+    public void UpdateBuffers()
+    {
+        if (_vertexCount == 0)
+            return;
+
+        _interalDrawCommand.MaterialBuffer = _worldMatrices.ToArray();
+        _interalDrawCommand.Commands = _drawCommands.ToArray();
     }
 
     public void RemoveChunk(TerrainChunkComponent chunk)
@@ -166,21 +157,59 @@ public class ChunkRenderJob
         if (index == -1)
             throw new Exception("Chunk does not exist in batch");
 
+        var oldMax = _drawCommands.Max(x => x.firstVertex + x.count);
+        if (_vertexCount != oldMax)
+        {
+            throw new Exception("Somehow vertex count has got out of sync!");
+        }
+
         var chunkCmd = _drawCommands[index];
-        for (int i = index; i < _drawCommands.Count; i++)
+        var nextStart = chunkCmd.firstVertex;
+
+        for (int i = index + 1; i < _drawCommands.Count; i++)
         {
             var cmd = _drawCommands[i];
-            cmd.firstVertex -= chunkCmd.count;
+
+            cmd.firstVertex = nextStart;
+
+            var chunkToMove = _chunks[i];
+            switch (Layer)
+            {
+                case ChunkRenderLayer.Opaque:
+                    if (chunkToMove.TerrainVertices == null)
+                        break;
+
+                    _vertexBuffer.SetSubData(CollectionsMarshal.AsSpan(chunkToMove.TerrainVertices), (int)cmd.firstVertex);
+                    cmd.count = (uint)chunkToMove.TerrainVertices.Count;
+                    nextStart = cmd.firstVertex + cmd.count;
+
+                    break;
+                case ChunkRenderLayer.Transparent:
+                    if (chunkToMove.WaterVertices == null)
+                        break;
+
+                    _vertexBuffer.SetSubData(CollectionsMarshal.AsSpan(chunkToMove.WaterVertices), (int)cmd.firstVertex);
+                    cmd.count = (uint)chunkToMove.WaterVertices.Count;
+                    nextStart = cmd.firstVertex + cmd.count;
+
+                    break;
+            }
+
             _drawCommands[i] = cmd;
         }
 
-        _vertices.RemoveRange((int)chunkCmd.firstVertex, (int)chunkCmd.count);
-
-        _vertexBuffer.SetData<TerrainVertex>(_vertices.ToArray());
-
-        RemoveDrawCommandAt(index);
-        RemoveMatrixAt(index);
+        _drawCommands.RemoveAt(index);
+        _worldMatrices.RemoveAt(index);
         _chunks.RemoveAt(index);
+
+        _vertexCount = _drawCommands.Any() ?
+            (int)_drawCommands.Max(x => x.firstVertex + x.count)
+            : 0;
+
+        if (_drawCommands.Count != _worldMatrices.Count || _chunks.Count != _drawCommands.Count)
+        {
+            throw new Exception("Somehow buffer lists have got out of sync!");
+        }
 
         switch (Layer)
         {
@@ -191,11 +220,33 @@ public class ChunkRenderJob
                 chunk.StoredRenderJobTransparent = null;
                 break;
         }
+
+        CheckForOverlap();
     }
 
-    public bool HasSpace()
+    void CheckForOverlap()
     {
-        return _chunks.Count < MAX_CHUNKS_PER_JOB;
+        foreach (var cmd in _drawCommands)
+        {
+            var start = cmd.firstVertex;
+            var end = start + cmd.count;
+
+            foreach(var checkedCmd in _drawCommands)
+            {
+                var checkedStart = checkedCmd.firstVertex;
+                var checkedEnd = checkedStart + checkedCmd.count;
+
+                if(start > checkedStart && end < checkedEnd)
+                {
+                    throw new Exception("Overlap detected");
+                }
+            }
+        }
+    }
+
+    public bool HasSpaceFor(int count)
+    {
+        return _vertexCount + count < MAX_VERTEX_COUNT;
     }
 
     public void Render()

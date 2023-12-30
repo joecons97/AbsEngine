@@ -119,6 +119,11 @@ public class Game
 
         _window.Render += (dt) =>
         {
+            foreach (var item in _activeScenes)
+            {
+                item.OnGui((float)dt);
+            }
+
             Renderer.CompleteFrame();
 
             OnRender?.Invoke(dt, this);

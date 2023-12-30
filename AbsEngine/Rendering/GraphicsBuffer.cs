@@ -11,11 +11,31 @@ public enum GraphicsBufferType
     Triangles,
 }
 
+public enum GraphicsBufferUsage
+{
+    /// <summary>
+    /// The data store contents will be modified once and used many times.
+    /// </summary>
+    Static,
+    /// <summary>
+    /// The data store contents will be modified repeatedly and used many times.
+    /// </summary>
+    Dynamic,
+    /// <summary>
+    /// The data store contents will be modified once and used at most a few times.
+    /// </summary>
+    Stream
+}
+
+
 internal interface IBackendGraphicsBuffer : IDisposable
 {
     void Bind();
     void UnBind();
     void SetData<TDataType>(Span<TDataType> data) where TDataType : unmanaged;
+    void SetSize<TDataType>(int size) where TDataType : unmanaged;
+    void SetSubData<TDataType>(Span<TDataType> data, int offset) where TDataType : unmanaged;
+    void SetUsage(GraphicsBufferUsage usage);
 }
 
 public class GraphicsBuffer
@@ -55,6 +75,15 @@ public class GraphicsBuffer
 
     public void SetData<TDataType>(Span<TDataType> data) where TDataType : unmanaged
         => _backendBuffer?.SetData(data);
+
+    public void SetSize<TDataType>(int size) where TDataType : unmanaged
+        => _backendBuffer?.SetSize<TDataType>(size);
+
+    public void SetSubData<TDataType>(Span<TDataType> data, int offset) where TDataType : unmanaged
+        => _backendBuffer?.SetSubData(data, offset);
+
+    public void SetUsage(GraphicsBufferUsage usage)
+        => _backendBuffer?.SetUsage(usage);
 
     public void Dispose()
     {

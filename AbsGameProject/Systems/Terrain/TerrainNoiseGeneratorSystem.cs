@@ -35,7 +35,7 @@ namespace AbsGameProject.Systems.Terrain
         {
             _ = Task.Run(() =>
             {
-                Random random = new Random();
+                Random random = new Random(1);
                 List<KeyValuePair<Vector3D<float>, Decorator>> structures = new List<KeyValuePair<Vector3D<float>, Decorator>>();
 
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
