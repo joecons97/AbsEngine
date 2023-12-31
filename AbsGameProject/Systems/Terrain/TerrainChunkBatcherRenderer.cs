@@ -11,8 +11,6 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
 
-    Stopwatch watch = new Stopwatch();
-
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {
         ChunkRenderJob.InitMaterials();
@@ -22,14 +20,10 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     {
         if (BatchQueue.Count > 0)
         {
-            //watch.Restart();
             var chunk = BatchQueue.Dequeue();
             var opaqueJob = chunk.StoredRenderJobOpaque;
             var transparentJob = chunk.StoredRenderJobTransparent;
-            //watch.Stop();
-            //Debug.WriteLine($"1 - Dequeue: {watch.ElapsedMilliseconds}ms");
 
-            //watch.Restart();
             if (chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0)
             {
                 if (opaqueJob == null)
@@ -50,17 +44,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);
             }
 
-
-            //watch.Stop();
-            //Debug.WriteLine($"2 - Job Init: {watch.ElapsedMilliseconds}ms");
-
-            //watch.Restart();
-            //await Task.WhenAll(
-            //    UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque),
-            //    UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent)
-            //);
-            //watch.Stop();
-            //Debug.WriteLine($"3 - Update Task: {watch.ElapsedMilliseconds}ms");
+            
             bool isValidUpdate = false;
             isValidUpdate =
                 (chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0 && chunk.StoredRenderJobOpaque != null)
@@ -69,21 +53,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 
             if (isValidUpdate)
             {
-                //watch.Restart();
-                chunk.StoredRenderJobOpaque?.UpdateBuffers();
-                //watch.Stop();
-                //Debug.WriteLine($"4 - Update Opaque Buffers: {watch.ElapsedMilliseconds}ms");
-
-                //watch.Restart();
-                chunk.StoredRenderJobTransparent?.UpdateBuffers();
-                //watch.Stop();
-                //Debug.WriteLine($"5 - Update Transparent Buffers: {watch.ElapsedMilliseconds}ms");
-
                 chunk.State = TerrainChunkComponent.TerrainState.Done;
-            }
-            else
-            {
-
             }
         }
 

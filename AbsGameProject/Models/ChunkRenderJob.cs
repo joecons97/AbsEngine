@@ -139,6 +139,7 @@ public class ChunkRenderJob
         _worldMatrices.Add(chunk.Entity.Transform.WorldMatrix);
 
         CheckForOverlap();
+        UpdateBuffers();
     }
 
     public void UpdateBuffers()
@@ -222,6 +223,7 @@ public class ChunkRenderJob
         }
 
         CheckForOverlap();
+        UpdateBuffers();
     }
 
     void CheckForOverlap()

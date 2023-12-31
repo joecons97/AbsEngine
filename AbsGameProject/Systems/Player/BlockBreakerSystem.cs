@@ -6,6 +6,7 @@ using AbsGameProject.Blocks;
 using AbsGameProject.Components.Player;
 using AbsGameProject.Maths.Physics;
 using Silk.NET.Maths;
+using System.Collections.Immutable;
 
 namespace AbsGameProject.Systems.Player;
 
@@ -55,7 +56,8 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
         {
             if (ChunkPhysics.CastVoxel(_mainCamera.Entity.Transform.Position, _mainCamera.Entity.Transform.Forward, 5, out var output))
             {
-
+                var opIndex = output.Chunk.StoredRenderJobOpaque?.Chunks.ToImmutableArray().IndexOf(output.Chunk);
+                var trIndex = output.Chunk.StoredRenderJobTransparent?.Chunks.ToImmutableArray().IndexOf(output.Chunk);
             }
         }
         else
