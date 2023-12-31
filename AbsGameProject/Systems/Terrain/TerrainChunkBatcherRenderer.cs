@@ -73,6 +73,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 if (job != null)
                 {
                     job.RemoveChunk(chunk);
+                    job.UpdateBuffers();
                 }
                 break;
             case TerrainChunkComponent.TerrainState.MeshConstructed:
@@ -104,12 +105,15 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                     }
 
                     job.AddChunk(chunk);
+                    job.UpdateBuffers();
                 }
                 else
                 {
                     job.RemoveChunk(chunk);
                     if (job.HasSpaceFor(count))
                         job.AddChunk(chunk);
+
+                    job.UpdateBuffers();
                 }
                 break;
         }
