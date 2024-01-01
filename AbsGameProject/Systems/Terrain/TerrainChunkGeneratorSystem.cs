@@ -1,8 +1,8 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
+using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
-using System.ComponentModel;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -17,6 +17,9 @@ namespace AbsGameProject.Systems.Terrain
 
         public TerrainChunkGeneratorSystem(Scene scene) : base(scene)
         {
+            var rh = RADIUS / 2;
+            Shader.SetGlobalFloat("FogMaxDistance", (rh - 1) * TerrainChunkComponent.WIDTH);
+            Shader.SetGlobalFloat("FogMinDistance", (rh - 5) * TerrainChunkComponent.WIDTH);
         }
 
         public override void Tick(float deltaTime)

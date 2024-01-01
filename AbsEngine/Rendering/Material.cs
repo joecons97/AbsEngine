@@ -33,6 +33,8 @@ public class Material
         => Shader?.SetFloat(name, value);
     public void SetVector(string name, Vector4D<float> value)
         => Shader?.SetVector(name, value);
+    public void SetColor(string name, System.Drawing.Color value)
+        => Shader?.SetVector(name, new Vector4D<float>(value.R/255f, value.G / 255f, value.B / 255f, value.A / 255f));
     public void SetMatrix(string name, Matrix4X4<float> value)
         => Shader?.SetMatrix(name, value);
     public void SetTexture(string name, Texture texture)

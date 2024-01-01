@@ -8,6 +8,7 @@ struct v2f
     vec4 worldPos;
     vec2 uvs;
     vec4 vertexColour;
+    float fogAmount;
 };
 
 #ifdef VERT
@@ -22,8 +23,19 @@ struct v2f
     };
     
     uniform mat4 _Vp;
+    
+    uniform float FogMaxDistance;
+    uniform float FogMinDistance;
 
     out v2f vertData;
+    
+    float getLinearFogStrength(float fogMin, float fogMax, float dist)
+    {
+        if (dist >= fogMax) return 1;
+        if (dist <= fogMin) return 0;
+
+        return 1 - (fogMax - dist) / (fogMax - fogMin);
+    }
 
     void main() 
     {
@@ -35,6 +47,9 @@ struct v2f
         vertData.worldPos = worldMat * vec4(vPos, 1.0);
         vertData.uvs = vec2(vUvs.x, vUvs.y);
         vertData.vertexColour = vColor;
+
+        float fogDistance = length(gl_Position.xyz);
+        vertData.fogAmount = clamp(getLinearFogStrength(FogMinDistance, FogMaxDistance, fogDistance), 0.0, 1.0);
     }
 
 #endif
@@ -50,6 +65,8 @@ struct v2f
 
     uniform sampler2D uAtlas;
     uniform float uWaterDepth = 0.1;
+
+    uniform vec4 uFogColour;
 
     const vec4 waterColour = vec4(0.094, 0.605, 0.894, 1);
 
@@ -88,6 +105,8 @@ struct v2f
         //fresnel *= 1.5;
 
         col.a = mix(col.a, 1, 1 - GetDepth(uWaterDepth));
+        
+        col = mix(col, uFogColour, vertData.fogAmount);
 
         FragColor = col;
     }

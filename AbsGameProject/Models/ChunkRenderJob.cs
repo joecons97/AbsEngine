@@ -84,6 +84,9 @@ public class ChunkRenderJob
         {
             MATERIAL_OPAQUE.SetTexture("uAtlas", TextureAtlas.AtlasTexture);
             MATERIAL_TRANSPARENT.SetTexture("uAtlas", TextureAtlas.AtlasTexture);
+
+            MATERIAL_OPAQUE.SetColor("uFogColour", System.Drawing.Color.CornflowerBlue);
+            MATERIAL_TRANSPARENT.SetColor("uFogColour", System.Drawing.Color.CornflowerBlue);
         }
     }
 
