@@ -16,6 +16,6 @@ internal class TerrainChunkQueuerSystem : ComponentSystem<TerrainChunkComponent>
 
     public override void OnTick(TerrainChunkComponent component, float deltaTime)
     {
-        TerrainChunkBatcherRenderer.BatchQueue.Enqueue(component);
+        TerrainChunkBatcherRenderer.QueueChunkForBatching(component);
     }
 }

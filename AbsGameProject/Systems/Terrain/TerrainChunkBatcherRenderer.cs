@@ -7,7 +7,7 @@ namespace AbsGameProject.Systems.Terrain;
 
 public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 {
-    public static Queue<TerrainChunkComponent> BatchQueue { get; private set; } = new Queue<TerrainChunkComponent>();
+    static Queue<TerrainChunkComponent> _batchQueue = new Queue<TerrainChunkComponent>();
 
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
 
@@ -16,11 +16,17 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
         ChunkRenderJob.InitMaterials();
     }
 
+    public static void QueueChunkForBatching(TerrainChunkComponent chunk)
+    {
+        if(_batchQueue.Contains(chunk) == false)
+            _batchQueue.Enqueue(chunk);
+    }
+
     public override void Tick(float deltaTime)
     {
-        if (BatchQueue.Count > 0)
+        if (_batchQueue.Count > 0)
         {
-            var chunk = BatchQueue.Dequeue();
+            var chunk = _batchQueue.Dequeue();
             var opaqueJob = chunk.StoredRenderJobOpaque;
             var transparentJob = chunk.StoredRenderJobTransparent;
 
