@@ -50,11 +50,11 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
     public override void OnGui(float deltaTime)
     {
-        ImGui.Begin("Player");
-        ImGui.Text($"Position: {_playerController.Entity.Transform.Position}");
-        ImGui.Text($"Chunk: {_playerController.Entity.Transform.Position.ToChunkPosition()}");
-        ImGui.Text($"Chunk Space: {_playerController.Entity.Transform.Position.ToChunkSpaceFloored()}");
-        ImGui.End();
+        //ImGui.Begin("Player");
+        //ImGui.Text($"Position: {_playerController.Entity.Transform.Position}");
+        //ImGui.Text($"Chunk: {_playerController.Entity.Transform.Position.ToChunkPosition()}");
+        //ImGui.Text($"Chunk Space: {_playerController.Entity.Transform.Position.ToChunkSpaceFloored()}");
+        //ImGui.End();
     }
 
     private void _keyboard_KeyDown(IKeyboard arg1, Key arg2, int arg3)

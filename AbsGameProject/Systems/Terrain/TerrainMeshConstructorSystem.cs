@@ -1,15 +1,12 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models.Meshing;
-using AbsGameProject.Textures;
 using Silk.NET.Maths;
 using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems.Terrain
 {
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct TerrainVertex
     {
@@ -22,7 +19,7 @@ namespace AbsGameProject.Systems.Terrain
     {
         protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.IsReadyForMeshGeneration;
 
-        protected override int MaxIterationsPerFrame => 1;
+        protected override int MaxIterationsPerFrame => 2;
 
         public TerrainMeshConstructorSystem(Scene scene) : base(scene)
         {
@@ -30,7 +27,7 @@ namespace AbsGameProject.Systems.Terrain
 
         public override async Task OnTickAsync(TerrainChunkComponent component, float deltaTime)
         {
-             if (component.VoxelData == null)
+            if (component.VoxelData == null)
                 return;
 
             await Task.Run(() =>

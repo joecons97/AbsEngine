@@ -1,5 +1,6 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
+using AbsEngine.Physics;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
@@ -8,12 +9,15 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainChunkGeneratorSystem : AbsEngine.ECS.System
     {
-        const int RADIUS = 25;
+        readonly List<TerrainChunkComponent> CHUNK_POOL = new();
+        readonly List<TerrainChunkComponent> ACTIVE_CHUNKS = new();
+
+        const int RADIUS = 30;
         float lastX;
         float lastZ;
         bool hasBeenInitialised = false;
 
-        readonly List<TerrainChunkComponent> pool = new();
+        List<Vector3D<float>> queuedPositions = new();
 
         public TerrainChunkGeneratorSystem(Scene scene) : base(scene)
         {
@@ -37,68 +41,74 @@ namespace AbsGameProject.Systems.Terrain
             lastX = roundedX;
             lastZ = roundedZ;
 
+            ACTIVE_CHUNKS.Clear();
             hasBeenInitialised = true;
-            var activeChunks = new List<TerrainChunkComponent>();
 
-            for (int x = -(RADIUS / 2); x < RADIUS / 2; x++)
+            Task.Run(() =>
             {
-                for (int z = -(RADIUS / 2); z < RADIUS / 2; z++)
+                for (int x = -(RADIUS / 2); x < RADIUS / 2; x++)
                 {
-                    int xF = roundedX + x * TerrainChunkComponent.WIDTH;
-                    int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
-
-                    var chunk = Scene.EntityManager.GetComponents<TerrainChunkComponent>(x =>
-                        x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF);
-
-                    if (chunk.Any())
+                    for (int z = -(RADIUS / 2); z < RADIUS / 2; z++)
                     {
-                        HandleNeighbours(chunk.First(), xF, zF);
-                        activeChunks.Add(chunk.First());
+                        int xF = roundedX + x * TerrainChunkComponent.WIDTH;
+                        int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
 
-                        continue;
+                        var chunk = Scene.EntityManager.GetComponents<TerrainChunkComponent>(x =>
+                            x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF);
+
+                        if (chunk.Any())
+                        {
+                            HandleNeighbours(chunk.First(), xF, zF);
+                            ACTIVE_CHUNKS.Add(chunk.First());
+
+                            continue;
+                        }
+
+                        queuedPositions.Add(new Vector3D<float>(xF, 0, zF));
+
                     }
-
-                    TerrainChunkComponent chunkComp;
-
-                    if (pool.Any())
-                    {
-                        chunkComp = pool.First();
-                        pool.Remove(chunkComp);
-
-                        //chunkComp.Renderer.Mesh = null;
-                        //chunkComp.WaterRenderer.Mesh = null;
-                        //chunkComp.Mesh = null;
-                        //chunkComp.WaterMesh = null;
-
-                        chunkComp.Entity.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
-                        chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
-                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                        chunkComp.VoxelData = null;
-                        chunkComp.WaterVertices?.Clear();
-                        chunkComp.TerrainVertices?.Clear();
-
-                        activeChunks.Add(chunkComp);
-                    }
-                    else
-                    {
-                        var chunkEnt = Scene.EntityManager.CreateEntity();
-                        chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>();
-                        chunkEnt.Transform.LocalPosition = new Vector3D<float>(xF, 0, zF);
-                        chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
-                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
-
-                        activeChunks.Add(chunkComp);
-                    }
-
-                    HandleNeighbours(chunkComp, xF, zF);
                 }
+            }).Wait();
+
+            foreach (var queuedPosition in queuedPositions
+                .OrderBy(x => Vector3D.DistanceSquared(x, mainCam.Position)))
+            {
+                TerrainChunkComponent chunkComp;
+
+                if (CHUNK_POOL.Any())
+                {
+                    chunkComp = CHUNK_POOL.First();
+                    CHUNK_POOL.Remove(chunkComp);
+
+                    chunkComp.Entity.Transform.LocalPosition = queuedPosition;
+                    chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
+                    chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                    chunkComp.VoxelData = null;
+                    chunkComp.WaterVertices?.Clear();
+                    chunkComp.TerrainVertices?.Clear();
+
+                    ACTIVE_CHUNKS.Add(chunkComp);
+                }
+                else
+                {
+                    var chunkEnt = Scene.EntityManager.CreateEntity();
+                    chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>();
+                    chunkEnt.Transform.LocalPosition = queuedPosition;
+                    chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
+                    chunkComp.State = TerrainChunkComponent.TerrainState.None;
+
+                    ACTIVE_CHUNKS.Add(chunkComp);
+                }
+
+                HandleNeighbours(chunkComp, (int)queuedPosition.X, (int)queuedPosition.Z);
             }
 
+            queuedPositions.Clear();
 
             foreach (var chunk in Scene.EntityManager.GetComponents<TerrainChunkComponent>()
-                .Except(activeChunks))
+                .Except(ACTIVE_CHUNKS))
             {
-                if (!pool.Contains(chunk))
+                if (!CHUNK_POOL.Contains(chunk))
                 {
                     if (chunk.NorthNeighbour != null)
                     {
@@ -121,7 +131,7 @@ namespace AbsGameProject.Systems.Terrain
                         chunk.SouthNeighbour = null;
                     }
 
-                    pool.Add(chunk);
+                    CHUNK_POOL.Add(chunk);
                 }
             }
 

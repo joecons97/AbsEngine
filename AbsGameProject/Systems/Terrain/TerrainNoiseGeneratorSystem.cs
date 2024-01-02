@@ -1,6 +1,5 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.Physics;
-using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Extensions;
 using AbsGameProject.Maths.Noise;
@@ -22,7 +21,6 @@ namespace AbsGameProject.Systems.Terrain
         private int waterHeight = 35;
 
         protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None;
-        protected override int MaxIterationsPerFrame => 1;
         protected override bool UseParallel => true;
 
         public TerrainNoiseGeneratorSystem(Scene scene) : base(scene)
@@ -54,7 +52,7 @@ namespace AbsGameProject.Systems.Terrain
                             persistence,
                             lacunarity);
 
-                        h = h / 2 + 1;
+                        h = (h + 1) / 2;
                         h *= amplitude;
 
                         if (h > maxY)

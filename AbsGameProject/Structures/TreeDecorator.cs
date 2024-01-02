@@ -37,6 +37,9 @@ internal class TreeDecorator : Decorator
     public override Task DecorateAtAsync(TerrainChunkComponent chunk, int x, int y, int z)
     {
         var height = TrunkHeight + random.Next(RandomHeightOffset);
+        if(y + height + 3 >= TerrainChunkComponent.HEIGHT)
+            return Task.CompletedTask;
+
         int leaves = LeavesRadius;
         var leavesHeight = height - leaves;
 

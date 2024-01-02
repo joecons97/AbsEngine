@@ -10,6 +10,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     static Queue<TerrainChunkComponent> _batchQueue = new Queue<TerrainChunkComponent>();
 
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
+    List<Task> tasks = new List<Task>();
 
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {
@@ -18,17 +19,20 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 
     public static void QueueChunkForBatching(TerrainChunkComponent chunk)
     {
-        if(_batchQueue.Contains(chunk) == false)
+        if (_batchQueue.Contains(chunk) == false)
             _batchQueue.Enqueue(chunk);
     }
 
-    public override void Tick(float deltaTime)
+    public override async void Tick(float deltaTime)
     {
         if (_batchQueue.Count > 0)
         {
             var chunk = _batchQueue.Dequeue();
             var opaqueJob = chunk.StoredRenderJobOpaque;
             var transparentJob = chunk.StoredRenderJobTransparent;
+
+            Task<bool>? opaqueJobTask = null;
+            Task<bool>? transparentJobTask = null;
 
             if (chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0)
             {
@@ -37,7 +41,8 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                         .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices.Count))
                         ?? new ChunkRenderJob(ChunkRenderLayer.Opaque);
 
-                UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque);
+                opaqueJobTask = UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque);
+                tasks.Add(opaqueJobTask);
             }
 
             if (chunk.WaterVertices != null && chunk.WaterVertices.Count > 0)
@@ -47,10 +52,24 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                         .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices.Count))
                         ?? new ChunkRenderJob(ChunkRenderLayer.Transparent);
 
-                UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);
+                transparentJobTask = UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);
+                tasks.Add(transparentJobTask);
             }
 
-            
+            await Task.WhenAll(tasks);
+
+            tasks.Clear();
+
+            if (opaqueJobTask?.Result == true)
+            {
+                opaqueJob?.UpdateBuffers();
+            }
+
+            if (transparentJobTask?.Result == true)
+            {
+                transparentJob?.UpdateBuffers();
+            }
+
             bool isValidUpdate = false;
             isValidUpdate =
                 (chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0 && chunk.StoredRenderJobOpaque != null)
@@ -69,7 +88,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
         }
     }
 
-    void UpdateChunk(TerrainChunkComponent chunk, ChunkRenderJob job, ChunkRenderLayer layer)
+    Task<bool> UpdateChunk(TerrainChunkComponent chunk, ChunkRenderJob job, ChunkRenderLayer layer)
     {
         switch (chunk.State)
         {
@@ -79,7 +98,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 if (job != null)
                 {
                     job.RemoveChunk(chunk);
-                    job.UpdateBuffers();
+                    return Task.FromResult(true);
                 }
                 break;
             case TerrainChunkComponent.TerrainState.MeshConstructed:
@@ -89,14 +108,14 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 {
                     case ChunkRenderLayer.Opaque:
                         if (chunk.TerrainVertices == null)
-                            return;
+                            return Task.FromResult(false);
 
                         comparisonJob = chunk.StoredRenderJobOpaque;
                         count = chunk.TerrainVertices.Count;
                         break;
                     case ChunkRenderLayer.Transparent:
                         if (chunk.WaterVertices == null)
-                            return;
+                            return Task.FromResult(false);
 
                         comparisonJob = chunk.StoredRenderJobTransparent;
                         count = chunk.WaterVertices.Count;
@@ -111,7 +130,8 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                     }
 
                     job.AddChunk(chunk);
-                    job.UpdateBuffers();
+
+                    return Task.FromResult(true);
                 }
                 else
                 {
@@ -119,9 +139,10 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                     if (job.HasSpaceFor(count))
                         job.AddChunk(chunk);
 
-                    job.UpdateBuffers();
+                    return Task.FromResult(true);
                 }
-                break;
         }
+
+        return Task.FromResult(false);
     }
 }
