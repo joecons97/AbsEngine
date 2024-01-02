@@ -16,7 +16,7 @@ public enum ChunkRenderLayer
 
 public class ChunkRenderJob
 {
-    const int MAX_VERTEX_COUNT = 30_000 * 20;
+    const int MAX_VERTEX_COUNT = 30_000 * 60;
 
     private static readonly VertexAttributeDescriptor[] VERTEX_ATTRIBS = new VertexAttributeDescriptor[]
     {
@@ -140,8 +140,6 @@ public class ChunkRenderJob
         _chunks.Add(chunk);
         _drawCommands.Add(cmd);
         _worldMatrices.Add(chunk.Entity.Transform.WorldMatrix);
-
-        CheckForOverlap();
     }
 
     public void UpdateBuffers()
@@ -223,29 +221,8 @@ public class ChunkRenderJob
                 chunk.StoredRenderJobTransparent = null;
                 break;
         }
-
-        CheckForOverlap();
     }
 
-    void CheckForOverlap()
-    {
-        foreach (var cmd in _drawCommands)
-        {
-            var start = cmd.firstVertex;
-            var end = start + cmd.count;
-
-            foreach(var checkedCmd in _drawCommands)
-            {
-                var checkedStart = checkedCmd.firstVertex;
-                var checkedEnd = checkedStart + checkedCmd.count;
-
-                if(start > checkedStart && end < checkedEnd)
-                {
-                    throw new Exception("Overlap detected");
-                }
-            }
-        }
-    }
 
     public bool HasSpaceFor(int count)
     {
