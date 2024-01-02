@@ -14,7 +14,7 @@ namespace AbsGameProject.Components.Player
         public float CurrentLookUp = 0;
 
         public float LookSensitivity = 0.1f;
-        public float WalkSpeed = 10;
+        public float WalkSpeed = 4;
         public float RunSpeed = 6;
         public float JumpStrength = 8;
 
