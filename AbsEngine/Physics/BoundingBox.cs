@@ -49,6 +49,11 @@ public class BoundingBox : IShape
         return false;
     }
 
+    public bool Intersects(Vector3D<float> position)
+    {
+        return IntersectsForcedOffset(Vector3D<float>.Zero, position);
+    }
+
     public bool IntersectsForcedOffset(Vector3D<float> offset, Vector3D<float> position)
     {
         return (offset.X + Min.X <= position.X &&

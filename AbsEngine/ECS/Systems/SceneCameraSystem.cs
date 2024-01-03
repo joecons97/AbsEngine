@@ -14,7 +14,7 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
     bool canMove;
 
-    public float MoveSpeed { get; private set; } = 15;
+    public float MoveSpeed { get; private set; } = 100;
 
     protected override Func<SceneCameraComponent, bool>? Predicate => (x) =>
     {
