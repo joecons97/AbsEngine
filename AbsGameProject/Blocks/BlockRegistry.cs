@@ -3,12 +3,14 @@
 public static class BlockRegistry
 {
     static Dictionary<string, Block> _blocks = new Dictionary<string, Block>();
+    static List<string> _blockKeys = new List<string>();    
 
     public static void AddBlock(Block block)
     {
         if( _blocks.ContainsKey(block.Id) ) { return; }
 
         _blocks.Add(block.Id, block);
+        _blockKeys = _blocks.Keys.ToList();
     }
 
     public static Block GetBlock(string id)
@@ -19,7 +21,8 @@ public static class BlockRegistry
     }
     public static Block GetBlock(int index)
     {
-        var block = _blocks.ElementAtOrDefault(index).Value;
+        var key = _blockKeys[index];
+        var block = _blocks[key];
 
         if(block == null)
             throw new KeyNotFoundException($"Block at index {index} not found in registry!");

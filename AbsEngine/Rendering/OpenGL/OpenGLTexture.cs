@@ -1,7 +1,5 @@
-﻿using Assimp;
-using Silk.NET.OpenGL;
+﻿using Silk.NET.OpenGL;
 using StbImageSharp;
-using System.Xml.Linq;
 
 namespace AbsEngine.Rendering.OpenGL;
 
@@ -159,7 +157,7 @@ internal class OpenGLTexture : IBackendTexture
         _gl.TextureParameter(Handle, GLEnum.TextureMaxLevel, maxMips);
     }
 
-    public void SetTextureTarget(TextureTarget textureTarget) 
+    public void SetTextureTarget(TextureTarget textureTarget)
         => _textureTarget = textureTarget;
 
     public void SetInternalFormat(InternalFormat internalFormat)

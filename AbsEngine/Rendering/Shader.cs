@@ -41,6 +41,7 @@ public class Shader : IDisposable
     internal IBackendShader _backendShader = null!;
 
     internal static Dictionary<string, GlobalShaderVariable> _globalVariables = new Dictionary<string, GlobalShaderVariable>();
+    internal static Dictionary<string, GlobalShaderVariable> _dirtyGlobalVariables = new Dictionary<string, GlobalShaderVariable>();
 
     public bool IsTransparent
         => _backendShader.GetRenderQueuePosition() == Renderer.TRANSPARENT_QUEUE_POSITION;
@@ -100,12 +101,23 @@ public class Shader : IDisposable
         => SetGlobalVariable(name, value, GlobalShaderVariableType.Vector2);
     public static void SetGlobalMatrix(string name, Matrix4X4<float> value)
         => SetGlobalVariable(name, value, GlobalShaderVariableType.Matrix);
-    
+
     static void SetGlobalVariable(string name, object value, GlobalShaderVariableType type)
     {
-        if(_globalVariables.ContainsKey(name))
-            _globalVariables[name] = new GlobalShaderVariable() { Type = type, Value = value };
+        if (_globalVariables.ContainsKey(name))
+        {
+            if(_globalVariables[name].Value.Equals(value) == false)
+            {
+                var variable = new GlobalShaderVariable() { Type = type, Value = value };
+                _dirtyGlobalVariables.Add(name, variable);
+                _globalVariables[name] = variable;
+            }
+        }
         else
-            _globalVariables.Add(name, new GlobalShaderVariable() { Type = type, Value = value });
+        {
+            var variable = new GlobalShaderVariable() { Type = type, Value = value };
+            _dirtyGlobalVariables.Add(name, variable);
+            _globalVariables.Add(name, variable);
+        }
     }
 }

@@ -15,7 +15,6 @@ public static class Renderer
     public const int TRANSPARENT_QUEUE_POSITION = 1000;
 
     internal static readonly Mesh BLIT_QUAD;
-
     private static readonly List<IRenderCommand> renderQueue = new List<IRenderCommand>();
     private static readonly List<FullscreenEffect> effects = new List<FullscreenEffect>();  
 
@@ -201,6 +200,8 @@ public static class Renderer
         FinaliseRender(game);
 
         DrawDebug();
+
+        Shader._dirtyGlobalVariables.Clear();
     }
 
     static internal void BindDefaultUniforms(CameraComponent cam, RenderTexture renderTarget)

@@ -19,7 +19,7 @@ namespace AbsGameProject.Systems.Terrain
     {
         protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.IsReadyForMeshGeneration;
 
-        protected override int MaxIterationsPerFrame => 2;
+        protected override int MaxIterationsPerFrame => 1;
 
         public TerrainMeshConstructorSystem(Scene scene) : base(scene)
         {

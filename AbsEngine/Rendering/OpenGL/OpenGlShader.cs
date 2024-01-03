@@ -9,11 +9,13 @@ internal class OpenGLShader : IBackendShader
     private readonly GL _gl;
     private List<string> _samplers = new();
     private List<string> _uniforms = new();
+    private Dictionary<string, int> _uniformLocations = new();
     private TriangleFace? _culling = TriangleFace.Back;
     private bool _isTransparent = false;
     private int _renderQueuePos = 0;
     private BlendingFactor _blendSrcFactor = BlendingFactor.SrcColor;
     private BlendingFactor _blendDstFactor = BlendingFactor.OneMinusSrcColor;
+    private bool _hasBeenBound = false;
 
     public OpenGLShader()
     {
@@ -46,7 +48,8 @@ internal class OpenGLShader : IBackendShader
             _gl.Disable(EnableCap.Blend);
         }
 
-        foreach (var globalVariable in Shader._globalVariables)
+        var gVarList = _hasBeenBound ? Shader._dirtyGlobalVariables : Shader._globalVariables;
+        foreach (var globalVariable in gVarList)
         {
             if (_uniforms.Contains(globalVariable.Key))
             {
@@ -93,6 +96,7 @@ internal class OpenGLShader : IBackendShader
             }
         }
 
+        _hasBeenBound = true;
         _gl.UseProgram(_handle);
     }
 
@@ -134,7 +138,13 @@ internal class OpenGLShader : IBackendShader
     public void SetFloat(string name, float value)
     {
         //Setting a uniform on a shader using a name.
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
+
         if (location == -1) //If GetUniformLocation returns -1 the uniform is not found.
         {
             return;
@@ -145,7 +155,13 @@ internal class OpenGLShader : IBackendShader
     public void SetInt(string name, int value)
     {
         //Setting a uniform on a shader using a name.
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
+
         if (location == -1) //If GetUniformLocation returns -1 the uniform is not found.
         {
             return;
@@ -155,7 +171,13 @@ internal class OpenGLShader : IBackendShader
 
     public void SetMatrix(string name, Matrix4X4<float> value)
     {
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
+
         if (location == -1)
         {
             return;
@@ -177,6 +199,7 @@ internal class OpenGLShader : IBackendShader
 
             _gl.ActiveTexture(TextureUnit.Texture0 + unit);
             tex.Bind();
+
             SetInt(name, unit);
         }
         else
@@ -186,7 +209,12 @@ internal class OpenGLShader : IBackendShader
     public void SetUint(string name, uint value)
     {
         //Setting a uniform on a shader using a name.
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
         if (location == -1) //If GetUniformLocation returns -1 the uniform is not found.
         {
             return;
@@ -196,7 +224,12 @@ internal class OpenGLShader : IBackendShader
 
     public void SetVector(string name, Vector4D<float> value)
     {
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
         if (location == -1)
         {
             return;
@@ -210,7 +243,12 @@ internal class OpenGLShader : IBackendShader
 
     public void SetVector(string name, Vector3D<float> value)
     {
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
         if (location == -1)
         {
             return;
@@ -224,7 +262,12 @@ internal class OpenGLShader : IBackendShader
 
     public void SetVector(string name, Vector2D<float> value)
     {
-        int location = _gl.GetUniformLocation(_handle, name);
+        int location = -1;
+        if (_uniformLocations.TryGetValue(name, out location) == false)
+        {
+            location = _gl.GetUniformLocation(_handle, name);
+            _uniformLocations.Add(name, location);
+        }
         if (location == -1)
         {
             return;
