@@ -57,8 +57,6 @@ namespace AbsEngine.Rendering.RenderCommand
             }
         }
 
-        public BoundingBox? BoundingBox { get; set; }
-
         private IMultiDrawRenderCommand<T> _internalDrawCommand = null!;
         private Material _material;
         private T[]? _materialBuffer;
@@ -104,12 +102,7 @@ namespace AbsEngine.Rendering.RenderCommand
             => _internalDrawCommand.Render(camera, target);
 
         public bool ShouldCull(Frustum frustum)
-        {
-            if (BoundingBox == null)
-                return false;
-
-            return !frustum.Intersects(BoundingBox);
-        }
+            => false;
 
         public void Dispose()
         {

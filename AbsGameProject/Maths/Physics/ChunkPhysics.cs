@@ -2,7 +2,6 @@
 using AbsEngine.Exceptions;
 using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
-using AbsGameProject.Models;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Maths.Physics;
@@ -38,15 +37,6 @@ public static class ChunkPhysics
         return retVec * TerrainChunkComponent.WIDTH;
     }
 
-    public static Vector3D<float> ToRegionPosition(this Vector3D<float> position)
-    {
-        Vector3D<float> retVec = new Vector3D<float>();
-        retVec.X = MathF.Floor(position.X / ChunkRenderJob.CHUNK_RENDER_JOB_REGION_SIZE);
-        retVec.Y = MathF.Floor(position.Y / ChunkRenderJob.CHUNK_RENDER_JOB_REGION_SIZE);
-        retVec.Z = MathF.Floor(position.Z / ChunkRenderJob.CHUNK_RENDER_JOB_REGION_SIZE);
-
-        return retVec * ChunkRenderJob.CHUNK_RENDER_JOB_REGION_SIZE;
-    }
     /// <summary>
     /// Finds the position of the vector relative to the chunk it is inside
     /// </summary>

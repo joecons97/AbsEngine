@@ -1,8 +1,6 @@
-﻿using AbsEngine.Physics;
-using AbsEngine.Rendering;
+﻿using AbsEngine.Rendering;
 using AbsEngine.Rendering.RenderCommand;
 using AbsGameProject.Components.Terrain;
-using AbsGameProject.Maths.Physics;
 using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
@@ -18,8 +16,6 @@ public enum ChunkRenderLayer
 
 public class ChunkRenderJob
 {
-    public const int CHUNK_RENDER_JOB_REGION_SIZE = 224;
-
     const int MAX_VERTEX_COUNT = 30_000 * 60;
 
     private static readonly VertexAttributeDescriptor[] VERTEX_ATTRIBS = new VertexAttributeDescriptor[]
@@ -31,8 +27,6 @@ public class ChunkRenderJob
 
     private static Material MATERIAL_OPAQUE = new Material("TerrainShaderMultidraw");
     private static Material MATERIAL_TRANSPARENT = new Material("WaterShaderMultidraw");
-
-    BoundingBox? _region;
 
     GraphicsBuffer _vertexBuffer;
     DrawBuffer _drawBuffer;
@@ -143,18 +137,6 @@ public class ChunkRenderJob
 
         _vertexCount += count;
 
-        if(_chunks.Count == 0)
-        {
-            var regionStart = chunk.Entity.Transform.LocalPosition.ToRegionPosition();
-
-            _region = new BoundingBox(
-                regionStart.X, regionStart.X + CHUNK_RENDER_JOB_REGION_SIZE,
-                regionStart.Y, regionStart.Y + CHUNK_RENDER_JOB_REGION_SIZE,
-                regionStart.Z, regionStart.Z + CHUNK_RENDER_JOB_REGION_SIZE);
-
-            _interalDrawCommand.BoundingBox = _region;
-        }
-
         _chunks.Add(chunk);
         _drawCommands.Add(cmd);
         _worldMatrices.Add(chunk.Entity.Transform.WorldMatrix);
@@ -221,12 +203,6 @@ public class ChunkRenderJob
         _worldMatrices.RemoveAt(index);
         _chunks.RemoveAt(index);
 
-        if (_chunks.Count == 0)
-        {
-            _region = null;
-            _interalDrawCommand.BoundingBox = _region;
-        }
-
         _vertexCount = _drawCommands.Any() ?
             (int)_drawCommands.Max(x => x.firstVertex + x.count)
             : 0;
@@ -247,12 +223,6 @@ public class ChunkRenderJob
         }
     }
 
-    public bool IsChunkValidForRegion(TerrainChunkComponent chunk)
-    {
-        if(_region == null) return true;
-
-        return _region.Min == chunk.Entity.Transform.LocalPosition.ToRegionPosition();
-    }
 
     public bool HasSpaceFor(int count)
     {
