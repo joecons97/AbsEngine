@@ -4,7 +4,6 @@ using AbsEngine.Rendering;
 using AbsEngine.Rendering.OpenGL;
 using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System.Collections.Concurrent;
@@ -87,34 +86,72 @@ public class Game
             OnLoad?.Invoke(this);
         };
 
+        _window.Closing += () =>
+        {
+            Profiler.Dispose();
+        };
+
         _window.Update += (dt) =>
         {
             DeltaTime = (float)dt;
             Time += DeltaTime;
+
+
+            //Profiler.StartFrame(Time);
+
             int count = 0;
-            while (_queueForDisposal.Count > 0)
+
+            //Profiler.StartTrace("Disposal loop");
+
+            using (Profiler.BeginEvent("Disposal loop"))
             {
-                if(!_queueForDisposal.TryDequeue(out var elm))
+                while (_queueForDisposal.Count > 0)
                 {
-                    continue;
+                    if (!_queueForDisposal.TryDequeue(out var elm))
+                    {
+                        continue;
+                    }
+
+                    elm.Dispose();
+
+                    count++;
+
+                    if (count > MAX_DISPOSABLE_PER_FRAME)
+                        break;
                 }
-
-                elm.Dispose();
-
-                count++;
-
-                if (count > MAX_DISPOSABLE_PER_FRAME)
-                    break;
             }
+            //Profiler.StopTrace();
 
-            foreach (var item in _activeScenes)
+            //Profiler.StartTrace("Tick scenes");
+
+            using (Profiler.BeginEvent("Tick scenes"))
             {
-                item.Tick((float)dt);
+                foreach (var item in _activeScenes)
+                {
+                    item.Tick((float)dt);
+                }
+            }
+            //Profiler.StopTrace();
+
+            //Profiler.StartTrace("Tick action event");
+
+            using (Profiler.BeginEvent("Tick action event"))
+            {
+                OnUpdate?.Invoke(dt, this);
+            }
+            //Profiler.StopTrace();
+
+            //Profiler.StartTrace("ImGui Update");
+
+            using (Profiler.BeginEvent("ImGui Update"))
+            {
+                _imGuiController?.Update((float)dt);
             }
 
-            OnUpdate?.Invoke(dt, this);
+            //Profiler.StopTrace();
 
-            _imGuiController?.Update((float)dt);
+            //Profiler.StopFrame();
+            Profiler.ProfileFrame("Main");
         };
 
         _window.Render += (dt) =>

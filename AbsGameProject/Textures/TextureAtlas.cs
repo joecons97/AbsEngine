@@ -44,49 +44,65 @@ namespace AbsGameProject.Textures
 
             foreach (var texture in model.Textures)
             {
-                if (string.IsNullOrEmpty(texture.Value))
-                    throw new ArgumentNullException(nameof(texture));
-
-                if (File.Exists(texture.Value) == false)
-                    throw new FileNotFoundException(texture.Value);
-
-                if (BlockLocations.ContainsKey(texture.Key))
-                    continue;
-
-                var imgResult = TextureLoader.LoadImageResult(texture.Value);
-
-                if (_carat.Y + imgResult.Height > Size)
-                    _carat.Y = 0;
-
-                for (int x = 0; x < Size; x++)
-                {
-                    if (_tex[x * Size + _carat.Y] == null)
-                    {
-                        _carat.X = x + Offset;
-                        break;
-                    }
-                }
-
-                for (int x = 0; x < imgResult.Width * 4; x += 4)
-                {
-                    for (int y = 0; y < imgResult.Height * 4; y += 4)
-                    {
-                        int pixelIndex = x * imgResult.Width + y;
-                        int texIndex = (_carat.X + x / 4) * Size + (_carat.Y + y / 4);
-                        var pixel = new Vector4D<byte>(
-                            imgResult.Data[pixelIndex],
-                            imgResult.Data[pixelIndex + 1],
-                            imgResult.Data[pixelIndex + 2],
-                            imgResult.Data[pixelIndex + 3]);
-
-                        _tex[texIndex] = pixel;
-                    }
-                }
-
-                BlockLocations.Add(texture.Key, new Rectangle<int>(_carat.X, _carat.Y, imgResult.Width, imgResult.Height));
-
-                _carat += new Vector2D<int>(0, imgResult.Height + Offset);
+                AddTexture(texture.Value, texture.Key);
             }
+        }
+
+        public static void InsertTextureFile(string fileName)
+        {
+            if (File.Exists(fileName) == false)
+                throw new FileNotFoundException(fileName);
+
+            AddTexture(fileName, Path.GetFileNameWithoutExtension(fileName));   
+        }
+
+        static void AddTexture(string texFile, string name)
+        {
+            if (_tex == null)
+                throw new Exception("Internal texture array _tex is null");
+
+            if (string.IsNullOrEmpty(texFile))
+                throw new ArgumentNullException(nameof(texFile));
+
+            if (File.Exists(texFile) == false)
+                throw new FileNotFoundException(texFile);
+
+            if (BlockLocations.ContainsKey(name))
+                return;
+
+            var imgResult = TextureLoader.LoadImageResult(texFile);
+
+            if (_carat.Y + imgResult.Height > Size)
+                _carat.Y = 0;
+
+            for (int x = 0; x < Size; x++)
+            {
+                if (_tex[x * Size + _carat.Y] == null)
+                {
+                    _carat.X = x + Offset;
+                    break;
+                }
+            }
+
+            for (int x = 0; x < imgResult.Width * 4; x += 4)
+            {
+                for (int y = 0; y < imgResult.Height * 4; y += 4)
+                {
+                    int pixelIndex = x * imgResult.Width + y;
+                    int texIndex = (_carat.X + x / 4) * Size + (_carat.Y + y / 4);
+                    var pixel = new Vector4D<byte>(
+                        imgResult.Data[pixelIndex],
+                        imgResult.Data[pixelIndex + 1],
+                        imgResult.Data[pixelIndex + 2],
+                        imgResult.Data[pixelIndex + 3]);
+
+                    _tex[texIndex] = pixel;
+                }
+            }
+
+            BlockLocations.Add(name, new Rectangle<int>(_carat.X, _carat.Y, imgResult.Width, imgResult.Height));
+
+            _carat += new Vector2D<int>(0, imgResult.Height + Offset);
         }
 
         public static void Build()

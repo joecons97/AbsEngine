@@ -28,6 +28,9 @@ internal class OpenGLMultiDrawRenderCommand<T> : IMultiDrawRenderCommand<T> wher
 
     public unsafe void Render(CameraComponent camera, RenderTexture target)
     {
+        if (_drawCommandsCount == 0)
+            return;
+
         if (_material == null)
             throw new ArgumentException("Unable to render OpenGLMultiDrawRenderCommand as a required buffer is null", nameof(_material));
 
@@ -83,6 +86,7 @@ internal class OpenGLMultiDrawRenderCommand<T> : IMultiDrawRenderCommand<T> wher
         if (_drawCommandsBuffer == null)
         {
             _drawCommandsBuffer = new OpenGLBufferContainer(gl, BufferTargetARB.DrawIndirectBuffer);
+            _drawCommandsBuffer.SetUsage(GraphicsBufferUsage.Dynamic);
         }
 
         _drawCommandsBuffer.Bind();
@@ -111,6 +115,7 @@ internal class OpenGLMultiDrawRenderCommand<T> : IMultiDrawRenderCommand<T> wher
         if (_materialBuffer == null)
         {
             _materialBuffer = new OpenGLBufferContainer(gl, BufferTargetARB.ShaderStorageBuffer);
+            _materialBuffer.SetUsage(GraphicsBufferUsage.Dynamic);
         }
 
         _materialBuffer.Bind();

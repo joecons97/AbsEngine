@@ -58,7 +58,7 @@ namespace AbsGameProject.Systems.Terrain
                         if (h > maxY)
                             maxY = (int)h;
 
-                        component.Heightmap[x, z] = (byte)h;
+                        component.Heightmap[x, z] = Math.Min((byte)h, (byte)TerrainChunkComponent.HEIGHT);
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                         {
                             if (y == (int)h - 1)

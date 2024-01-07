@@ -62,9 +62,16 @@ public class Scene : IDisposable
         _hasTickBegun = true;
         _deltaTime = deltaTime;
 
-        foreach (var system in _systems)
+        using (Profiler.BeginEvent("Tick systems"))
         {
-            system.Tick(deltaTime);
+            foreach (var system in _systems)
+            {
+                using (Profiler.BeginEvent($"Tick {system.GetType().Name}"))
+                {
+
+                    system.Tick(deltaTime);
+                }
+            }
         }
 
         _hasTickBegun = false;
@@ -72,9 +79,12 @@ public class Scene : IDisposable
 
     public void OnGui(float deltaTime)
     {
-        foreach (var system in _systems)
+        using (Profiler.BeginEvent("Tick systems Gui"))
         {
-            system.OnGui(deltaTime);
+            foreach (var system in _systems)
+            {
+                system.OnGui(deltaTime);
+            }
         }
     }
 

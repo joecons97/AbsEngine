@@ -1,4 +1,5 @@
 ﻿using AbsEngine.ECS;
+using AbsEngine.ECS.Components;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models;
 using System.Diagnostics;
@@ -10,11 +11,15 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     static Queue<TerrainChunkComponent> _batchQueue = new Queue<TerrainChunkComponent>();
 
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
-    List<Task> tasks = new List<Task>();
+    List<Task> _tasks = new List<Task>();
+
+    CameraComponent _camera;
 
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {
         ChunkRenderJob.InitMaterials();
+
+        _camera = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).First();
     }
 
     public static void QueueChunkForBatching(TerrainChunkComponent chunk)
@@ -42,7 +47,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                         ?? new ChunkRenderJob(ChunkRenderLayer.Opaque);
 
                 opaqueJobTask = UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque);
-                tasks.Add(opaqueJobTask);
+                _tasks.Add(opaqueJobTask);
             }
 
             if (chunk.WaterVertices != null && chunk.WaterVertices.Count > 0)
@@ -53,12 +58,12 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                         ?? new ChunkRenderJob(ChunkRenderLayer.Transparent);
 
                 transparentJobTask = UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);
-                tasks.Add(transparentJobTask);
+                _tasks.Add(transparentJobTask);
             }
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(_tasks);
 
-            tasks.Clear();
+            _tasks.Clear();
 
             if (opaqueJobTask?.Result == true)
             {
