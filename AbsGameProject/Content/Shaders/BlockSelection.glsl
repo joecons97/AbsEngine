@@ -47,7 +47,6 @@ uniform float _FarClipPlane;
 
     void main()
     {
-        vec2 st = vertData.uvs.xy;
         float square = 0;
 
         Unity_Rectangle_float(vertData.uvs.xy, 0.9, 0.9, square);

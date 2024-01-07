@@ -1,8 +1,5 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.ECS.Components;
 using AbsEngine.Physics;
-using AbsEngine.Rendering;
-using AbsEngine.Rendering.RenderCommand;
 using AbsGameProject.Blocks;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
@@ -23,6 +20,7 @@ namespace AbsGameProject.Components.Terrain
             None,
             NoiseGenerated,
             Decorated,
+            MeshConstructing,
             MeshConstructed,
             MeshGenerated,
             Done
@@ -30,7 +28,7 @@ namespace AbsGameProject.Components.Terrain
 
         public TerrainState State { get; set; } = TerrainState.None;
 
-        public List<TerrainVertex>? TerrainVertices { get; set; } 
+        public List<TerrainVertex>? TerrainVertices { get; set; }
         public List<TerrainVertex>? WaterVertices { get; set; }
 
         public bool IsAwaitingRebuild { get; set; }
@@ -43,6 +41,8 @@ namespace AbsGameProject.Components.Terrain
         public ChunkRenderJob? StoredRenderJobOpaque { get; set; }
         public ChunkRenderJob? StoredRenderJobTransparent { get; set; }
 
+        public Task? ConstructionTask { get; set; }
+
         public bool IsReadyForDecoration =>
             State == TerrainState.NoiseGenerated &&
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.NoiseGenerated &&
@@ -51,6 +51,7 @@ namespace AbsGameProject.Components.Terrain
             SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
 
         public bool IsReadyForMeshGeneration =>
+            ConstructionTask == null && 
             State == TerrainState.Decorated &&
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
             RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
@@ -82,67 +83,77 @@ namespace AbsGameProject.Components.Terrain
             return pos.X >= 0 && pos.X < WIDTH && pos.Y >= 0 && pos.Y < HEIGHT && pos.Z >= 0 && pos.Z < WIDTH;
         }
 
+        public static bool IsPositionInBounds(int x, int y, int z)
+        {
+            return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && z >= 0 && z < WIDTH;
+        }
+
         public ushort GetBlockId(int x, int y, int z)
         {
             if (VoxelData == null)
                 return 0;
 
-            if (x <= -1)
+            if (IsPositionInBounds(x, y, z))
             {
-                if (LeftNeighbour != null)
+                return VoxelData[x, y, z];
+            }
+            else
+            {
+                if (x <= -1)
                 {
-                    //if (LeftNeighbour.VoxelData == null)
-                    //    Debug.WriteLine("LeftNeighbour VoxelData is null!", "Warning");
+                    if (LeftNeighbour != null)
+                    {
+                        //if (LeftNeighbour.VoxelData == null)
+                        //    Debug.WriteLine("LeftNeighbour VoxelData is null!", "Warning");
 
-                    return LeftNeighbour.GetBlockId(WIDTH + x, y, z);
+                        return LeftNeighbour.GetBlockId(WIDTH + x, y, z);
+                    }
+
+                    return 0;
+                }
+                else if (x >= WIDTH)
+                {
+                    if (RightNeighbour != null)
+                    {
+                        //if (RightNeighbour.VoxelData == null)
+                        //    Debug.WriteLine("RightNeighbour VoxelData is null!", "Warning");
+
+                        return RightNeighbour.GetBlockId(x - WIDTH, y, z);
+                    }
+
+                    return 0;
                 }
 
-                return 0;
-            }
-
-            if (x >= WIDTH)
-            {
-                if (RightNeighbour != null)
+                if (z <= -1)
                 {
-                    //if (RightNeighbour.VoxelData == null)
-                    //    Debug.WriteLine("RightNeighbour VoxelData is null!", "Warning");
+                    if (SouthNeighbour != null)
+                    {
+                        //if (SouthNeighbour.VoxelData == null)
+                        //    Debug.WriteLine("SouthNeighbour VoxelData is null!", "Warning");
 
-                    return RightNeighbour.GetBlockId(x - WIDTH, y, z);
+                        return SouthNeighbour.GetBlockId(x, y, WIDTH + z);
+                    }
+
+                    return 0;
+                }
+                else if (z >= WIDTH)
+                {
+                    if (NorthNeighbour != null)
+                    {
+                        //if (NorthNeighbour.VoxelData == null)
+                        //    Debug.WriteLine("NorthNeighbour VoxelData is null!", "Warning");
+
+                        return NorthNeighbour.GetBlockId(x, y, z - WIDTH);
+                    }
+
+                    return 0;
                 }
 
-                return 0;
+                if (y < 0 || y > HEIGHT - 1)
+                    return 0;
             }
 
-            if (z <= -1)
-            {
-                if (SouthNeighbour != null)
-                {
-                    //if (SouthNeighbour.VoxelData == null)
-                    //    Debug.WriteLine("SouthNeighbour VoxelData is null!", "Warning");
-
-                    return SouthNeighbour.GetBlockId(x, y, WIDTH + z);
-                }
-
-                return 0;
-            }
-
-            if (z >= WIDTH)
-            {
-                if (NorthNeighbour != null)
-                {
-                    //if (NorthNeighbour.VoxelData == null)
-                    //    Debug.WriteLine("NorthNeighbour VoxelData is null!", "Warning");
-
-                    return NorthNeighbour.GetBlockId(x, y, z - WIDTH);
-                }
-
-                return 0;
-            }
-
-            if (y < 0 || y > HEIGHT - 1)
-                return 0;
-
-            return VoxelData[x, y, z];
+            return 0;
         }
 
         public Block GetBlock(int x, int y, int z)

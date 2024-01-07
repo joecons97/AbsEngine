@@ -60,6 +60,13 @@ namespace AbsGameProject
             BlockRegistry.AddBlock(Block.New("leaves_oak", "Oak Leaves").WithTransparency(false).
                 WithVoxelModel("Content/Models/Blocks/Leaves.json").Build());
 
+            for (int i = 0; i < 9; i++)
+            {
+                TextureAtlas.InsertTextureFile($"Content\\Textures\\Blocks\\destroy_stage_{i}.png");
+                var coord = TextureAtlas.BlockLocations[$"destroy_stage_{i}"];
+                Shader.SetGlobalVector($"destroy_stage_{i}", coord.Origin.As<float>() / TextureAtlas.Size);
+            }
+
             TextureAtlas.Build();
 
             var scene = Scene.Load();

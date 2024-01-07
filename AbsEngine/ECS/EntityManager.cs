@@ -1,4 +1,6 @@
 ﻿using AbsEngine.ECS.Components;
+using System;
+using System.ComponentModel;
 
 namespace AbsEngine.ECS;
 
@@ -40,6 +42,15 @@ public class EntityManager
             return Enumerable.Empty<T>();
 
         return _components[type].Select(x => (T)x).Where(predicate);
+    }
+
+    public IReadOnlyCollection<Component> GetComponentListReference<T>() where T : Component
+    {
+        var type = typeof(T);
+        if (_components.ContainsKey(type) == false)
+            _components.Add(type, new HashSet<Component>());
+
+        return _components[type];
     }
 
     public T CreateComponent<T>(Entity entity, params object?[] ctr) where T : Component
