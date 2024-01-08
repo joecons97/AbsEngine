@@ -55,11 +55,11 @@ namespace AbsGameProject.Systems.Terrain
                         int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
 
                         var chunk = sceneChunkListReference.FirstOrDefault(x =>
-                            x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF) as TerrainChunkComponent;
+                            x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF);
 
                         if (chunk != null)
                         {
-                            ACTIVE_CHUNKS.Add(chunk);
+                            ACTIVE_CHUNKS.Add((TerrainChunkComponent)chunk);
 
                             continue;
                         }

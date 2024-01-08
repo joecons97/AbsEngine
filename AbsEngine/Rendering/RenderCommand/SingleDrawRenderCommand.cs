@@ -23,13 +23,16 @@ namespace AbsEngine.Rendering.RenderCommand
 
         public void Render(IGraphics graphics, CameraComponent camera, RenderTexture target)
         {
-            switch (graphics.GraphicsAPIs)
+            using (Profiler.BeginEvent("Render SingleDrawRenderCommand"))
             {
-                case GraphicsAPIs.OpenGL:
-                    RenderOpenGL(graphics, camera, target);
-                    break;
-                case GraphicsAPIs.D3D11:
-                    throw new NotImplementedException();
+                switch (graphics.GraphicsAPIs)
+                {
+                    case GraphicsAPIs.OpenGL:
+                        RenderOpenGL(graphics, camera, target);
+                        break;
+                    case GraphicsAPIs.D3D11:
+                        throw new NotImplementedException();
+                }
             }
         }
 

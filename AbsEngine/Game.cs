@@ -96,12 +96,7 @@ public class Game
             DeltaTime = (float)dt;
             Time += DeltaTime;
 
-
-            //Profiler.StartFrame(Time);
-
             int count = 0;
-
-            //Profiler.StartTrace("Disposal loop");
 
             using (Profiler.BeginEvent("Disposal loop"))
             {
@@ -120,52 +115,52 @@ public class Game
                         break;
                 }
             }
-            //Profiler.StopTrace();
 
-            //Profiler.StartTrace("Tick scenes");
-
-            using (Profiler.BeginEvent("Tick scenes"))
+            using (Profiler.BeginEvent("Tick Scenes"))
             {
                 foreach (var item in _activeScenes)
                 {
                     item.Tick((float)dt);
                 }
             }
-            //Profiler.StopTrace();
 
-            //Profiler.StartTrace("Tick action event");
-
-            using (Profiler.BeginEvent("Tick action event"))
+            using (Profiler.BeginEvent("Tick Action Event"))
             {
                 OnUpdate?.Invoke(dt, this);
             }
-            //Profiler.StopTrace();
-
-            //Profiler.StartTrace("ImGui Update");
 
             using (Profiler.BeginEvent("ImGui Update"))
             {
                 _imGuiController?.Update((float)dt);
             }
-
-            //Profiler.StopTrace();
-
-            //Profiler.StopFrame();
-            Profiler.ProfileFrame("Main");
         };
 
         _window.Render += (dt) =>
         {
-            foreach (var item in _activeScenes)
+            using (Profiler.BeginEvent("Tick Scenes OnGui"))
             {
-                item.OnGui((float)dt);
+                foreach (var item in _activeScenes)
+                {
+                    item.OnGui((float)dt);
+                }
             }
 
-            Renderer.CompleteFrame();
+            using (Profiler.BeginEvent("CompleteFrame"))
+            {
+                Renderer.CompleteFrame();
+            }
 
-            OnRender?.Invoke(dt, this);
+            using (Profiler.BeginEvent("OnRender Event"))
+            {
+                OnRender?.Invoke(dt, this);
+            }
 
-            _imGuiController?.Render();
+            using (Profiler.BeginEvent("Render ImGui"))
+            {
+                _imGuiController?.Render();
+            }
+
+            Profiler.ProfileFrame("Main");
         };
 
         _window.FramebufferResize += (s) =>

@@ -124,15 +124,18 @@ public static class Renderer
         if (game == null)
             throw new GameInstanceException();
 
-        if (RenderTexture.Active != null)
+        using (Profiler.BeginEvent("Clear RenderTargets"))
         {
-            ClearRenderTexture(game, RenderTexture.Active);
-        }
-        else
-        {
-            ClearRenderTexture(game, backBufferForShaders);
+            if (RenderTexture.Active != null)
+            {
+                ClearRenderTexture(game, RenderTexture.Active);
+            }
+            else
+            {
+                ClearRenderTexture(game, backBufferForShaders);
 
-            ClearRenderTexture(game, backBufferRenderTexture);
+                ClearRenderTexture(game, backBufferRenderTexture);
+            }
         }
 
         RenderTexture renderTarget;
@@ -160,42 +163,51 @@ public static class Renderer
 
         bool hasBlitToShaderBuffer = false;
 
-        while (renderQueue.Count > 0)
+        using (Profiler.BeginEvent("Render Queue"))
         {
-            _drawCalls++;
-            var r = renderQueue.First();
-            renderQueue.RemoveAt(0);
-
-            if (r.RenderQueuePosition >= TRANSPARENT_QUEUE_POSITION && hasBlitToShaderBuffer == false)
+            while (renderQueue.Count > 0)
             {
-                backBufferRenderTexture.BlitTo(backBufferForShaders);
-                hasBlitToShaderBuffer = true;
-            }
+                _drawCalls++;
+                var r = renderQueue.First();
+                renderQueue.RemoveAt(0);
 
-            if(r.ShouldCull(frustum))
-            {
-                _culledDrawCalls++;
-                continue;
-            }
+                if (r.RenderQueuePosition >= TRANSPARENT_QUEUE_POSITION && hasBlitToShaderBuffer == false)
+                {
+                    using (Profiler.BeginEvent("Blit to transparency texture"))
+                    {
+                        backBufferRenderTexture.BlitTo(backBufferForShaders);
+                        hasBlitToShaderBuffer = true;
+                    }
+                }
 
-            r.Render(game.Graphics, cam, backBufferForShaders);
+                if (r.ShouldCull(frustum))
+                {
+                    _culledDrawCalls++;
+                    continue;
+                }
+
+                r.Render(game.Graphics, cam, backBufferForShaders);
+            }
         }
 
         renderTarget.UnBind();
 
-        var currentRt = backBufferRenderTexture;
-
-        foreach (var item in effects)
+        using (Profiler.BeginEvent("Render Post Processing Effects"))
         {
-            ClearRenderTexture(game, postProcessingRenderTexture);
+            var currentRt = backBufferRenderTexture;
 
-            item.OnRender(currentRt, postProcessingRenderTexture);
+            foreach (var item in effects)
+            {
+                ClearRenderTexture(game, postProcessingRenderTexture);
 
-            currentRt = postProcessingRenderTexture;
+                item.OnRender(currentRt, postProcessingRenderTexture);
+
+                currentRt = postProcessingRenderTexture;
+            }
+
+            if (effects.Count > 0)
+                postProcessingRenderTexture.BlitTo(backBufferRenderTexture);
         }
-
-        if(effects.Count > 0)
-            postProcessingRenderTexture.BlitTo(backBufferRenderTexture);
 
         FinaliseRender(game);
 
@@ -206,23 +218,29 @@ public static class Renderer
 
     static internal void BindDefaultUniforms(CameraComponent cam, RenderTexture renderTarget)
     {
-        Shader.SetGlobalVector("_Resolution", (Vector2D<float>)renderTarget!.ColorTexture.Size);
-        Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
-        Shader.SetGlobalFloat("_FarClipPlane", cam.FarClipPlane);
-        Shader.SetGlobalVector("_CameraPosition", cam.Entity.Transform.Position);
-        Shader.SetGlobalFloat("_Time", Game.Instance!.Time);
-        Shader.SetGlobalFloat("_DeltaTime", Game.Instance!.DeltaTime);
+        using (Profiler.BeginEvent("BindDefaultUniforms"))
+        {
+            Shader.SetGlobalVector("_Resolution", (Vector2D<float>)renderTarget!.ColorTexture.Size);
+            Shader.SetGlobalFloat("_NearClipPlane", cam.NearClipPlane);
+            Shader.SetGlobalFloat("_FarClipPlane", cam.FarClipPlane);
+            Shader.SetGlobalVector("_CameraPosition", cam.Entity.Transform.Position);
+            Shader.SetGlobalFloat("_Time", Game.Instance!.Time);
+            Shader.SetGlobalFloat("_DeltaTime", Game.Instance!.DeltaTime);
+        }
     }
 
     static void FinaliseRender(Game game)
     {
-        game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
+        using (Profiler.BeginEvent("FinaliseRender"))
+        {
+            game.Graphics.ClearScreen(System.Drawing.Color.CornflowerBlue);
 
-        backBufferMaterial.SetTexture("_ColorMap", backBufferRenderTexture.ColorTexture);
-        backBufferMaterial.Bind();
-        BLIT_QUAD.Bind();
+            backBufferMaterial.SetTexture("_ColorMap", backBufferRenderTexture.ColorTexture);
+            backBufferMaterial.Bind();
+            BLIT_QUAD.Bind();
 
-        game.Graphics.DrawElements((uint)BLIT_QUAD.Triangles.Length);
+            game.Graphics.DrawElements((uint)BLIT_QUAD.Triangles.Length);
+        }
     }
 
     static void DrawDebug()

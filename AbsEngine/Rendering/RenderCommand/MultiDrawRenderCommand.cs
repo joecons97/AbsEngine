@@ -99,8 +99,12 @@ namespace AbsEngine.Rendering.RenderCommand
 
 
         public void Render(IGraphics graphics, CameraComponent camera, RenderTexture target)
-            => _internalDrawCommand.Render(camera, target);
-
+        {
+            using (Profiler.BeginEvent("Render MultiDrawRenderCommand"))
+            {
+                _internalDrawCommand.Render(camera, target);
+            }
+        }
         public bool ShouldCull(Frustum frustum)
             => false;
 

@@ -68,7 +68,6 @@ public class Scene : IDisposable
             {
                 using (Profiler.BeginEvent($"Tick {system.GetType().Name}"))
                 {
-
                     system.Tick(deltaTime);
                 }
             }
