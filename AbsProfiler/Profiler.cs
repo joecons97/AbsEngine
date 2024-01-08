@@ -27,28 +27,29 @@ public static class Profiler
         [CallerFilePath] string scriptPath = "",
         [CallerLineNumber] int lineNumber = 0)
     {
-#if DEBUG
-        if (!tracyAllocationsDictionary.TryGetValue(functionName, out var tuple))
+        if (TracyConnected() == 1)
         {
-            var source = (CString)scriptPath;
-            var function = (CString)functionName;
+            if (!tracyAllocationsDictionary.TryGetValue(functionName, out var tuple))
+            {
+                var source = (CString)scriptPath;
+                var function = (CString)functionName;
 
-            tuple = new Tuple<CString, CString>(source, function);
-            tracyAllocationsDictionary.Add(functionName, tuple);
+                tuple = new Tuple<CString, CString>(source, function);
+                tracyAllocationsDictionary.Add(functionName, tuple);
+            }
+
+            var srcLoc = TracyAllocSrcloc((uint)lineNumber, tuple.Item1, (ulong)scriptPath.Length, tuple.Item2, (ulong)functionName.Length);
+            var ctx = TracyEmitZoneBeginAlloc(srcLoc, 1);
+
+            if (colorType != default)
+            {
+                TracyEmitZoneColor(ctx, (uint)colorType);
+            }
+
+            return new ProfilerScope(ctx);
         }
 
-        var srcLoc = TracyAllocSrcloc((uint)lineNumber, tuple.Item1, (ulong)scriptPath.Length, tuple.Item2, (ulong)functionName.Length);
-        var ctx = TracyEmitZoneBeginAlloc(srcLoc, 1);
-
-        if (colorType != default)
-        {
-            TracyEmitZoneColor(ctx, (uint)colorType);
-        }
-
-        return new ProfilerScope(ctx);
-#else
         return new ProfilerScope(null);
-#endif
     }
 
     public static void ProfileFrame(string name)

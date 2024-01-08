@@ -7,6 +7,7 @@ using Assimp;
 using ImGuiNET;
 using Silk.NET.Maths;
 using System.Diagnostics;
+using System.Numerics;
 
 namespace AbsEngine.Rendering;
 
@@ -29,6 +30,8 @@ public static class Renderer
     private static int _culledDrawCalls = 0;
 
     private static float _fpsTime = 0;
+
+    private static bool _displayDebug = false;
 
     static Renderer()
     {
@@ -211,7 +214,9 @@ public static class Renderer
 
         FinaliseRender(game);
 
+#if DEBUG
         DrawDebug();
+#endif
 
         Shader._dirtyGlobalVariables.Clear();
     }
@@ -247,7 +252,7 @@ public static class Renderer
     {
         if (SceneCameraComponent.IsInSceneView)
         {
-            if (_fpsTime > 0.5f)
+            if (_fpsTime > 1f)
             {
                 _fps = 1.0f / Game.Instance!.DeltaTime;
                 _fpsTime = 0;
@@ -255,7 +260,28 @@ public static class Renderer
 
             _fpsTime += Game.Instance!.DeltaTime;
 
-            ImGui.Begin("Renderer");
+            ImGui.SetNextWindowPos(new Vector2(0, 0));
+            var size = ImGui.GetIO().DisplaySize;
+            ImGui.SetNextWindowSize(size);
+
+            ImGui.Begin("", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.MenuBar);
+
+            if (ImGui.BeginMenuBar())
+            {
+                if (ImGui.Selectable("Display Time Info", _displayDebug))
+                {
+                    _displayDebug = !_displayDebug;
+                }
+            }
+            ImGui.End();
+        }
+
+        if (_displayDebug)
+        {
+            ImGui.SetNextWindowPos(new Vector2(0, 24));
+            ImGui.SetNextWindowBgAlpha(0.5f);
+
+            ImGui.Begin("Renderer", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize);
 
             ImGui.Value("FPS", _fps);
             ImGui.Value("Time", Game.Instance!.Time);

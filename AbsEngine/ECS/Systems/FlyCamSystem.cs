@@ -71,8 +71,11 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
 
     public override Task OnTickAsync(CameraComponent component, float deltaTime)
     {
+
+#if DEBUG
         if (!SceneCameraComponent.IsInSceneView)
             OnTick(component, deltaTime);
+#endif
 
         return Task.CompletedTask;
     }
