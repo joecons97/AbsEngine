@@ -20,7 +20,7 @@ namespace AbsGameProject.Systems.Terrain
 
         private int waterHeight = 35;
 
-        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None;
+        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None && x.IsPooled == false;
         protected override bool UseParallel => true;
 
         public TerrainNoiseGeneratorSystem(Scene scene) : base(scene)
@@ -33,9 +33,6 @@ namespace AbsGameProject.Systems.Terrain
         {
             _ = Task.Run(() =>
             {
-                Random random = new Random(1);
-                List<KeyValuePair<Vector3D<float>, Decorator>> structures = new List<KeyValuePair<Vector3D<float>, Decorator>>();
-
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
                 var maxY = 0;
                 var trans = component.Entity.Transform;

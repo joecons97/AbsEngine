@@ -5,13 +5,10 @@ using AbsEngine.ECS.Extensions;
 using AbsEngine.Rendering;
 using AbsGameProject.Blocks;
 using AbsGameProject.Components.Player;
-using AbsGameProject.FullscreenEffects;
 using AbsGameProject.Maths.Physics;
-using AbsGameProject.Systems;
 using AbsGameProject.Systems.Player;
 using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
-using ImGuiNET;
 using Silk.NET.Maths;
 
 namespace AbsGameProject
@@ -31,7 +28,7 @@ namespace AbsGameProject
 
         private static void GameProject_KeyDown(Silk.NET.Input.IKeyboard arg1, Silk.NET.Input.Key arg2, int arg3)
         {
-            if(arg2 == Silk.NET.Input.Key.F11)
+            if (arg2 == Silk.NET.Input.Key.F11)
             {
                 _isFullscreen = !_isFullscreen;
                 Game.Instance?.Graphics.SetFullscreen(_isFullscreen);
@@ -86,7 +83,7 @@ namespace AbsGameProject
             scene.RegisterSystem<BlockBreakerSystem>();
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
             scene.RegisterSystem<PlayerControllerSystem>();
-           
+
             //game.AddEffect<Grayscale>();
         }
 

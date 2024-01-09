@@ -3,10 +3,8 @@ using AbsEngine.Exceptions;
 using AbsEngine.IO;
 using AbsEngine.Physics;
 using AbsEngine.Rendering.RenderCommand;
-using Assimp;
 using ImGuiNET;
 using Silk.NET.Maths;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace AbsEngine.Rendering;
@@ -17,7 +15,7 @@ public static class Renderer
 
     internal static readonly Mesh BLIT_QUAD;
     private static readonly List<IRenderCommand> renderQueue = new List<IRenderCommand>();
-    private static readonly List<FullscreenEffect> effects = new List<FullscreenEffect>();  
+    private static readonly List<FullscreenEffect> effects = new List<FullscreenEffect>();
 
     private static readonly RenderTexture backBufferRenderTexture;
     private static readonly RenderTexture backBufferForShaders;
@@ -76,7 +74,7 @@ public static class Renderer
     {
         var type = typeof(T);
         var effect = effects.FirstOrDefault(x => x.GetType() == type);
-        if(effect == null) 
+        if (effect == null)
             return null;
 
         return (T)effect;
@@ -113,7 +111,7 @@ public static class Renderer
 
     static CameraComponent? GetActiveCamera(Game game)
     {
-        return !SceneCameraComponent.IsInSceneView 
+        return !SceneCameraComponent.IsInSceneView
             ? game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault()
             : game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<SceneCameraComponent>().FirstOrDefault();
     }
@@ -127,6 +125,7 @@ public static class Renderer
         if (game == null)
             throw new GameInstanceException();
 
+        RenderTexture renderTarget;
         using (Profiler.BeginEvent("Clear RenderTargets"))
         {
             if (RenderTexture.Active != null)
@@ -139,24 +138,25 @@ public static class Renderer
 
                 ClearRenderTexture(game, backBufferRenderTexture);
             }
-        }
 
-        RenderTexture renderTarget;
-        if (RenderTexture.Active != null)
-        {
-            renderTarget = RenderTexture.Active;
-        }
-        else
-        {
-            renderTarget = backBufferRenderTexture;
-        }
+            if (RenderTexture.Active != null)
+            {
+                renderTarget = RenderTexture.Active;
+            }
+            else
+            {
+                renderTarget = backBufferRenderTexture;
+            }
 
-        renderTarget.Bind();
+            renderTarget.Bind();
+        }
 
         var cam = GetActiveCamera(game);
 
         if (cam == null)
-            throw new Exception("Cannot complete frame, Main camera is null");
+        {
+            return;
+        }
 
         var frustum = cam.GetFrustum();
 
@@ -252,14 +252,6 @@ public static class Renderer
     {
         if (SceneCameraComponent.IsInSceneView)
         {
-            if (_fpsTime > 1f)
-            {
-                _fps = 1.0f / Game.Instance!.DeltaTime;
-                _fpsTime = 0;
-            }
-
-            _fpsTime += Game.Instance!.DeltaTime;
-
             ImGui.SetNextWindowPos(new Vector2(0, 0));
             var size = ImGui.GetIO().DisplaySize;
             ImGui.SetNextWindowSize(size);
@@ -278,6 +270,14 @@ public static class Renderer
 
         if (_displayDebug)
         {
+            if (_fpsTime > 1f)
+            {
+                _fps = 1.0f / Game.Instance!.DeltaTime;
+                _fpsTime = 0;
+            }
+
+            _fpsTime += Game.Instance!.DeltaTime;
+
             ImGui.SetNextWindowPos(new Vector2(0, 24));
             ImGui.SetNextWindowBgAlpha(0.5f);
 

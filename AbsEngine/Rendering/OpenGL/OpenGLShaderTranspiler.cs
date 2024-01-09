@@ -129,7 +129,7 @@ internal class OpenGLShaderTranspiler : IShaderTranspiler
                 break;
 
             var match = outVarDefRegex.Match(line);
-            if (match.Captures.Any())
+            if (match.Captures.Count > 0)
             {
                 var varNameGroup = match.Groups.Values.FirstOrDefault(x => x.Value.Contains(vsFunc.Type) == false);
                 if (varNameGroup == null)
@@ -147,7 +147,7 @@ internal class OpenGLShaderTranspiler : IShaderTranspiler
                     outPositionRegex = new Regex($@"({outVarName})\.(Position)\s*=");
 
                 var glPosMatch = outPositionRegex.Match(line);
-                if (glPosMatch.Captures.Any())
+                if (glPosMatch.Captures.Count > 0)
                 {
                     line = line + line.Replace(glPosMatch.Value, "\ngl_Position =");
                 }

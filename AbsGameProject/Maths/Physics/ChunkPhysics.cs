@@ -85,7 +85,7 @@ public static class ChunkPhysics
                     var blockId = chunk.GetBlockId(pos.X, pos.Y, pos.Z);
                     var block = BlockRegistry.GetBlock(blockId);
 
-                    if (blockId != 0 && block.CollisionShapes.Any())
+                    if (blockId != 0 && block.CollisionShapes.Length > 0)
                     {
                         op.BlockID = blockId;
                         op.BlockPosition = (Vector3D<float>)pos;

@@ -1,32 +1,40 @@
-﻿using bottlenoselabs.C2CS.Runtime;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
+#if RELEASE_PROFILER || DEBUG
+using bottlenoselabs.C2CS.Runtime;
 using static Tracy.PInvoke;
+#endif
 
 public static class Profiler
 {
+#if RELEASE_PROFILER || DEBUG
     private static Dictionary<string, Tuple<CString, CString>> tracyAllocationsDictionary = new();
     private static CString frameName;
-
+#endif
     public struct ProfilerScope : IDisposable
     {
+#if RELEASE_PROFILER || DEBUG
         private TracyCZoneCtx? ctx;
 
         public ProfilerScope(TracyCZoneCtx? ctx)
         {
             this.ctx = ctx;
         }
-
+#endif
         public readonly void Dispose()
         {
-            if(ctx.HasValue)
+#if RELEASE_PROFILER || DEBUG
+            if (ctx.HasValue)
                 TracyEmitZoneEnd(ctx.Value);
+#endif
         }
     }
+
 
     public static ProfilerScope BeginEvent([CallerMemberName] string functionName = "", ColorType colorType = default,
         [CallerFilePath] string scriptPath = "",
         [CallerLineNumber] int lineNumber = 0)
     {
+#if RELEASE_PROFILER || DEBUG
         if (TracyConnected() == 1)
         {
             if (!tracyAllocationsDictionary.TryGetValue(functionName, out var tuple))
@@ -50,24 +58,31 @@ public static class Profiler
         }
 
         return new ProfilerScope(null);
+#else
+        return new ProfilerScope();
+#endif
     }
 
     public static void ProfileFrame(string name)
     {
+#if RELEASE_PROFILER || DEBUG
         if (frameName == default)
             frameName = (CString)name;
 
         TracyEmitFrameMark(frameName);
+#endif
     }
 
     public static void Dispose()
     {
+#if RELEASE_PROFILER || DEBUG
         // Free CStrings
         foreach (var kvp in tracyAllocationsDictionary)
         {
             kvp.Value.Item1.Dispose();
             kvp.Value.Item2.Dispose();
         }
+#endif
     }
 
     public enum ColorType : uint

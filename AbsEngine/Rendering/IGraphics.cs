@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace AbsEngine.Rendering;
 
-public interface IGraphics
+public interface IGraphics : IDisposable
 {
     public static IGraphics Create(IWindow window, GraphicsAPIs gfxAPi)
     {

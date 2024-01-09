@@ -75,8 +75,8 @@ public class RenderTexture : IDisposable
     public void Dispose()
     {
         Game.Instance?.QueueDisposable(_backendRt);
-        Game.Instance?.QueueDisposable(ColorTexture);
-        Game.Instance?.QueueDisposable(DepthTexture);
+        ColorTexture.Dispose();
+        DepthTexture.Dispose();
 
         GC.SuppressFinalize(this);
     }

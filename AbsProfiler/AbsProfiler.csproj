@@ -4,10 +4,11 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;Release_Profiler;Debug_NoProfiler</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Tracy-CSharp" Version="0.10.0.2" />
+    <PackageReference Include="Tracy-CSharp" Version="0.10.0.2" Condition="'$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release_Profiler'" />
   </ItemGroup>
 
 </Project>

@@ -134,10 +134,10 @@ internal class OpenGLMesh : IBackendMesh
             var fallbackLength = Positions.Length;
 
             int positionsOffset = Positions.Length * 3;
-            int coloursOffset = Colours == null || !Colours.Any() ? 0 : Colours.Length * 4;
-            int uvsOffset = Uvs == null || !Uvs.Any() ? 0 : Uvs.Length * 2;
-            int normalsOffset = Normals == null || !Normals.Any() ? 0 : Normals.Length * 3;
-            int tangentsOffset = Tangents == null || !Tangents.Any() ? 0 : Tangents.Length * 3;
+            int coloursOffset = Colours == null || Colours.Length == 0 ? 0 : Colours.Length * 4;
+            int uvsOffset = Uvs == null || Uvs.Length == 0 ? 0 : Uvs.Length * 2;
+            int normalsOffset = Normals == null || Normals.Length == 0 ? 0 : Normals.Length * 3;
+            int tangentsOffset = Tangents == null || Tangents.Length == 0 ? 0 : Tangents.Length * 3;
 
             float[] vertices = new float[positionsOffset + coloursOffset + uvsOffset + normalsOffset + tangentsOffset];
             Task.Run(async () =>
@@ -194,7 +194,7 @@ internal class OpenGLMesh : IBackendMesh
             if (Triangles != null && Triangles.Length != 0)
             {
                 _ebo = new OpenGLBufferContainer(_gl, BufferTargetARB.ElementArrayBuffer);
-                _ebo.SetData<uint>(Triangles.ToArray());
+                _ebo.SetData<uint>(Triangles);
 
                 _vao = new OpenGLDrawBuffer(_gl, _vbo, _ebo);
             }

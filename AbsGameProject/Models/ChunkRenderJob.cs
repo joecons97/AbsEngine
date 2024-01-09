@@ -204,7 +204,7 @@ public class ChunkRenderJob
         _worldMatrices.RemoveAt(index);
         _chunks.RemoveAt(index);
 
-        _vertexCount = _drawCommands.Any() ?
+        _vertexCount = _drawCommands.Count > 0 ?
             (int)_drawCommands.Max(x => x.firstVertex + x.count)
             : 0;
 

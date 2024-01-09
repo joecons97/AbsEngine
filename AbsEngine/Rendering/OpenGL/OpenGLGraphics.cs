@@ -17,7 +17,6 @@ internal class OpenGLGraphics : IGraphics
     public OpenGLGraphics(IWindow window, GraphicsAPIs graphicsAPIs)
     {
         Gl = window.CreateOpenGL();
-
         GraphicsAPIs = graphicsAPIs;
         ShaderTranspiler = new OpenGLShaderTranspiler();
     }
@@ -49,5 +48,10 @@ internal class OpenGLGraphics : IGraphics
             Gl.Enable(GLEnum.DepthTest); 
         else
             Gl.Disable(GLEnum.DepthTest);
+    }
+
+    public void Dispose()
+    {
+        Gl.Dispose();
     }
 }

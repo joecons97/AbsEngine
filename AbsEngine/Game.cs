@@ -89,6 +89,7 @@ public class Game
         _window.Closing += () =>
         {
             Profiler.Dispose();
+            Graphics.Dispose();
         };
 
         _window.Update += (dt) =>

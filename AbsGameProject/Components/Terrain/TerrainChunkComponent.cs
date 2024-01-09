@@ -33,6 +33,8 @@ namespace AbsGameProject.Components.Terrain
 
         public bool IsAwaitingRebuild { get; set; }
 
+        public bool IsPooled { get; set; }
+
         public byte[,]? Heightmap { get; set; }
         public ushort[,,]? VoxelData { get; set; }
 
@@ -320,6 +322,21 @@ namespace AbsGameProject.Components.Terrain
                     break;
                 }
             }
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null) 
+                return false;
+
+            var c = (TerrainChunkComponent)obj;
+
+            return c.Entity.Transform.LocalPosition == Entity.Transform.LocalPosition;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

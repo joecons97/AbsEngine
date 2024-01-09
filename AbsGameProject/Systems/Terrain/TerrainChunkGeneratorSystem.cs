@@ -3,6 +3,7 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
+using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -68,7 +69,7 @@ namespace AbsGameProject.Systems.Terrain
 
                         TerrainChunkComponent chunkComp;
 
-                        if (CHUNK_POOL.Any())
+                        if (CHUNK_POOL.Count > 0)
                         {
                             chunkComp = CHUNK_POOL.First();
                             CHUNK_POOL.Remove(chunkComp);
@@ -76,9 +77,7 @@ namespace AbsGameProject.Systems.Terrain
                             chunkComp.Entity.Transform.LocalPosition = pos;
                             chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                             chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                            chunkComp.VoxelData = null;
-                            chunkComp.WaterVertices?.Clear();
-                            chunkComp.TerrainVertices?.Clear();
+                            chunkComp.IsPooled = false;
 
                             ACTIVE_CHUNKS.Add(chunkComp);
                         }
@@ -89,6 +88,7 @@ namespace AbsGameProject.Systems.Terrain
                             chunkEnt.Transform.LocalPosition = pos;
                             chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                             chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                            chunkComp.IsPooled = false;
 
                             ACTIVE_CHUNKS.Add(chunkComp);
                         }
@@ -125,6 +125,11 @@ namespace AbsGameProject.Systems.Terrain
                             chunk.SouthNeighbour.NorthNeighbour = null;
                             chunk.SouthNeighbour = null;
                         }
+
+                        chunk.State = TerrainChunkComponent.TerrainState.None;
+                        chunk.IsPooled = true;
+                        chunk.VoxelData = null;
+                        chunk.Heightmap = null;
 
                         CHUNK_POOL.Add(chunk);
                         TerrainChunkBatcherRenderer.QueueChunkForBatching(chunk);

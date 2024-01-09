@@ -9,6 +9,7 @@
     <Title>Abs Engine</Title>
     <Authors>Josephus</Authors>
     <Product>Abs Engine</Product>
+    <Configurations>Debug;Release;Release_Profiler;Debug_NoProfiler</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.ECS.Components;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models;
 using System.Diagnostics;
@@ -13,13 +12,9 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
     List<Task> _tasks = new List<Task>();
 
-    CameraComponent _camera;
-
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {
         ChunkRenderJob.InitMaterials();
-
-        _camera = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).First();
     }
 
     public static void QueueChunkForBatching(TerrainChunkComponent chunk)
@@ -39,7 +34,8 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             Task<bool>? opaqueJobTask = null;
             Task<bool>? transparentJobTask = null;
 
-            if (chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0)
+            if ((chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0) 
+                || (chunk.State == TerrainChunkComponent.TerrainState.None && opaqueJob != null))
             {
                 if (opaqueJob == null)
                     opaqueJob = _renderJobs
@@ -50,7 +46,8 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 _tasks.Add(opaqueJobTask);
             }
 
-            if (chunk.WaterVertices != null && chunk.WaterVertices.Count > 0)
+            if ((chunk.WaterVertices != null && chunk.WaterVertices.Count > 0)
+                || (chunk.State == TerrainChunkComponent.TerrainState.None && transparentJob != null))
             {
                 if (transparentJob == null)
                     transparentJob = _renderJobs
@@ -103,6 +100,16 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 if (job != null)
                 {
                     job.RemoveChunk(chunk);
+                    switch (layer)
+                    {
+                        case ChunkRenderLayer.Opaque:
+                            chunk.TerrainVertices?.Clear();
+                            break;
+                        case ChunkRenderLayer.Transparent:
+                            chunk.WaterVertices?.Clear();
+                            break;
+                    }
+
                     return Task.FromResult(true);
                 }
                 break;
