@@ -20,8 +20,8 @@ namespace AbsGameProject.Components.Player
 
         public bool IsInWater;
         public bool IsFeetInWater;
-        public float WaterWalkSpeed = 2f;
-        public float WaterRiseSpeed = 30f;
+        public float WaterWalkSpeed = 3f;
+        public float WaterRiseSpeed = 60f;
         public float WaterDrag = 15;
 
         public bool IsGrounded = true;
