@@ -1,6 +1,6 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
-using AbsGameProject.Maths.Physics;
+using AbsGameProject.Components.Physics;
 
 namespace AbsGameProject.Components.Player
 {

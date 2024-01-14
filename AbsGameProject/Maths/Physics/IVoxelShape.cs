@@ -1,4 +1,5 @@
 ﻿using AbsEngine.Physics;
+using AbsGameProject.Components.Physics;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Maths.Physics;

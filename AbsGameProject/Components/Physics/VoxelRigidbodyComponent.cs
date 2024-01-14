@@ -1,8 +1,9 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components.Physics;
+using AbsGameProject.Maths.Physics;
 using Silk.NET.Maths;
 
-namespace AbsGameProject.Maths.Physics;
+namespace AbsGameProject.Components.Physics;
 
 public class VoxelRigidbodyComponent : Component
 {

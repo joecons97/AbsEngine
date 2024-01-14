@@ -1,8 +1,9 @@
 ﻿using AbsEngine.ECS.Components.Physics;
 using AbsEngine.Physics;
+using AbsGameProject.Maths.Physics;
 using Silk.NET.Maths;
 
-namespace AbsGameProject.Maths.Physics;
+namespace AbsGameProject.Components.Physics;
 
 public class VoxelBoxColliderComponent : ColliderComponent
 {
