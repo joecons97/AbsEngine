@@ -3,6 +3,7 @@ using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
 using AbsEngine.ECS.Extensions;
 using AbsEngine.Rendering;
+using AbsEngine.Rendering.FullscreenEffects;
 using AbsGameProject.Blocks;
 using AbsGameProject.Components.Player;
 using AbsGameProject.Maths.Physics;
@@ -84,6 +85,8 @@ namespace AbsGameProject
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
             scene.RegisterSystem<PlayerControllerSystem>();
 
+            var toneMapper = game.AddEffect<Tonemapping>();
+            //toneMapper.Mode = TonemapperMode.NaughtyDog;
             //game.AddEffect<Grayscale>();
         }
 

@@ -13,7 +13,7 @@ namespace AbsGameProject.Components.Terrain
     public class TerrainChunkComponent : Component
     {
         public const int WIDTH = 16;
-        public const int HEIGHT = 128;
+        public const int HEIGHT = 255;
 
         public enum TerrainState
         {
