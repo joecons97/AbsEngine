@@ -181,7 +181,7 @@ public class Game
             _queueForDisposal.Enqueue(disposable);
     }
 
-    public void AddEffect<T>() where T : FullscreenEffect
+    public T AddEffect<T>() where T : FullscreenEffect
         => Renderer.AddEffect<T>();
 
     public void RemoveEffect<T>() where T : FullscreenEffect

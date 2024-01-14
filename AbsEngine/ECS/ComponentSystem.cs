@@ -24,7 +24,7 @@ public abstract class ComponentSystem<T> : System where T : Component
             if (lastTickTime >= FixedTimeStep.Value)
             {
                 lastTickTime = 0;
-                deltaTime = FixedTimeStep.Value;
+                deltaTime = Math.Max(FixedTimeStep.Value, deltaTime);
             }
             else
             {

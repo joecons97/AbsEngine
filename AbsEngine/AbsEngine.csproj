@@ -40,6 +40,12 @@
     <None Update="Engine\Shaders\Includes\GLSLInc.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Engine\Shaders\Tonemapper_NaughtyDog.shader">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Engine\Shaders\Tonemapper_Reinhardt.shader">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

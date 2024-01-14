@@ -37,8 +37,16 @@ public static class Renderer
             throw new GameInstanceException();
 
         backBufferRenderTexture = new RenderTexture(Game.Instance.Window.Size);
+        backBufferRenderTexture.ColorTexture.InternalFormat = Silk.NET.OpenGL.InternalFormat.Rgba16f;
+        backBufferRenderTexture.ColorTexture.Update();
+
         backBufferForShaders = new RenderTexture(Game.Instance.Window.Size);
+        backBufferForShaders.ColorTexture.InternalFormat = Silk.NET.OpenGL.InternalFormat.Rgba16f;
+        backBufferForShaders.ColorTexture.Update();
+
         postProcessingRenderTexture = new RenderTexture(Game.Instance.Window.Size);
+        postProcessingRenderTexture.ColorTexture.InternalFormat = Silk.NET.OpenGL.InternalFormat.Rgba16f;
+        postProcessingRenderTexture.ColorTexture.Update();
 
         backBufferMaterial = new Material("BackBuffer");
         BLIT_QUAD = MeshLoader.LoadMesh("Engine/Meshes/Quad.fbx");
@@ -46,7 +54,7 @@ public static class Renderer
         Game.Instance.Window.Resize += Window_Resize;
     }
 
-    internal static void AddEffect<T>() where T : FullscreenEffect
+    internal static T AddEffect<T>() where T : FullscreenEffect
     {
         var type = typeof(T);
         if (effects.Any(x => x.GetType() == type))
@@ -57,6 +65,8 @@ public static class Renderer
             throw new Exception($"An error occurred whilst instantiating fullscreen effect of type {type}");
 
         effects.Add(instance);
+
+        return (T)instance;
     }
 
     internal static void RemoveEffect<T>() where T : FullscreenEffect
