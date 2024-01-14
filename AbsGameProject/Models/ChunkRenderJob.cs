@@ -5,6 +5,7 @@ using AbsGameProject.Components.Terrain;
 using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Models;
@@ -21,7 +22,7 @@ public class ChunkRenderJob
 
     private static readonly VertexAttributeDescriptor[] VERTEX_ATTRIBS = new VertexAttributeDescriptor[]
     {
-        new VertexAttributeDescriptor(VertexAttributeFormat.SInt8, 3),
+        new VertexAttributeDescriptor(VertexAttributeFormat.UInt8, 3),
         new VertexAttributeDescriptor(VertexAttributeFormat.UNorm8, 4),
         new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
     };
@@ -157,12 +158,26 @@ public class ChunkRenderJob
         var index = _chunks.IndexOf(chunk);
 
         if (index == -1)
-            throw new Exception("Chunk does not exist in batch");
+        {
+            Debug.WriteLine("Chunk does not exist in batch");
+            return;
+            //throw new Exception("Chunk does not exist in batch");
+        }
 
         var oldMax = _drawCommands.Max(x => x.firstVertex + x.count);
         if (_vertexCount != oldMax)
         {
             throw new Exception("Somehow vertex count has got out of sync!");
+        }
+
+        switch (Layer)
+        {
+            case ChunkRenderLayer.Opaque:
+                chunk.StoredRenderJobOpaque = null;
+                break;
+            case ChunkRenderLayer.Transparent:
+                chunk.StoredRenderJobTransparent = null;
+                break;
         }
 
         var chunkCmd = _drawCommands[index];
@@ -211,16 +226,6 @@ public class ChunkRenderJob
         if (_drawCommands.Count != _worldMatrices.Count || _chunks.Count != _drawCommands.Count)
         {
             throw new Exception("Somehow buffer lists have got out of sync!");
-        }
-
-        switch (Layer)
-        {
-            case ChunkRenderLayer.Opaque:
-                chunk.StoredRenderJobOpaque = null;
-                break;
-            case ChunkRenderLayer.Transparent:
-                chunk.StoredRenderJobTransparent = null;
-                break;
         }
     }
 
