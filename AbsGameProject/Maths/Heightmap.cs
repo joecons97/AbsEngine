@@ -39,21 +39,21 @@ public static class Heightmap
 
         var mountainStrength = (noise.GetNoise(
             new Vector2D<float>(x, z),
-            noiseSize * 5,
-            octaves,
+            noiseSize * 6,
+            1,
             persistence,
         lacunarity) + 1) / 2;
 
         var mountains = (noise.GetNoiseRidged(
             new Vector2D<float>(x, z),
-            noiseSize * 2,
+            noiseSize * 3,
             8,
             persistence,
             lacunarity) + 1) / 2;
 
         mountains = MathF.Pow(mountains, 3);
+        mountains *= amplitude * 2;
         mountains = mountains * mountainStrength;
-        mountains *= amplitude;
 
         return MathF.Max(mountains, continent);
     }
