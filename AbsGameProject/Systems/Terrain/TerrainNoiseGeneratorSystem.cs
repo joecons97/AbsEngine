@@ -2,6 +2,7 @@
 using AbsEngine.Physics;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Extensions;
+using AbsGameProject.Maths;
 using AbsGameProject.Maths.Noise;
 using Silk.NET.Maths;
 
@@ -9,14 +10,6 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainNoiseGeneratorSystem : ComponentSystem<TerrainChunkComponent>
     {
-        private FastNoiseLite noise;
-        private float noiseSize = 5f;
-        private float amplitude = 70;
-
-        private int octaves = 12;
-        private float lacunarity = 2;
-        private float persistence = 0.5f;
-
         private int waterHeight = 35;
 
         protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None && x.IsPooled == false;
@@ -24,7 +17,6 @@ namespace AbsGameProject.Systems.Terrain
 
         public TerrainNoiseGeneratorSystem(Scene scene) : base(scene)
         {
-            noise = new FastNoiseLite();
         }
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
@@ -41,38 +33,7 @@ namespace AbsGameProject.Systems.Terrain
                 {
                     for (int z = 0; z < TerrainChunkComponent.WIDTH; z++)
                     {
-                        noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-                        var continent = (noise.GetNoise(
-                            new Vector2D<float>(x + trans.LocalPosition.X, z + trans.LocalPosition.Z),
-                            noiseSize,
-                            octaves,
-                            persistence,
-                            lacunarity) + 1) / 2;
-
-                        continent = MathF.Pow(continent, 1.5f);
-                        continent *= amplitude / 1.25f;
-                        continent += 10;
-
-                        var mountainStrength = (noise.GetNoise(
-                            new Vector2D<float>(x + trans.LocalPosition.X, z + trans.LocalPosition.Z),
-                            noiseSize * 5,
-                            octaves,
-                            persistence,
-                            lacunarity) + 1) / 2;
-
-                        var mountains = (noise.GetNoiseRidged(
-                            new Vector2D<float>(x + trans.LocalPosition.X, z + trans.LocalPosition.Z),
-                            noiseSize * 2,
-                            8,
-                            persistence,
-                            lacunarity) + 1) / 2;
-
-                        mountains = MathF.Pow(mountains, 3);
-
-                        mountains = mountains * mountainStrength;
-                        mountains *= amplitude;
-
-                        var h = MathF.Max(mountains, continent);
+                        var h = Heightmap.GetHeightAt((int)(x + trans.LocalPosition.X), (int)(z + trans.LocalPosition.Z));
 
                         if (h > maxY)
                             maxY = (int)h;
