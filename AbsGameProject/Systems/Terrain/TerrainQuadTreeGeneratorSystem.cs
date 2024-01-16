@@ -2,6 +2,7 @@
 using AbsEngine.ECS.Components;
 using AbsEngine.IO;
 using AbsEngine.Rendering;
+using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
 using System.Drawing;
 
@@ -9,10 +10,11 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class Node
     {
-        private const int MIN_CHUNK_SIZE = 16;
+        public const int MIN_CHUNK_SIZE = 16;
 
         private const float THRESHOLD_MULTIPLIER = 5;
 
+        public Entity? AssociatedEntity { get; set; }
         public Vector2D<int> Position { get; set; }
         public int Size { get; set; }
         public List<Node> Children { get; set; }
@@ -51,9 +53,10 @@ namespace AbsGameProject.Systems.Terrain
                 }
             }
 
+            //TODO Remove Size == 16
             if (Children.Count == 0)
             {
-                sys._toLoad.Add(this);
+                sys._toLoad.Enqueue(this);
             }
         }
 
@@ -101,7 +104,14 @@ namespace AbsGameProject.Systems.Terrain
 
     public class TerrainQuadTreeGeneratorSystem : AbsEngine.ECS.System
     {
-        public List<Node> _toLoad = new List<Node>();
+        public Queue<Node> _toLoad = new Queue<Node>();
+        public List<Node> _activeNodes = new List<Node>();
+        public List<Node> _lastActiveNodes = new List<Node>();
+        public Queue<Entity> _pool = new Queue<Entity>();
+
+        Mesh _planeMesh;
+        TransformComponent _mainCameraTransform;
+        Vector2D<int>? _lastPos;
 
         Dictionary<int, Vector4D<float>> _colors = new Dictionary<int, Vector4D<float>>()
         {
@@ -118,25 +128,79 @@ namespace AbsGameProject.Systems.Terrain
 
         public TerrainQuadTreeGeneratorSystem(Scene scene) : base(scene)
         {
-            var planeMesh = MeshLoader.LoadMesh("Engine/Meshes/Plane.fbx");
-            Node rootNode = new Node(null, Vector2D<int>.Zero, 4096);
+            _mainCameraTransform = Scene.EntityManager.GetComponents<SceneCameraComponent>().First().Entity.Transform;
 
-            rootNode.Recurse(new Vector3D<int>(0, 0, 0), this);
+            _planeMesh = MeshLoader.LoadMesh("Engine/Meshes/Plane.fbx");
 
-            foreach (var node in _toLoad)
+        }
+
+        public override void Tick(float deltaTime)
+        {
+            var roundedX = (int)MathF.Floor(_mainCameraTransform.LocalPosition.X / Node.MIN_CHUNK_SIZE) * Node.MIN_CHUNK_SIZE;
+            var roundedZ = (int)MathF.Floor(_mainCameraTransform.LocalPosition.Z / Node.MIN_CHUNK_SIZE) * Node.MIN_CHUNK_SIZE;
+
+            if (_lastPos != null && roundedX == _lastPos.Value.X && roundedZ == _lastPos.Value.Y)
+                return;
+
+            Node rootNode = new Node(null, new Vector2D<int>(0, 0), 4096);
+
+            rootNode.Recurse(new Vector3D<int>(roundedX, 0, roundedZ), this);
+
+            _lastActiveNodes = _activeNodes.ToList();
+            _activeNodes.Clear();
+
+            while(_toLoad.Count > 0)
             {
-                var ent = Scene.EntityManager.CreateEntity(node.ToString());
+                var node = _toLoad.Dequeue();
+                if (_lastActiveNodes.Contains(node))
+                {
+                    node.AssociatedEntity = _lastActiveNodes.First(x => x == node).AssociatedEntity;
+                    _lastActiveNodes.Remove(node);
+                    _activeNodes.Add(node);
+                    continue;
+                }
+
+                Entity? ent = null;
+                if (_pool.TryDequeue(out ent) == false)
+                {
+                    ent = Scene.EntityManager.CreateEntity(node.ToString());
+
+                    var mesh = ent.AddComponent<MeshRendererComponent>();
+                    mesh.Mesh = _planeMesh;
+                    mesh.Material = new Material("QuadTreeChunk");
+
+                    var col = _colors[node.Size];
+                    mesh.Material.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
+                }
+                else
+                {
+                    var mesh = ent.GetComponent<MeshRendererComponent>();
+                    var col = _colors[node.Size];
+                    mesh.Material?.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
+                }
+
                 ent.Transform.Position = new Vector3D<float>(node.Position.X, 0, node.Position.Y);
                 ent.Transform.LocalEulerAngles = new Vector3D<float>(-90, 0, 0);
                 ent.Transform.LocalScale = (node.Size / 2) * Vector3D<float>.One;
 
-                var mesh = ent.AddComponent<MeshRendererComponent>();
-                mesh.Mesh = planeMesh;
-                mesh.Material = new Material("QuadTreeChunk");
+                node.AssociatedEntity = ent;
 
-                var col = _colors[node.Size];
-                mesh.Material.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
+                _activeNodes.Add(node);
             }
+
+            foreach (var node in _lastActiveNodes)
+            {
+                if (node.AssociatedEntity != null)
+                {
+                    _pool.Enqueue(node.AssociatedEntity);
+                    var pos = node.AssociatedEntity.Transform.Position;
+                    node.AssociatedEntity.Transform.Position = new Vector3D<float>(pos.X, -1000, pos.Z);
+                }
+            }
+            _lastActiveNodes.Clear();
+
+            _lastPos = new Vector2D<int>(roundedX, roundedZ);
+
         }
     }
 }
