@@ -110,6 +110,7 @@ namespace AbsGameProject.Systems.Terrain
         public Queue<Entity> _pool = new Queue<Entity>();
 
         Mesh _planeMesh;
+        CameraComponent _mainCam;
         TransformComponent _mainCameraTransform;
         Vector2D<int>? _lastPos;
 
@@ -128,7 +129,8 @@ namespace AbsGameProject.Systems.Terrain
 
         public TerrainQuadTreeGeneratorSystem(Scene scene) : base(scene)
         {
-            _mainCameraTransform = Scene.EntityManager.GetComponents<SceneCameraComponent>().First().Entity.Transform;
+            _mainCam = Scene.EntityManager.GetComponents<SceneCameraComponent>().First();
+            _mainCameraTransform = _mainCam.Entity.Transform;
 
             _planeMesh = MeshLoader.LoadMesh("Engine/Meshes/Plane.fbx");
 
@@ -142,7 +144,7 @@ namespace AbsGameProject.Systems.Terrain
             if (_lastPos != null && roundedX == _lastPos.Value.X && roundedZ == _lastPos.Value.Y)
                 return;
 
-            Node rootNode = new Node(null, new Vector2D<int>(0, 0), 4096);
+            Node rootNode = new Node(null, new Vector2D<int>(roundedX, roundedZ), 4096);
 
             rootNode.Recurse(new Vector3D<int>(roundedX, 0, roundedZ), this);
 
@@ -174,6 +176,7 @@ namespace AbsGameProject.Systems.Terrain
                 }
                 else
                 {
+                    ent.IsActive = true;
                     var mesh = ent.GetComponent<MeshRendererComponent>();
                     var col = _colors[node.Size];
                     mesh.Material?.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
@@ -194,7 +197,7 @@ namespace AbsGameProject.Systems.Terrain
                 {
                     _pool.Enqueue(node.AssociatedEntity);
                     var pos = node.AssociatedEntity.Transform.Position;
-                    node.AssociatedEntity.Transform.Position = new Vector3D<float>(pos.X, -1000, pos.Z);
+                    node.AssociatedEntity.IsActive = false;
                 }
             }
             _lastActiveNodes.Clear();
