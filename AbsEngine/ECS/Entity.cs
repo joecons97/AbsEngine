@@ -6,6 +6,7 @@ public class Entity
 {
     public Scene Scene { get; }
     public ComponentList Components { get; }
+    public bool IsActive { get; set; } = true;
     public uint ID { get; }
 
     private TransformComponent _cachedTransform = null!;

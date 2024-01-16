@@ -40,7 +40,7 @@ public abstract class AsyncComponentSystem<T> : System where T : Component
 
             await Parallel.ForEachAsync(comps, async (comp, token) =>
             {
-                if (_componentsInProgress.Contains(comp) == false)
+                if (comp.Entity.IsActive && _componentsInProgress.Contains(comp) == false)
                 {
                     _componentsInProgress.Add(comp);
 

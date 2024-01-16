@@ -45,14 +45,16 @@ public abstract class ComponentSystem<T> : System where T : Component
         {
             Parallel.ForEach(comps, t =>
             {
-                OnTick(t, deltaTime);
+                if(t.Entity.IsActive)
+                    OnTick(t, deltaTime);
             });
         }
         else
         {
             foreach (var comp in comps)
             {
-                OnTick(comp, deltaTime);
+                if (comp.Entity.IsActive)
+                    OnTick(comp, deltaTime);
             }
         }
     }

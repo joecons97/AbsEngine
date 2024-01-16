@@ -13,7 +13,9 @@ public static class SceneExtensions
     public static void RegisterSceneCamera(this Scene scene)
     {
         var sceneCam = scene.EntityManager.CreateEntity("Scene Camera");
-        sceneCam.AddComponent<SceneCameraComponent>();
+        sceneCam.Transform.Position = new Silk.NET.Maths.Vector3D<float>(0, 50, 0);
+        var cam = sceneCam.AddComponent<SceneCameraComponent>();
+        cam.FarClipPlane = 5000;
 
         scene.RegisterSystem<SceneCameraSystem>();
     }
