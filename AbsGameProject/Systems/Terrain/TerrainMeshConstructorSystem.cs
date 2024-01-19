@@ -84,11 +84,11 @@ namespace AbsGameProject.Systems.Terrain
                         var transparentColours = new List<Vector4D<float>>();
                         var transparentUvs = new List<Vector2D<float>>();
 
-                        for (int x = 0; x < TerrainChunkComponent.WIDTH; x++)
+                        for (int x = 0; x < TerrainChunkComponent.WIDTH; x += component.Scale)
                         {
-                            for (int z = 0; z < TerrainChunkComponent.WIDTH; z++)
+                            for (int z = 0; z < TerrainChunkComponent.WIDTH; z += component.Scale)
                             {
-                                for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
+                                for (int y = 0; y < TerrainChunkComponent.HEIGHT; y += component.Scale)
                                 {
                                     var state = component.VoxelData[x, y, z];
                                     if (state == 0)
@@ -100,23 +100,26 @@ namespace AbsGameProject.Systems.Terrain
 
                                     CullFaceDirection toCull = CullFaceDirection.None;
 
-                                    if (ShouldRenderFace(component, x, y, z + 1, blockIndex) == false)
+                                    if (ShouldRenderFace(component, x, y, z + component.Scale, blockIndex) == false)
                                         toCull |= CullFaceDirection.North;
 
-                                    if (ShouldRenderFace(component, x, y, z - 1, blockIndex) == false)
+                                    if (ShouldRenderFace(component, x, y, z - component.Scale, blockIndex) == false)
                                         toCull |= CullFaceDirection.South;
 
-                                    if (ShouldRenderFace(component, x, y + 1, z, blockIndex) == false)
+                                    if (ShouldRenderFace(component, x, y + component.Scale, z, blockIndex) == false)
                                         toCull |= CullFaceDirection.Up;
 
-                                    if (ShouldRenderFace(component, x, y - 1, z, blockIndex) == false)
+                                    if (ShouldRenderFace(component, x, y - component.Scale, z, blockIndex) == false)
                                         toCull |= CullFaceDirection.Down;
 
-                                    if (ShouldRenderFace(component, x + 1, y, z, blockIndex) == false)
+                                    if (ShouldRenderFace(component, x + component.Scale, y, z, blockIndex) == false)
                                         toCull |= CullFaceDirection.West;
 
-                                    if (ShouldRenderFace(component, x - 1, y, z, blockIndex) == false)
+                                    if (ShouldRenderFace(component, x - component.Scale, y, z, blockIndex) == false)
                                         toCull |= CullFaceDirection.East;
+
+                                    if (toCull == CullFaceDirection.None && block.TransparentCullSelf == true)
+                                        continue;
 
                                     foreach (var face in block.Mesh.Faces)
                                     {
@@ -124,7 +127,8 @@ namespace AbsGameProject.Systems.Terrain
                                         {
                                             for (var i = 0; i < face.Value.Positions.Count; i++)
                                             {
-                                                var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                                var pos = (face.Value.Positions[i] * component.Scale)
+                                                    + new Vector3D<float>(x, y, z);
 
                                                 var uv = face.Value.UVs[i];
                                                 var col = face.Value.TintIndicies[i] == null

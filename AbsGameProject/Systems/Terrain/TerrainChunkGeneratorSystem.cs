@@ -3,7 +3,6 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using Silk.NET.Maths;
-using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -12,7 +11,7 @@ namespace AbsGameProject.Systems.Terrain
         readonly List<TerrainChunkComponent> CHUNK_POOL = new();
         readonly List<TerrainChunkComponent> ACTIVE_CHUNKS = new();
 
-        const int RADIUS = 30;
+        const int RADIUS = 50;
         float lastX;
         float lastZ;
         bool hasBeenInitialised = false;
@@ -52,13 +51,17 @@ namespace AbsGameProject.Systems.Terrain
                 {
                     for (int z = -(RADIUS / 2); z < RADIUS / 2; z++)
                     {
+                        int scale = 1;
+                        if (MathF.Abs(x) > 10 || MathF.Abs(z) > 10)
+                            scale = 2;
+
                         int xF = roundedX + x * TerrainChunkComponent.WIDTH;
                         int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
 
                         var chunk = sceneChunkListReference.FirstOrDefault(x =>
                             x.Entity.Transform.LocalPosition.X == xF && x.Entity.Transform.LocalPosition.Z == zF);
 
-                        if (chunk != null)
+                        if (chunk != null && ((TerrainChunkComponent)chunk).Scale == scale)
                         {
                             ACTIVE_CHUNKS.Add((TerrainChunkComponent)chunk);
 
@@ -79,6 +82,7 @@ namespace AbsGameProject.Systems.Terrain
                             chunkComp.State = TerrainChunkComponent.TerrainState.None;
                             chunkComp.IsPooled = false;
 
+                            chunkComp.Scale = scale;
                             ACTIVE_CHUNKS.Add(chunkComp);
                         }
                         else
@@ -86,6 +90,8 @@ namespace AbsGameProject.Systems.Terrain
                             var chunkEnt = Scene.EntityManager.CreateEntity();
                             chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>();
                             chunkEnt.Transform.LocalPosition = pos;
+                            
+                            chunkComp.Scale = scale;
                             chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                             chunkComp.State = TerrainChunkComponent.TerrainState.None;
                             chunkComp.IsPooled = false;

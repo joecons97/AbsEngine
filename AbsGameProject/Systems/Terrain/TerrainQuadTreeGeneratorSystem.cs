@@ -56,7 +56,7 @@ namespace AbsGameProject.Systems.Terrain
             //TODO Remove Size == 16
             if (Children.Count == 0)
             {
-                sys._toLoad.Enqueue(this);
+                sys._toLoad.Add(this);
             }
         }
 
@@ -104,7 +104,7 @@ namespace AbsGameProject.Systems.Terrain
 
     public class TerrainQuadTreeGeneratorSystem : AbsEngine.ECS.System
     {
-        public Queue<Node> _toLoad = new Queue<Node>();
+        public List<Node> _toLoad = new List<Node>();
         public List<Node> _activeNodes = new List<Node>();
         public List<Node> _lastActiveNodes = new List<Node>();
         public Queue<Entity> _pool = new Queue<Entity>();
@@ -113,6 +113,8 @@ namespace AbsGameProject.Systems.Terrain
         CameraComponent _mainCam;
         TransformComponent _mainCameraTransform;
         Vector2D<int>? _lastPos;
+
+        IReadOnlyCollection<Component> _sceneChunkListReference;
 
         Dictionary<int, Vector4D<float>> _colors = new Dictionary<int, Vector4D<float>>()
         {
@@ -134,6 +136,7 @@ namespace AbsGameProject.Systems.Terrain
 
             _planeMesh = MeshLoader.LoadMesh("Engine/Meshes/Plane.fbx");
 
+            _sceneChunkListReference = Scene.EntityManager.GetComponentListReference<TerrainChunkComponent>();
         }
 
         public override void Tick(float deltaTime)
@@ -148,12 +151,15 @@ namespace AbsGameProject.Systems.Terrain
 
             rootNode.Recurse(new Vector3D<int>(roundedX, 0, roundedZ), this);
 
+            _toLoad = _toLoad.OrderBy(x => x.Size).ToList();
+
             _lastActiveNodes = _activeNodes.ToList();
             _activeNodes.Clear();
 
-            while(_toLoad.Count > 0)
+            while(_toLoad.Count() > 0)
             {
-                var node = _toLoad.Dequeue();
+                var node = _toLoad.First();
+                _toLoad.Remove(node);
                 if (_lastActiveNodes.Contains(node))
                 {
                     node.AssociatedEntity = _lastActiveNodes.First(x => x == node).AssociatedEntity;
@@ -162,48 +168,143 @@ namespace AbsGameProject.Systems.Terrain
                     continue;
                 }
 
+                TerrainChunkComponent? chunkComp = null;
                 Entity? ent = null;
                 if (_pool.TryDequeue(out ent) == false)
                 {
                     ent = Scene.EntityManager.CreateEntity(node.ToString());
 
-                    var mesh = ent.AddComponent<MeshRendererComponent>();
-                    mesh.Mesh = _planeMesh;
-                    mesh.Material = new Material("QuadTreeChunk");
+                    chunkComp = ent.AddComponent<TerrainChunkComponent>();
 
-                    var col = _colors[node.Size];
-                    mesh.Material.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
+                    //var mesh = ent.AddComponent<MeshRendererComponent>();
+                    //mesh.Mesh = _planeMesh;
+                    //mesh.Material = new Material("QuadTreeChunk");
+
+                    //var col = _colors[node.Size];
+                    //mesh.Material.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
                 }
                 else
                 {
                     ent.IsActive = true;
-                    var mesh = ent.GetComponent<MeshRendererComponent>();
-                    var col = _colors[node.Size];
-                    mesh.Material?.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
+                    //var mesh = ent.GetComponent<MeshRendererComponent>();
+                    //var col = _colors[node.Size];
+                    //mesh.Material?.SetColor("Colour", Color.FromArgb((int)(col.X * 255), (int)(col.Y * 255), (int)(col.Z * 255)));
+
+                    chunkComp = ent.GetComponent<TerrainChunkComponent>()!;
                 }
 
+                chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
+                chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                chunkComp.IsPooled = false;
+
                 ent.Transform.Position = new Vector3D<float>(node.Position.X, 0, node.Position.Y);
-                ent.Transform.LocalEulerAngles = new Vector3D<float>(-90, 0, 0);
-                ent.Transform.LocalScale = (node.Size / 2) * Vector3D<float>.One;
+                ent.Transform.LocalEulerAngles = new Vector3D<float>(0, 0, 0);
+                ent.Transform.LocalScale = new Vector3D<float>(node.Size / 16, 1, node.Size / 16);
 
                 node.AssociatedEntity = ent;
 
                 _activeNodes.Add(node);
+
+                //HandleNeighbours(chunkComp, (int)node.Position.X, (int)node.Position.Y);
             }
 
             foreach (var node in _lastActiveNodes)
             {
-                if (node.AssociatedEntity != null)
+                if (node.AssociatedEntity != null && _pool.Contains(node.AssociatedEntity) == false)
                 {
-                    _pool.Enqueue(node.AssociatedEntity);
-                    var pos = node.AssociatedEntity.Transform.Position;
                     node.AssociatedEntity.IsActive = false;
+
+                    var chunk = node.AssociatedEntity.GetComponent<TerrainChunkComponent>()!;
+                    if (chunk.NorthNeighbour != null)
+                    {
+                        chunk.NorthNeighbour.SouthNeighbour = null;
+                        chunk.NorthNeighbour = null;
+                    }
+                    if (chunk.RightNeighbour != null)
+                    {
+                        chunk.RightNeighbour.LeftNeighbour = null;
+                        chunk.RightNeighbour = null;
+                    }
+                    if (chunk.LeftNeighbour != null)
+                    {
+                        chunk.LeftNeighbour.RightNeighbour = null;
+                        chunk.LeftNeighbour = null;
+                    }
+                    if (chunk.SouthNeighbour != null)
+                    {
+                        chunk.SouthNeighbour.NorthNeighbour = null;
+                        chunk.SouthNeighbour = null;
+                    }
+
+                    chunk.State = TerrainChunkComponent.TerrainState.None;
+                    chunk.IsPooled = true;
+                    chunk.VoxelData = null;
+                    chunk.Heightmap = null;
+
+                    TerrainChunkBatcherRenderer.QueueChunkForBatching(chunk);
+                    _pool.Enqueue(node.AssociatedEntity);
                 }
             }
             _lastActiveNodes.Clear();
 
             _lastPos = new Vector2D<int>(roundedX, roundedZ);
 
+        }
+
+        void HandleNeighbours(TerrainChunkComponent chunkComp, int xF, int zF)
+        {
+            using (Profiler.BeginEvent($"HandleNeighbours for {chunkComp}"))
+            {
+                var neighbours = _sceneChunkListReference.Where(x =>
+                (int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH ||
+
+                (int)x.Entity.Transform.LocalPosition.X == xF &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH ||
+
+                (int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF ||
+
+                (int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
+                (int)x.Entity.Transform.LocalPosition.Z == zF);
+
+                chunkComp.NorthNeighbour = neighbours
+                    .FirstOrDefault(x =>
+                    (int)x.Entity.Transform.LocalPosition.X == xF &&
+                    (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH) as TerrainChunkComponent ?? chunkComp.NorthNeighbour;
+
+                chunkComp.SouthNeighbour = neighbours
+                    .FirstOrDefault(x =>
+                    (int)x.Entity.Transform.LocalPosition.X == xF &&
+                    (int)x.Entity.Transform.LocalPosition.Z == zF - TerrainChunkComponent.WIDTH) as TerrainChunkComponent ?? chunkComp.SouthNeighbour;
+
+                chunkComp.LeftNeighbour = neighbours
+                    .FirstOrDefault(x =>
+                    (int)x.Entity.Transform.LocalPosition.X == xF - TerrainChunkComponent.WIDTH &&
+                    (int)x.Entity.Transform.LocalPosition.Z == zF) as TerrainChunkComponent ?? chunkComp.LeftNeighbour;
+
+                chunkComp.RightNeighbour = neighbours
+                    .FirstOrDefault(x =>
+                    (int)x.Entity.Transform.LocalPosition.X == xF + TerrainChunkComponent.WIDTH &&
+                    (int)x.Entity.Transform.LocalPosition.Z == zF) as TerrainChunkComponent ?? chunkComp.RightNeighbour;
+
+                if (chunkComp.NorthNeighbour != null)
+                {
+                    chunkComp.NorthNeighbour.SouthNeighbour = chunkComp;
+                }
+                if (chunkComp.RightNeighbour != null)
+                {
+                    chunkComp.RightNeighbour.LeftNeighbour = chunkComp;
+                }
+                if (chunkComp.LeftNeighbour != null)
+                {
+                    chunkComp.LeftNeighbour.RightNeighbour = chunkComp;
+                }
+                if (chunkComp.SouthNeighbour != null)
+                {
+                    chunkComp.SouthNeighbour.NorthNeighbour = chunkComp;
+                }
+            }
         }
     }
 }

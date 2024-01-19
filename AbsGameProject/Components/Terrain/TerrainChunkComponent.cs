@@ -31,6 +31,8 @@ namespace AbsGameProject.Components.Terrain
         public List<TerrainVertex>? TerrainVertices { get; set; }
         public List<TerrainVertex>? WaterVertices { get; set; }
 
+        public int Scale { get; set; }
+
         public bool IsAwaitingRebuild { get; set; }
 
         public bool IsPooled { get; set; }
@@ -46,19 +48,19 @@ namespace AbsGameProject.Components.Terrain
         public Task? ConstructionTask { get; set; }
 
         public bool IsReadyForDecoration =>
-            State == TerrainState.NoiseGenerated &&
-            LeftNeighbour != null && LeftNeighbour.State >= TerrainState.NoiseGenerated &&
-            RightNeighbour != null && RightNeighbour.State >= TerrainState.NoiseGenerated &&
-            NorthNeighbour != null && NorthNeighbour.State >= TerrainState.NoiseGenerated &&
-            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
+            State == TerrainState.NoiseGenerated;
+        //&& LeftNeighbour != null && LeftNeighbour.State >= TerrainState.NoiseGenerated &&
+        //RightNeighbour != null && RightNeighbour.State >= TerrainState.NoiseGenerated &&
+        //NorthNeighbour != null && NorthNeighbour.State >= TerrainState.NoiseGenerated &&
+        //SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
 
         public bool IsReadyForMeshGeneration =>
-            ConstructionTask == null && 
-            State == TerrainState.Decorated &&
-            LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
-            RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
-            NorthNeighbour != null && NorthNeighbour.State >= TerrainState.Decorated &&
-            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated;
+            ConstructionTask == null &&
+            State == TerrainState.Decorated;
+        //&& LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
+        //RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
+        //NorthNeighbour != null && NorthNeighbour.State >= TerrainState.Decorated &&
+        //SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated;
 
         public TerrainChunkComponent? LeftNeighbour;
         public TerrainChunkComponent? RightNeighbour;
@@ -326,7 +328,7 @@ namespace AbsGameProject.Components.Terrain
 
         public override bool Equals(object? obj)
         {
-            if (obj == null) 
+            if (obj == null)
                 return false;
 
             var c = (TerrainChunkComponent)obj;
