@@ -12,7 +12,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
     List<Task> _tasks = new List<Task>();
 
-    protected override bool UseJobSystem => false;
+    public override bool UseJobSystem => false;
 
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {

@@ -10,7 +10,7 @@ public abstract class System : IDisposable
 
     protected virtual float? FixedTimeStep => null;
 
-    protected virtual bool UseJobSystem => true;
+    public virtual bool UseJobSystem => true;
 
     float lastTickTime = 0;
 

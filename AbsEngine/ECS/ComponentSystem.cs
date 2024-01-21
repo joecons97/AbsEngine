@@ -31,7 +31,7 @@ public abstract class ComponentSystem<T> : System where T : Component
 
             using (Profiler.BeginEvent("Re-count"))
             {
-                if (++_componentsToSkip > count)
+                if (MaxIterationsPerFrame != int.MaxValue && ++_componentsToSkip > count)
                     _componentsToSkip = 0;
 
                 count = comps.Count;
@@ -43,7 +43,9 @@ public abstract class ComponentSystem<T> : System where T : Component
         for (int i = 0; i < comps.Count; i++)
         {
             T? comp = comps[i];
-            OnTick(comp, deltaTime);
+
+            using (Profiler.BeginEvent($"Tick {comp.Entity.Name}"))
+                OnTick(comp, deltaTime);
         }
     }
 
