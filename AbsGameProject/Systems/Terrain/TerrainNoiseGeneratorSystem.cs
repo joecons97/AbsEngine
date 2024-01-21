@@ -12,8 +12,6 @@ namespace AbsGameProject.Systems.Terrain
 
         protected override int MaxIterationsPerFrame => 1;
 
-        protected override bool UseParallel => true;
-
         public TerrainNoiseGeneratorSystem(Scene scene) : base(scene)
         {
         }

@@ -90,13 +90,14 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
                 _playerController.IsFeetInWater = feetBlock.Id == "water";
             }
 
-            _playerController.VoxelRigidbody!.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
+            //_playerController.VoxelRigidbody!.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
 
         }
 
         using (Profiler.BeginEvent("Input"))
         {
-            var speed = _playerController.IsFeetInWater ? _playerController.WaterWalkSpeed : _playerController.WalkSpeed;
+            //var speed = _playerController.IsFeetInWater ? _playerController.WaterWalkSpeed : _playerController.WalkSpeed;
+            var speed = _playerController.WalkSpeed;
 
             if (_keyboard.IsKeyPressed(Key.W))
             {

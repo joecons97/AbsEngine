@@ -73,7 +73,7 @@ namespace AbsGameProject.Components.Terrain
             {
                 var chunkPos = worldPos.ToChunkPosition();
 
-                return scene.EntityManager.GetComponents<TerrainChunkComponent>(x => x.Entity.Transform.Position == chunkPos, 1)
+                return scene.EntityManager.GetComponents<TerrainChunkComponent>(x => x.Entity.Transform.Position == chunkPos)
                     .FirstOrDefault();
             }
         }

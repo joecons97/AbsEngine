@@ -23,8 +23,6 @@ public class SpinnerSystem : AsyncComponentSystem<TransformComponent>
 
 public class SpinnerSystemSync : ComponentSystem<TransformComponent>
 {
-    protected override bool UseParallel => true;
-
     public SpinnerSystemSync(Scene scene) : base(scene)
     {
     }

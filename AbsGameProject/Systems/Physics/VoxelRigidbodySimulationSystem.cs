@@ -10,6 +10,8 @@ public class VoxelRigidbodySimulationSystem : ComponentSystem<VoxelRigidbodyComp
 
     protected override float? FixedTimeStep => 0.0166666667f;
 
+    protected override bool UseJobSystem => false;
+
     public VoxelRigidbodySimulationSystem(Scene scene) : base(scene)
     {
     }

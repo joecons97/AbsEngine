@@ -8,7 +8,6 @@ namespace AbsGameProject.Systems.Terrain
     public class TerrainDecoratorSystem : ComponentSystem<TerrainChunkComponent>
     {
         protected override int MaxIterationsPerFrame => 1;
-        protected override bool UseParallel => true;
 
         Decorator test;
         Random random;

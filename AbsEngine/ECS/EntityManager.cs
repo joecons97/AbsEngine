@@ -26,57 +26,22 @@ public class EntityManager
             _components[type].Add(component);
     }
 
-    public IReadOnlyCollection<T> GetComponents<T>(int count = 0) where T : Component
+    public IEnumerable<T> GetComponents<T>() where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-            return new List<T>(0);
+            return Enumerable.Empty<T>();
 
-        var bag = _components[type];
-        List<T> result = new List<T>();
-
-        using (Profiler.BeginEvent("GetComponents Loop"))
-        {
-            foreach (var component in bag)
-            {
-                var cast = (T)component;
-                result.Add(cast);
-                if (count > 0 && result.Count >= count)
-                    break;
-            }
-        }
-
-        return result;
+        return _components[type].Select(x => (T)x);
     }
 
-    public IReadOnlyCollection<T> GetComponents<T>(Func<T, bool> predicate, int count = 0) where T : Component
+    public IEnumerable<T> GetComponents<T>(Func<T, bool> predicate) where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-            return new List<T>(0);
+            return Enumerable.Empty<T>();
 
-        var bag = _components[type];
-        List<T> result = new List<T>();
-
-        using (Profiler.BeginEvent("GetComponents Loop"))
-        {
-            foreach (var component in bag)
-            {
-                var cast = (T)component;
-                bool res;
-                using (Profiler.BeginEvent("Execute Predicate"))
-                    res = predicate.Invoke(cast);
-
-                if (res)
-                {
-                    result.Add(cast);
-                    if (count > 0 && result.Count >= count)
-                        break;
-                }
-            }
-        }
-
-        return result;
+        return _components[type].Select(x => (T)x).Where(predicate);
     }
 
     public IReadOnlyCollection<Component> GetComponentListReference<T>() where T : Component

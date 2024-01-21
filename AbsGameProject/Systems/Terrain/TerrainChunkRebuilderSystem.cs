@@ -7,8 +7,6 @@ internal class TerrainChunkRebuilderSystem : ComponentSystem<TerrainChunkCompone
 {
     protected override int MaxIterationsPerFrame => 1;
 
-    protected override bool UseParallel => true;
-
     public TerrainChunkRebuilderSystem(Scene scene) : base(scene)
     {
     }
