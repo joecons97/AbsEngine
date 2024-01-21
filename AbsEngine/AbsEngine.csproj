@@ -28,6 +28,7 @@
     <PackageReference Include="Silk.NET.Windowing" Version="2.20.0" />
     <PackageReference Include="StbImageSharp" Version="2.27.13" />
     <PackageReference Include="Tracy-CSharp" Version="0.10.0.2" />
+    <PackageReference Include="ZeroAllocJobScheduler" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>

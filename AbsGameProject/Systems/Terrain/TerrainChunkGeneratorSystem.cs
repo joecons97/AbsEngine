@@ -28,7 +28,7 @@ namespace AbsGameProject.Systems.Terrain
             sceneChunkListReference = Scene.EntityManager.GetComponentListReference<TerrainChunkComponent>();
         }
 
-        public override void Tick(float deltaTime)
+        public override void OnTick(float deltaTime)
         {
             var mainCam = Scene.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).First().Entity.Transform.Parent;
             if (mainCam == null)
@@ -136,7 +136,6 @@ namespace AbsGameProject.Systems.Terrain
                     }
                 }
             }
-            base.Tick(deltaTime);
         }
 
         void HandleNeighbours(TerrainChunkComponent chunkComp, int xF, int zF)

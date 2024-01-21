@@ -71,7 +71,7 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
         }
     }
 
-    public override void Tick(float deltaTime)
+    public override void OnTick(float deltaTime)
     {
         if (ChunkPhysics.CastVoxel(_mainCamera.Entity.Transform.Position, _mainCamera.Entity.Transform.Forward, 5, out var output))
         {

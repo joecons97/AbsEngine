@@ -5,7 +5,9 @@ namespace AbsGameProject.Systems.Terrain;
 
 internal class TerrainChunkRebuilderSystem : ComponentSystem<TerrainChunkComponent>
 {
-    protected override Func<TerrainChunkComponent, bool>? Predicate => x => x.State == TerrainChunkComponent.TerrainState.Done && x.IsAwaitingRebuild;
+    protected override int MaxIterationsPerFrame => 1;
+
+    protected override bool UseParallel => true;
 
     public TerrainChunkRebuilderSystem(Scene scene) : base(scene)
     {
@@ -13,6 +15,9 @@ internal class TerrainChunkRebuilderSystem : ComponentSystem<TerrainChunkCompone
 
     public override void OnTick(TerrainChunkComponent component, float deltaTime)
     {
+        if ((component.State == TerrainChunkComponent.TerrainState.Done && component.IsAwaitingRebuild) == false)
+            return;
+
         component.IsAwaitingRebuild = false;
         component.State = TerrainChunkComponent.TerrainState.Decorated;
     }

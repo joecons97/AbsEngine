@@ -1,9 +1,7 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.Physics;
 using AbsGameProject.Components.Terrain;
-using AbsGameProject.Extensions;
 using AbsGameProject.Maths;
-using AbsGameProject.Maths.Noise;
 using Silk.NET.Maths;
 
 namespace AbsGameProject.Systems.Terrain
@@ -12,7 +10,8 @@ namespace AbsGameProject.Systems.Terrain
     {
         private int waterHeight = 35;
 
-        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.State == TerrainChunkComponent.TerrainState.None && x.IsPooled == false;
+        protected override int MaxIterationsPerFrame => 1;
+
         protected override bool UseParallel => true;
 
         public TerrainNoiseGeneratorSystem(Scene scene) : base(scene)
@@ -21,6 +20,9 @@ namespace AbsGameProject.Systems.Terrain
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
         {
+            if ((component.State == TerrainChunkComponent.TerrainState.None && component.IsPooled == false) == false)
+                return;
+
             _ = Task.Run(() =>
             {
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);

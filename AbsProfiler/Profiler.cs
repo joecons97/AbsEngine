@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 #if RELEASE_PROFILER || DEBUG
 using bottlenoselabs.C2CS.Runtime;
 using static Tracy.PInvoke;
@@ -7,7 +8,7 @@ using static Tracy.PInvoke;
 public static class Profiler
 {
 #if RELEASE_PROFILER || DEBUG
-    private static Dictionary<string, Tuple<CString, CString>> tracyAllocationsDictionary = new();
+    private static ConcurrentDictionary<string, Tuple<CString, CString>> tracyAllocationsDictionary = new();
     private static CString frameName;
 #endif
     public struct ProfilerScope : IDisposable
@@ -43,7 +44,7 @@ public static class Profiler
                 var function = (CString)functionName;
 
                 tuple = new Tuple<CString, CString>(source, function);
-                tracyAllocationsDictionary.Add(functionName, tuple);
+                tracyAllocationsDictionary.TryAdd(functionName, tuple);
             }
 
             var srcLoc = TracyAllocSrcloc((uint)lineNumber, tuple.Item1, (ulong)scriptPath.Length, tuple.Item2, (ulong)functionName.Length);

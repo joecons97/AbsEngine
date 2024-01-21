@@ -7,7 +7,6 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainDecoratorSystem : ComponentSystem<TerrainChunkComponent>
     {
-        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.IsReadyForDecoration;
         protected override int MaxIterationsPerFrame => 1;
         protected override bool UseParallel => true;
 
@@ -22,6 +21,9 @@ namespace AbsGameProject.Systems.Terrain
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
         {
+            if(component.IsReadyForDecoration == false)
+                return;
+
             _ = Task.Run(async () =>
             {
                 var decorationTasks = new List<Task>(); 

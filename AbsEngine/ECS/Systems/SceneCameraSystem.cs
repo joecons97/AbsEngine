@@ -17,11 +17,6 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
     public float MoveSpeed { get; private set; } = 15;
 
-    protected override Func<SceneCameraComponent, bool>? Predicate => (x) =>
-    {
-        return x.IsMainCamera;
-    };
-
     public SceneCameraSystem(Scene scene) : base(scene)
     {
         inputContext = scene.Game.InputContext;
@@ -104,7 +99,7 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
     public override Task OnTickAsync(SceneCameraComponent component, float deltaTime)
     {
-        if (SceneCameraComponent.IsInSceneView)
+        if (component.IsMainCamera && SceneCameraComponent.IsInSceneView)
         {
             OnTick(component, deltaTime);
         }

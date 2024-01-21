@@ -12,6 +12,8 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
     List<Task> _tasks = new List<Task>();
 
+    protected override bool UseJobSystem => false;
+
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {
         ChunkRenderJob.InitMaterials();
@@ -23,7 +25,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             _batchQueue.Enqueue(chunk);
     }
 
-    public override async void Tick(float deltaTime)
+    public override async void OnTick(float deltaTime)
     {
         if (_batchQueue.Count > 0)
         {

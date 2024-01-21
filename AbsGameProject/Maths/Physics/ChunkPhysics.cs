@@ -59,55 +59,57 @@ public static class ChunkPhysics
 
     public static bool CastVoxel(Vector3D<float> position, Vector3D<float> direction, float distance, out RayVoxelOut output)
     {
-        if (Game.Instance == null)
-            throw new GameInstanceException();
-
-        RayVoxelOut op = new RayVoxelOut();
-        Vector3D<float> curPos = position;
-        Vector3D<float> lastPos = new Vector3D<float>();
-        float distTravelled = 0;
-
-        while (distTravelled < distance)
+        using (Profiler.BeginEvent("ChunkPhysics.CastVoxel"))
         {
-            var chunkPos = curPos.ToChunkPosition();
-            var pos = (Vector3D<int>)curPos.ToChunkSpaceFloored();
+            if (Game.Instance == null)
+                throw new GameInstanceException();
 
-            foreach (var scene in Game.Instance.ActiveScenes)
+            RayVoxelOut op = new RayVoxelOut();
+            Vector3D<float> curPos = position;
+            Vector3D<float> lastPos = new Vector3D<float>();
+            float distTravelled = 0;
+
+            TerrainChunkComponent? chunk = null;
+
+            while (distTravelled < distance)
             {
-                var chunk = scene.EntityManager.GetComponents<TerrainChunkComponent>(
-                    x =>
-                    x.Entity.Transform.LocalPosition.X == chunkPos.X &&
-                    x.Entity.Transform.LocalPosition.Z == chunkPos.Z)
-                    .FirstOrDefault();
+                var chunkPos = curPos.ToChunkPosition();
+                var pos = (Vector3D<int>)curPos.ToChunkSpaceFloored();
 
-                if (chunk != null && chunk.VoxelData != null)
+                foreach (var scene in Game.Instance.ActiveScenes)
                 {
-                    var blockId = chunk.GetBlockId(pos.X, pos.Y, pos.Z);
-                    var block = BlockRegistry.GetBlock(blockId);
+                    if(chunk == null || chunk.Entity.Transform.LocalPosition != chunkPos)
+                        chunk = TerrainChunkComponent.GetAt(scene, chunkPos);
 
-                    if (blockId != 0 && block.CollisionShapes.Length > 0)
+                    if (chunk != null && chunk.VoxelData != null)
                     {
-                        op.BlockID = blockId;
-                        op.BlockPosition = (Vector3D<float>)pos;
-                        op.WorldPosition = chunkPos + (Vector3D<float>)pos;
+                        var blockId = chunk.GetBlockId(pos.X, pos.Y, pos.Z);
+                        var block = BlockRegistry.GetBlock(blockId);
 
-                        op.Chunk = chunk;
+                        if (blockId != 0 && block.CollisionShapes.Length > 0)
+                        {
+                            op.BlockID = blockId;
+                            op.BlockPosition = (Vector3D<float>)pos;
+                            op.WorldPosition = chunkPos + (Vector3D<float>)pos;
 
-                        op.PlacementPosition = lastPos.ToChunkSpaceFloored();
-                        op.PlacementChunk = lastPos.ToChunkPosition();
+                            op.Chunk = chunk;
 
-                        output = op;
-                        return true;
+                            op.PlacementPosition = lastPos.ToChunkSpaceFloored();
+                            op.PlacementChunk = lastPos.ToChunkPosition();
+
+                            output = op;
+                            return true;
+                        }
                     }
                 }
+
+                lastPos = curPos;
+                curPos += direction * STEP_SIZE;
+                distTravelled += STEP_SIZE;
             }
 
-            lastPos = curPos;
-            curPos += direction * STEP_SIZE;
-            distTravelled += STEP_SIZE;
+            output = default;
+            return false;
         }
-
-        output = default;
-        return false;
     }
 }

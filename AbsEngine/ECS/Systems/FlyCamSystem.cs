@@ -15,11 +15,6 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
 
     public float MoveSpeed { get; private set; } = 15;
 
-    protected override Func<CameraComponent, bool>? Predicate => (x) =>
-    {
-        return x.IsMainCamera;
-    };
-
     public FlyCamSystem(Scene scene) : base(scene)
     {
         inputContext = scene.Game.InputContext;
@@ -73,7 +68,7 @@ public class FlyCamSystem : AsyncComponentSystem<CameraComponent>
     {
 
 #if DEBUG
-        if (!SceneCameraComponent.IsInSceneView)
+        if (component.IsMainCamera && !SceneCameraComponent.IsInSceneView)
             OnTick(component, deltaTime);
 #endif
 

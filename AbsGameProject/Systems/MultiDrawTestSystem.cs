@@ -89,7 +89,7 @@ internal class MultiDrawTestSystem : AbsEngine.ECS.System
         _command = new MultiDrawRenderCommand<MultiDrawTestBuffer>(_drawBuffer, _drawCommands, _material, _buffers);
     }
 
-    public override void Tick(float deltaTime)
+    public override void OnTick(float deltaTime)
     {
         Renderer.Render(_command);
     }

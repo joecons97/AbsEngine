@@ -5,7 +5,6 @@ using AbsGameProject.Components.Player;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models.Meshing;
-using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using System.Numerics;
@@ -65,7 +64,7 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         }
     }
 
-    public override void Tick(float deltaTime)
+    public override void OnTick(float deltaTime)
     {
         _playerRenderer.IsEnabled = SceneCameraComponent.IsInSceneView;
 
@@ -78,42 +77,49 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
         var velocity = new Vector3D<float>(0, _playerController.VoxelRigidbody?.Velocity.Y ?? 0, 0);
 
-        var chunk = TerrainChunkComponent.GetAt(Scene, _playerController.Entity.Transform.Position);
-        if (chunk != null)
+        using (Profiler.BeginEvent("Figure out state"))
         {
-            var chunkSpacePos = _playerController.Entity.Transform.Position.ToChunkSpaceFloored();
-            var block = chunk.GetBlock((int)chunkSpacePos.X, (int)chunkSpacePos.Y + 1, (int)chunkSpacePos.Z);
-            var feetBlock = chunk.GetBlock((int)chunkSpacePos.X, (int)chunkSpacePos.Y, (int)chunkSpacePos.Z);
+            var chunk = TerrainChunkComponent.GetAt(Scene, _playerController.Entity.Transform.Position);
+            if (chunk != null)
+            {
+                var chunkSpacePos = _playerController.Entity.Transform.Position.ToChunkSpaceFloored();
+                var block = chunk.GetBlock((int)chunkSpacePos.X, (int)chunkSpacePos.Y + 1, (int)chunkSpacePos.Z);
+                var feetBlock = chunk.GetBlock((int)chunkSpacePos.X, (int)chunkSpacePos.Y, (int)chunkSpacePos.Z);
 
-            _playerController.IsInWater = block.Id == "water";
-            _playerController.IsFeetInWater = feetBlock.Id == "water";
+                _playerController.IsInWater = block.Id == "water";
+                _playerController.IsFeetInWater = feetBlock.Id == "water";
+            }
+
+            _playerController.VoxelRigidbody!.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
+
         }
 
-        _playerController.VoxelRigidbody!.Drag = _playerController.IsFeetInWater ? _playerController.WaterDrag : 1;
+        using (Profiler.BeginEvent("Input"))
+        {
+            var speed = _playerController.IsFeetInWater ? _playerController.WaterWalkSpeed : _playerController.WalkSpeed;
 
-        var speed = _playerController.IsFeetInWater ? _playerController.WaterWalkSpeed : _playerController.WalkSpeed;
+            if (_keyboard.IsKeyPressed(Key.W))
+            {
+                velocity += t.Forward * speed;
+            }
+            else if (_keyboard.IsKeyPressed(Key.S))
+            {
+                velocity += t.Forward * -speed;
+            }
 
-        if (_keyboard.IsKeyPressed(Key.W))
-        {
-            velocity += t.Forward * speed;
-        }
-        else if (_keyboard.IsKeyPressed(Key.S))
-        {
-            velocity += t.Forward * -speed;
-        }
-
-        if (_keyboard.IsKeyPressed(Key.D))
-        {
-            velocity += t.Right * -speed;
-        }
-        else if (_keyboard.IsKeyPressed(Key.A))
-        {
-            velocity += t.Right * speed;
-        }
-        if (_keyboard.IsKeyPressed(Key.Equal))
-        {
-            _mouse.Cursor.CursorMode = CursorMode.Normal;
-            SceneCameraComponent.IsInSceneView = true;
+            if (_keyboard.IsKeyPressed(Key.D))
+            {
+                velocity += t.Right * -speed;
+            }
+            else if (_keyboard.IsKeyPressed(Key.A))
+            {
+                velocity += t.Right * speed;
+            }
+            if (_keyboard.IsKeyPressed(Key.Equal))
+            {
+                _mouse.Cursor.CursorMode = CursorMode.Normal;
+                SceneCameraComponent.IsInSceneView = true;
+            }
         }
 
         _playerController.VoxelRigidbody.Velocity = velocity;
@@ -125,15 +131,18 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
 
         if (!_playerController.IsInWater)
         {
-            var pos = _playerController.Entity.Transform.Position + Vector3D<float>.UnitY * 0.5f;
-            _playerController.IsGrounded = ChunkPhysics.CastVoxel(pos, -Vector3D<float>.UnitY, .65f, out var _);
-
-            if (_keyboard.IsKeyPressed(Key.Space)
-                && _playerController.IsFeetInWater && velocity.Y > 0
-                && _playerController.CanJumpFromWater && _playerController.IsGrounded == false)
+            using (Profiler.BeginEvent("Not in water"))
             {
-                _playerController.CanJumpFromWater = false;
-                _playerController.VoxelRigidbody?.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY * 2);
+                var pos = _playerController.Entity.Transform.Position + Vector3D<float>.UnitY * 0.5f;
+                _playerController.IsGrounded = ChunkPhysics.CastVoxel(pos, -Vector3D<float>.UnitY, .65f, out var _);
+
+                if (_keyboard.IsKeyPressed(Key.Space)
+                    && _playerController.IsFeetInWater && velocity.Y > 0
+                    && _playerController.CanJumpFromWater && _playerController.IsGrounded == false)
+                {
+                    _playerController.CanJumpFromWater = false;
+                    _playerController.VoxelRigidbody?.AddImpluse(_playerController.JumpStrength * Vector3D<float>.UnitY * 2);
+                }
             }
         }
         else
@@ -153,18 +162,21 @@ public class PlayerControllerSystem : AbsEngine.ECS.System
         if (_playerController.CameraEntityTransform == null)
             return;
 
-        _mouse.Cursor.CursorMode = CursorMode.Disabled;
-        var pos = _mouse.Position;
-        if (_lastMousePos == default)
+        using (Profiler.BeginEvent("Mouse Look"))
+        {
+            _mouse.Cursor.CursorMode = CursorMode.Disabled;
+            var pos = _mouse.Position;
+            if (_lastMousePos == default)
+                _lastMousePos = pos;
+
+            var mouseDelta = _lastMousePos - pos;
             _lastMousePos = pos;
 
-        var mouseDelta = _lastMousePos - pos;
-        _lastMousePos = pos;
+            _playerController.CurrentLookUp += mouseDelta.Y * _playerController.LookSensitivity;
+            _playerController.CurrentLookUp = MathF.Min(MathF.Max(_playerController.CurrentLookUp, _playerController.MinLookUp), _playerController.MaxLookUp);
 
-        _playerController.CurrentLookUp += mouseDelta.Y * _playerController.LookSensitivity;
-        _playerController.CurrentLookUp = MathF.Min(MathF.Max(_playerController.CurrentLookUp, _playerController.MinLookUp), _playerController.MaxLookUp);
-
-        _playerController.CameraEntityTransform.LocalEulerAngles = new Vector3D<float>(_playerController.CurrentLookUp, 0, 0);
-        _playerController.Entity.Transform.LocalEulerAngles += new Vector3D<float>(0, mouseDelta.X * _playerController.LookSensitivity, 0);
+            _playerController.CameraEntityTransform.LocalEulerAngles = new Vector3D<float>(_playerController.CurrentLookUp, 0, 0);
+            _playerController.Entity.Transform.LocalEulerAngles += new Vector3D<float>(0, mouseDelta.X * _playerController.LookSensitivity, 0);
+        }
     }
 }

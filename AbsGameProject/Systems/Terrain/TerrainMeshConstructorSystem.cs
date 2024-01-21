@@ -18,10 +18,7 @@ namespace AbsGameProject.Systems.Terrain
 
     public class TerrainMeshConstructorSystem : ComponentSystem<TerrainChunkComponent>
     {
-        protected override Func<TerrainChunkComponent, bool>? Predicate => (x) => x.IsReadyForMeshGeneration;
-
         protected override int MaxIterationsPerFrame => 1;
-
 
         Queue<TerrainChunkComponent> _chunksToConstruct = new Queue<TerrainChunkComponent>();
 
@@ -158,6 +155,9 @@ namespace AbsGameProject.Systems.Terrain
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
         {
+            if (component.IsReadyForMeshGeneration == false)
+                return;
+
             if (_chunksToConstruct.Contains(component) == false)
                 _chunksToConstruct.Enqueue(component);
         }
