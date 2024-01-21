@@ -67,6 +67,8 @@ public static class ChunkPhysics
         Vector3D<float> lastPos = new Vector3D<float>();
         float distTravelled = 0;
 
+        TerrainChunkComponent? chunk = null;
+
         while (distTravelled < distance)
         {
             var chunkPos = curPos.ToChunkPosition();
@@ -74,7 +76,8 @@ public static class ChunkPhysics
 
             foreach (var scene in Game.Instance.ActiveScenes)
             {
-                var chunk = scene.EntityManager.GetComponents<TerrainChunkComponent>(
+                if(chunk == null || chunk.Entity.Transform.LocalPosition != chunkPos)
+                    chunk = scene.EntityManager.GetComponents<TerrainChunkComponent>(
                     x =>
                     x.Entity.Transform.LocalPosition.X == chunkPos.X &&
                     x.Entity.Transform.LocalPosition.Z == chunkPos.Z)
