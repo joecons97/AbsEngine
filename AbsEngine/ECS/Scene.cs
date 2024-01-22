@@ -1,5 +1,7 @@
 ﻿using AbsEngine.Exceptions;
 using AbsEngine.IO;
+using Assimp;
+using Schedulers;
 
 namespace AbsEngine.ECS;
 
@@ -16,6 +18,8 @@ public class Scene : IDisposable
     internal bool _hasTickBegun = false;
 
     internal float _deltaTime;
+
+    private List<JobHandle> jobHandles = new List<JobHandle>();
 
     internal Scene(string name)
     {
@@ -61,6 +65,7 @@ public class Scene : IDisposable
     {
         _hasTickBegun = true;
         _deltaTime = deltaTime;
+        jobHandles.Clear();
 
         using (Profiler.BeginEvent("Tick systems"))
         {
@@ -68,8 +73,18 @@ public class Scene : IDisposable
             {
                 using (Profiler.BeginEvent($"Tick {system.GetType().Name}"))
                 {
-                    system.Tick(deltaTime);
+                    var h = system.Tick(deltaTime);
+                    if(h != null)
+                        jobHandles.Add(h.Value);
                 }
+            }
+
+            using (Profiler.BeginEvent($"Flush"))
+                Game.Scheduler.Flush();
+
+            using (Profiler.BeginEvent($"Complete Jobs"))
+            {
+                JobHandle.CompleteAll(jobHandles);
             }
         }
 

@@ -5,13 +5,15 @@ namespace AbsEngine.ECS.Systems;
 
 public class MeshRendererSystem : ComponentSystem<MeshRendererComponent>
 {
+    public override bool UseJobSystem => false;
+
     public MeshRendererSystem(Scene scene) : base(scene)
     {
     }
 
     public override void OnTick(MeshRendererComponent component, float deltaTime)
     {
-        if (component.IsEnabled == false || component.Material == null || component.Mesh == null)
+        if (component.Material == null || component.Mesh == null)
             return;
 
         var trans = component.Entity.Transform;

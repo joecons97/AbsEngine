@@ -76,11 +76,9 @@ namespace AbsGameProject
             scene.RegisterSceneCamera();
 
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
-            scene.RegisterSystem<TerrainChunkRebuilderSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
             scene.RegisterSystem<TerrainDecoratorSystem>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
-            scene.RegisterSystem<TerrainChunkQueuerSystem>();
             scene.RegisterSystem<TerrainChunkBatcherRenderer>();
             scene.RegisterSystem<BlockBreakerSystem>();
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();

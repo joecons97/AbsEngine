@@ -12,6 +12,8 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
     List<Task> _tasks = new List<Task>();
 
+    public override bool UseJobSystem => false;
+
     public TerrainChunkBatcherRenderer(Scene scene) : base(scene)
     {
         ChunkRenderJob.InitMaterials();
@@ -19,11 +21,14 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 
     public static void QueueChunkForBatching(TerrainChunkComponent chunk)
     {
+        if (chunk == null)
+            return;
+
         if (_batchQueue.Contains(chunk) == false)
             _batchQueue.Enqueue(chunk);
     }
 
-    public override async void Tick(float deltaTime)
+    public override async void OnTick(float deltaTime)
     {
         if (_batchQueue.Count > 0)
         {
@@ -39,7 +44,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             {
                 if (opaqueJob == null)
                     opaqueJob = _renderJobs
-                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices.Count))
+                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices!.Count))
                         ?? new ChunkRenderJob(ChunkRenderLayer.Opaque);
 
                 opaqueJobTask = UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque);
@@ -51,7 +56,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             {
                 if (transparentJob == null)
                     transparentJob = _renderJobs
-                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices.Count))
+                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices!.Count))
                         ?? new ChunkRenderJob(ChunkRenderLayer.Transparent);
 
                 transparentJobTask = UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);

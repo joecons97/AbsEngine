@@ -2,6 +2,7 @@
 using AbsEngine.IO;
 using AbsEngine.Rendering;
 using AbsEngine.Rendering.OpenGL;
+using Schedulers;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL.Extensions.ImGui;
@@ -19,6 +20,8 @@ public class Game
     public event Action<Game>? OnLoad;
     public event Action<double, Game>? OnUpdate;
     public event Action<double, Game>? OnRender;
+    
+    public JobScheduler Scheduler { get; private set; } = null!;
 
     public IInputContext InputContext { get; private set; } = null!;
     public IGraphics Graphics { get; private set; } = null!;
@@ -68,6 +71,11 @@ public class Game
 
         _window.Load += () =>
         {
+            Scheduler = new JobScheduler(new JobScheduler.Config()
+            {
+                ThreadPrefixName = "Abs Engine Worker Thread"
+            });
+
             Graphics = IGraphics.Create(_window, gfxApi);
             InputContext = _window.CreateInput();
 

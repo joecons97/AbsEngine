@@ -69,9 +69,13 @@ namespace AbsGameProject.Components.Terrain
 
         public static TerrainChunkComponent? GetAt(Scene scene, Vector3D<float> worldPos)
         {
-            var chunkPos = worldPos.ToChunkPosition();
+            using (Profiler.BeginEvent("TerrainChunkComponent.GetAt"))
+            {
+                var chunkPos = worldPos.ToChunkPosition();
 
-            return scene.EntityManager.GetComponents<TerrainChunkComponent>(x => x.Entity.Transform.Position == chunkPos).FirstOrDefault();
+                return scene.EntityManager.GetComponents<TerrainChunkComponent>(x => x.Entity.Transform.LocalPosition == chunkPos)
+                    .FirstOrDefault();
+            }
         }
 
         public override void OnStart()
