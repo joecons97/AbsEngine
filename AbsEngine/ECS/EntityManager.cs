@@ -8,7 +8,7 @@ public class EntityManager
 {
     public Scene Scene { get; }
 
-    private Dictionary<Type, ConcurrentBag<Component>> _components = new Dictionary<Type, ConcurrentBag<Component>>();
+    private Dictionary<Type, List<Component>> _components = new Dictionary<Type, List<Component>>();
     private HashSet<Entity> _entities = new HashSet<Entity>();
 
     public EntityManager(Scene scene)
@@ -21,9 +21,12 @@ public class EntityManager
         var type = component.GetType();
 
         if (_components.ContainsKey(type) == false)
-            _components.Add(type, new ConcurrentBag<Component>() { component });
+            _components.Add(type, new List<Component>() { component });
         else
-            _components[type].Add(component);
+        {
+            lock(_components[type])
+                _components[type].Add(component);
+        }
     }
 
     public IEnumerable<T> GetComponents<T>() where T : Component
@@ -32,7 +35,8 @@ public class EntityManager
         if (_components.ContainsKey(type) == false)
             return Enumerable.Empty<T>();
 
-        return _components[type].Select(x => (T)x);
+        lock (_components[type])
+            return _components[type].Select(x => (T)x);
     }
 
     public IEnumerable<T> GetComponents<T>(out int count) where T : Component
@@ -44,10 +48,13 @@ public class EntityManager
             return Enumerable.Empty<T>();
         }
 
-        var list = _components[type];
-        count = list.Count;
+        lock (_components[type])
+        {
+            var list = _components[type];
+            count = list.Count;
 
-        return list.Select(x => (T)x);
+            return list.Select(x => (T)x);
+        }
     }
 
     public IEnumerable<T> GetComponents<T>(Func<T, bool> predicate) where T : Component
@@ -56,16 +63,18 @@ public class EntityManager
         if (_components.ContainsKey(type) == false)
             return Enumerable.Empty<T>();
 
-        return _components[type].Select(x => (T)x).Where(predicate);
+        lock (_components[type])
+            return _components[type].Select(x => (T)x).Where(predicate);
     }
 
     public IReadOnlyCollection<Component> GetComponentListReference<T>() where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-            _components.Add(type, new ConcurrentBag<Component>());
+            _components.Add(type, new List<Component>());
 
-        return _components[type];
+        lock (_components[type])
+            return _components[type];
     }
 
     public T CreateComponent<T>(Entity entity, params object?[] ctr) where T : Component
@@ -78,9 +87,12 @@ public class EntityManager
         entity.Components.Add(component);
 
         if (_components.ContainsKey(type) == false)
-            _components.Add(type, new ConcurrentBag<Component>() { component });
+            _components.Add(type, new List<Component>() { component });
         else
-            _components[type].Add(component);
+        {
+            lock (_components[type])
+                _components[type].Add(component);
+        }
 
         component.OnStart();
 
