@@ -111,10 +111,7 @@ public class Scene : IDisposable
 
         var system = (T)Activator.CreateInstance(type, list.ToArray())!;
 
-        if (system.UseJobSystem)
-            _systems.Insert(0, system);
-        else
-            _systems.Add(system);
+        _systems.Add(system);
 
         system.OnStart();
     }

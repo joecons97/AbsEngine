@@ -44,7 +44,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             {
                 if (opaqueJob == null)
                     opaqueJob = _renderJobs
-                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices.Count))
+                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices!.Count))
                         ?? new ChunkRenderJob(ChunkRenderLayer.Opaque);
 
                 opaqueJobTask = UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque);
@@ -56,7 +56,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             {
                 if (transparentJob == null)
                     transparentJob = _renderJobs
-                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices.Count))
+                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices!.Count))
                         ?? new ChunkRenderJob(ChunkRenderLayer.Transparent);
 
                 transparentJobTask = UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);
