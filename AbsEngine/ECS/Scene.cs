@@ -63,8 +63,6 @@ public class Scene : IDisposable
 
     public void Tick(float deltaTime)
     {
-        bool IsRunningJobSystemSystems = true;
-
         _hasTickBegun = true;
         _deltaTime = deltaTime;
         jobHandles.Clear();
@@ -73,20 +71,6 @@ public class Scene : IDisposable
         {
             foreach (var system in _systems)
             {
-                //We want to allow the job system systems to run before continuing
-                if (system.UseJobSystem == false && IsRunningJobSystemSystems)
-                {
-                    using (Profiler.BeginEvent($"Flush"))
-                        Game.Scheduler.Flush();
-
-                    using (Profiler.BeginEvent($"Complete Jobs"))
-                    {
-                        JobHandle.CompleteAll(jobHandles);
-                    }
-
-                    IsRunningJobSystemSystems = false;
-                }
-
                 using (Profiler.BeginEvent($"Tick {system.GetType().Name}"))
                 {
                     var h = system.Tick(deltaTime);
@@ -95,6 +79,13 @@ public class Scene : IDisposable
                 }
             }
 
+            using (Profiler.BeginEvent($"Flush"))
+                Game.Scheduler.Flush();
+
+            using (Profiler.BeginEvent($"Complete Jobs"))
+            {
+                JobHandle.CompleteAll(jobHandles);
+            }
         }
 
         _hasTickBegun = false;

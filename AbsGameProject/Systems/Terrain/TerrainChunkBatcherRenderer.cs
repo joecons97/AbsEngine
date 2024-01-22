@@ -21,6 +21,9 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 
     public static void QueueChunkForBatching(TerrainChunkComponent chunk)
     {
+        if (chunk == null)
+            return;
+
         if (_batchQueue.Contains(chunk) == false)
             _batchQueue.Enqueue(chunk);
     }

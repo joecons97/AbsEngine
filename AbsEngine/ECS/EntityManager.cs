@@ -35,6 +35,21 @@ public class EntityManager
         return _components[type].Select(x => (T)x);
     }
 
+    public IEnumerable<T> GetComponents<T>(out int count) where T : Component
+    {
+        var type = typeof(T);
+        if (_components.ContainsKey(type) == false)
+        {
+            count = 0;
+            return Enumerable.Empty<T>();
+        }
+
+        var list = _components[type];
+        count = list.Count;
+
+        return list.Select(x => (T)x);
+    }
+
     public IEnumerable<T> GetComponents<T>(Func<T, bool> predicate) where T : Component
     {
         var type = typeof(T);

@@ -18,6 +18,8 @@ public class BlockBreakerSystem : AbsEngine.ECS.System
     private Block airBlock;
     private Block dirtBlock;
 
+    public override bool UseJobSystem => false;
+
     public BlockBreakerSystem(Scene scene) : base(scene)
     {
         Mesh mesh = MeshLoader.LoadMesh("Content/Models/Cube.obj");

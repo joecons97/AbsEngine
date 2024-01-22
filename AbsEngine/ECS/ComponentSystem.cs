@@ -18,20 +18,30 @@ public abstract class ComponentSystem<T> : System where T : Component
         int count = 0;
         using (Profiler.BeginEvent("Gather Components"))
         {
+            IEnumerable<T> initQuery;
             using (Profiler.BeginEvent($"Scene.EntityManager.GetComponents<{typeof(T)}>"))
-                comps = Scene.EntityManager.GetComponents<T>().ToList();
+                initQuery = Scene.EntityManager.GetComponents<T>(out count);
 
-            count = comps.Count;
-
-            using (Profiler.BeginEvent($"Skip & Take"))
+            using (Profiler.BeginEvent($"Skip"))
             {
-                var list = comps.Skip(_componentsToSkip).Take(MaxIterationsPerFrame).ToList();
-                comps = list;
+                if (_componentsToSkip > 0)
+                    initQuery = initQuery.Skip(_componentsToSkip);
+            }
+
+            using (Profiler.BeginEvent($"Take"))
+            {
+                if (MaxIterationsPerFrame != int.MaxValue)
+                    initQuery = initQuery.Take(MaxIterationsPerFrame);
+            }
+
+            using (Profiler.BeginEvent($"ToList"))
+            {
+                comps = initQuery.ToList();
             }
 
             using (Profiler.BeginEvent("Re-count"))
             {
-                if (MaxIterationsPerFrame != int.MaxValue && ++_componentsToSkip > count)
+                if (MaxIterationsPerFrame != int.MaxValue && (_componentsToSkip += MaxIterationsPerFrame) > count)
                     _componentsToSkip = 0;
 
                 count = comps.Count;
