@@ -122,7 +122,7 @@ public static class Renderer
     static CameraComponent? GetActiveCamera(Game game)
     {
         return !SceneCameraComponent.IsInSceneView
-            ? game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>(x => x.IsMainCamera).FirstOrDefault()
+            ? game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<CameraComponent>().FirstOrDefault(x => x.IsMainCamera)
             : game._activeScenes.FirstOrDefault()?.EntityManager.GetComponents<SceneCameraComponent>().FirstOrDefault();
     }
 

@@ -29,42 +29,42 @@ public class EntityManager
         }
     }
 
-    public IEnumerable<T> GetComponents<T>() where T : Component
+    public IReadOnlyList<T> GetComponents<T>() where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-            return Enumerable.Empty<T>();
+            return new List<T>(0);
 
         lock (_components[type])
-            return _components[type].Select(x => (T)x);
+            return _components[type].Select(x => (T)x).ToList();
     }
 
-    public IEnumerable<T> GetComponents<T>(out int count) where T : Component
+    public IReadOnlyList<T> GetComponents<T>(out int count) where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
         {
             count = 0;
-            return Enumerable.Empty<T>();
+            return new List<T>(0);
         }
 
-        lock (_components[type])
+        var list = _components[type];
+        lock (list)
         {
-            var list = _components[type];
             count = list.Count;
 
-            return list.Select(x => (T)x);
+            return list.Select(x => (T)x).ToList();
         }
     }
 
-    public IEnumerable<T> GetComponents<T>(Func<T, bool> predicate) where T : Component
+    public IReadOnlyList<T> GetComponents<T>(Func<T, bool> predicate) where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-            return Enumerable.Empty<T>();
+            return new List<T>(0);
 
         lock (_components[type])
-            return _components[type].Select(x => (T)x).Where(predicate);
+            return _components[type].Select(x => (T)x).Where(predicate).ToList(); ;
     }
 
     public IReadOnlyCollection<Component> GetComponentListReference<T>() where T : Component

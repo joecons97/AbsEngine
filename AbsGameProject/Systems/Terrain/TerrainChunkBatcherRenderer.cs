@@ -33,6 +33,9 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
         if (_batchQueue.Count > 0)
         {
             var chunk = _batchQueue.Dequeue();
+            if (chunk == null)
+                return;
+
             var opaqueJob = chunk.StoredRenderJobOpaque;
             var transparentJob = chunk.StoredRenderJobTransparent;
 
