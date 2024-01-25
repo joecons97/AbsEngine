@@ -4,6 +4,7 @@ using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using Schedulers;
 using Silk.NET.Maths;
+using System.Diagnostics;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -111,10 +112,11 @@ namespace AbsGameProject.Systems.Terrain
                         var pos = new Vector3D<float>(xF, 0, zF);
 
                         var chunk = chunkRefs.FirstOrDefault(x => x.Entity.Transform.LocalPosition == pos);
+                        var c = chunk as TerrainChunkComponent;
 
-                        if (chunk != null)
+                        if (c != null && c.IsPooled == false)
                         {
-                            activeChunks.Add((TerrainChunkComponent)chunk);
+                            activeChunks.Add(c);
 
                             continue;
                         }
@@ -191,6 +193,7 @@ namespace AbsGameProject.Systems.Terrain
             }
 
             state.IsComplete = true;
+            GC.Collect();
         }
 
         void HandleNeighbours(TerrainChunkComponent chunkComp, int xF, int zF)
