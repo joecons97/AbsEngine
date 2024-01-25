@@ -32,27 +32,36 @@ public class EntityManager
 
     internal T[] GetComponentsUnsafe<T>() where T : Component
     {
-        var type = typeof(T);
-        if (_components.ContainsKey(type) == false)
-            return Array.Empty<T>();
+        using (Profiler.BeginEvent($"GetComponentsUnsafe<{typeof(T)}>"))
+        {
+            var type = typeof(T);
+            if (_components.ContainsKey(type) == false)
+                return Array.Empty<T>();
 
-        lock (_components[type])
-            return _components[type].UnsafeConvert<T>();
+            lock (_components[type])
+                return _components[type].UnsafeConvert<T>();
+        }
     }
 
     public T[] GetComponents<T>() where T : Component
     {
-        var type = typeof(T);
-        if (_components.ContainsKey(type) == false)
-            return Array.Empty<T>();
+        using (Profiler.BeginEvent($"GetComponents<{typeof(T)}>"))
+        {
+            var type = typeof(T);
+            if (_components.ContainsKey(type) == false)
+                return Array.Empty<T>();
 
-        lock (_components[type])
-            return _components[type].ToArray<T>()!;
+            lock (_components[type])
+                return _components[type].ToArray<T>()!;
+        }
     }
 
     public T? GetFirstOrDefault<T>(Func<T, bool> predicate) where T : Component
     {
-        return GetComponentsUnsafe<T>().Where(x => x != null).FirstOrDefault(predicate);
+        using (Profiler.BeginEvent($"GetFirstOrDefault<{typeof(T)}>"))
+        {
+            return GetComponentsUnsafe<T>().Where(x => x != null).FirstOrDefault(predicate);
+        }
     }
 
     public T CreateComponent<T>(Entity entity, params object?[] ctr) where T : Component
