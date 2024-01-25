@@ -1,4 +1,5 @@
-﻿using AbsEngine.ECS.Components;
+﻿using AbsEngine.Collections;
+using AbsEngine.ECS.Components;
 using System;
 using System.Collections.Concurrent;
 
@@ -8,7 +9,7 @@ public class EntityManager
 {
     public Scene Scene { get; }
 
-    private Dictionary<Type, List<Component>> _components = new Dictionary<Type, List<Component>>();
+    private Dictionary<Type, UnsafeArrayList> _components = new Dictionary<Type, UnsafeArrayList>();
     private HashSet<Entity> _entities = new HashSet<Entity>();
 
     public EntityManager(Scene scene)
@@ -21,7 +22,7 @@ public class EntityManager
         var type = component.GetType();
 
         if (_components.ContainsKey(type) == false)
-            _components.Add(type, new List<Component>() { component });
+            _components.Add(type, new UnsafeArrayList() { component });
         else
         {
             lock(_components[type])
@@ -29,52 +30,29 @@ public class EntityManager
         }
     }
 
-    public IReadOnlyList<T> GetComponents<T>() where T : Component
+    internal T[] GetComponentsUnsafe<T>() where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-            return new List<T>(0);
+            return Array.Empty<T>();
 
         lock (_components[type])
-            return _components[type].Select(x => (T)x).ToList();
+            return _components[type].UnsafeConvert<T>();
     }
 
-    public IReadOnlyList<T> GetComponents<T>(out int count) where T : Component
+    public T[] GetComponents<T>() where T : Component
     {
         var type = typeof(T);
         if (_components.ContainsKey(type) == false)
-        {
-            count = 0;
-            return new List<T>(0);
-        }
-
-        var list = _components[type];
-        lock (list)
-        {
-            count = list.Count;
-
-            return list.Select(x => (T)x).ToList();
-        }
-    }
-
-    public IReadOnlyList<T> GetComponents<T>(Func<T, bool> predicate) where T : Component
-    {
-        var type = typeof(T);
-        if (_components.ContainsKey(type) == false)
-            return new List<T>(0);
+            return Array.Empty<T>();
 
         lock (_components[type])
-            return _components[type].Select(x => (T)x).Where(predicate).ToList(); ;
+            return _components[type].ToArray<T>()!;
     }
 
-    public IReadOnlyCollection<Component> GetComponentListReference<T>() where T : Component
+    public T? GetFirstOrDefault<T>(Func<T, bool> predicate) where T : Component
     {
-        var type = typeof(T);
-        if (_components.ContainsKey(type) == false)
-            _components.Add(type, new List<Component>());
-
-        lock (_components[type])
-            return _components[type];
+        return GetComponentsUnsafe<T>().Where(x => x != null).FirstOrDefault(predicate);
     }
 
     public T CreateComponent<T>(Entity entity, params object?[] ctr) where T : Component
@@ -87,7 +65,7 @@ public class EntityManager
         entity.Components.Add(component);
 
         if (_components.ContainsKey(type) == false)
-            _components.Add(type, new List<Component>() { component });
+            _components.Add(type, new UnsafeArrayList() { component });
         else
         {
             lock (_components[type])

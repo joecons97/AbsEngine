@@ -3,9 +3,6 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Jobs;
-using Schedulers;
-using Silk.NET.Maths;
-using System.Diagnostics;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -19,8 +16,6 @@ namespace AbsGameProject.Systems.Terrain
         float lastZ;
         bool hasBeenInitialised = false;
 
-        IReadOnlyCollection<Component> sceneChunkListReference;
-
         TransformComponent? _mainCam;
         ChunkBuildJobState? activeJobState;
 
@@ -32,7 +27,6 @@ namespace AbsGameProject.Systems.Terrain
             Shader.SetGlobalFloat("FogMaxDistance", (rh - 1) * TerrainChunkComponent.WIDTH);
             Shader.SetGlobalFloat("FogMinDistance", (rh - 5) * TerrainChunkComponent.WIDTH);
 
-            sceneChunkListReference = Scene.EntityManager.GetComponentListReference<TerrainChunkComponent>();
             _mainCam = Scene.EntityManager.GetComponents<CameraComponent>().FirstOrDefault(x => x.IsMainCamera)?.Entity.Transform;
         }
 
@@ -59,7 +53,7 @@ namespace AbsGameProject.Systems.Terrain
             activeJobState = new ChunkBuildJobState();
 
             Scene.Game.Scheduler.Schedule(
-                new ChunkBuildJob(RADIUS, roundedX, roundedZ, sceneChunkListReference, ACTIVE_CHUNKS, CHUNK_POOL, Scene, activeJobState));
+                new ChunkBuildJob(RADIUS, roundedX, roundedZ, ACTIVE_CHUNKS, CHUNK_POOL, Scene, activeJobState));
 
             Scene.Game.Scheduler.Flush();
         }

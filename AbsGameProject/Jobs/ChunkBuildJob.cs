@@ -1,4 +1,5 @@
 ﻿using AbsEngine.ECS;
+using AbsEngine.ECS.Components;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Systems.Terrain;
 using Schedulers;
@@ -17,7 +18,6 @@ namespace AbsGameProject.Jobs
         int roundedX;
         int roundedZ;
 
-        IReadOnlyCollection<Component> chunkRefs;
         List<TerrainChunkComponent> activeChunks;
         List<TerrainChunkComponent> chunkPool;
 
@@ -25,14 +25,12 @@ namespace AbsGameProject.Jobs
 
         ChunkBuildJobState state;
 
-        public ChunkBuildJob(int radius, int roundedX, int roundedZ, IReadOnlyCollection<Component> previousChunks,
-            List<TerrainChunkComponent> activeChunks, List<TerrainChunkComponent> chunkPool, Scene scene,
-            ChunkBuildJobState state)
+        public ChunkBuildJob(int radius, int roundedX, int roundedZ, List<TerrainChunkComponent> activeChunks, 
+            List<TerrainChunkComponent> chunkPool, Scene scene, ChunkBuildJobState state)
         {
             this.radius = radius;
             this.roundedX = roundedX;
             this.roundedZ = roundedZ;
-            this.chunkRefs = previousChunks;
             this.activeChunks = activeChunks;
             this.chunkPool = chunkPool;
             this.scene = scene;
@@ -52,12 +50,11 @@ namespace AbsGameProject.Jobs
 
                         var pos = new Vector3D<float>(xF, 0, zF);
 
-                        var chunk = chunkRefs.FirstOrDefault(x => x.Entity.Transform.LocalPosition == pos);
-                        var c = chunk as TerrainChunkComponent;
+                        var chunk = scene.EntityManager.GetFirstOrDefault<TerrainChunkComponent>(x => x.Entity.Transform.LocalPosition == pos);
 
-                        if (c != null && c.IsPooled == false)
+                        if (chunk != null && chunk.IsPooled == false)
                         {
-                            activeChunks.Add(c);
+                            activeChunks.Add(chunk);
 
                             continue;
                         }
@@ -141,7 +138,7 @@ namespace AbsGameProject.Jobs
         {
             using (Profiler.BeginEvent($"HandleNeighbours for {chunkComp}"))
             {
-                var neighbours = chunkRefs.Where(x =>
+                var neighbours = scene.EntityManager.GetComponents<TerrainChunkComponent>().Where(x =>
                 (int)x.Entity.Transform.LocalPosition.X == xF &&
                 (int)x.Entity.Transform.LocalPosition.Z == zF + TerrainChunkComponent.WIDTH ||
 
