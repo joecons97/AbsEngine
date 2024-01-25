@@ -43,7 +43,7 @@ namespace AbsGameProject.Components.Terrain
         public ChunkRenderJob? StoredRenderJobOpaque { get; set; }
         public ChunkRenderJob? StoredRenderJobTransparent { get; set; }
 
-        public Task? ConstructionTask { get; set; }
+        public bool IsMeshBeingConstructed = false;
 
         public bool IsReadyForDecoration =>
             State == TerrainState.NoiseGenerated &&
@@ -53,7 +53,7 @@ namespace AbsGameProject.Components.Terrain
             SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
 
         public bool IsReadyForMeshGeneration =>
-            ConstructionTask == null && 
+            IsMeshBeingConstructed == false && 
             State == TerrainState.Decorated &&
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
             RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
