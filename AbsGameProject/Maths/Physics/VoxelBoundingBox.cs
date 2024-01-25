@@ -77,11 +77,8 @@ public class VoxelBoundingBox : BoundingBox, IVoxelShape
 
         bool DoPos(Vector3D<float> chunkPosition, Vector3D<float> posInChunk)
         {
-            var chunk = Game.Instance?.ActiveScenes
-                .SelectMany(x =>
-                    x.EntityManager.GetComponents<TerrainChunkComponent>(x =>
-                        x.Entity.Transform.LocalPosition.X == chunkPosition.X && x.Entity.Transform.LocalPosition.Z == chunkPosition.Z))
-                .FirstOrDefault();
+            var chunk = Game.Instance?.ActiveScenes[0].EntityManager.GetComponents<TerrainChunkComponent>().FirstOrDefault(x =>
+                    x.Entity.Transform.LocalPosition.X == chunkPosition.X && x.Entity.Transform.LocalPosition.Z == chunkPosition.Z);
 
             if (chunk != null)
             {

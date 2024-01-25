@@ -20,7 +20,11 @@ public abstract class ComponentSystem<T> : System where T : Component
         {
             IEnumerable<T> initQuery;
             using (Profiler.BeginEvent($"Scene.EntityManager.GetComponents<{typeof(T)}>"))
-                initQuery = Scene.EntityManager.GetComponents<T>(out count);
+            {
+                var arr = Scene.EntityManager.GetComponentsUnsafe<T>();
+                count = arr.Length;
+                initQuery = arr;
+            }
 
             using (Profiler.BeginEvent($"Skip"))
             {
@@ -53,6 +57,7 @@ public abstract class ComponentSystem<T> : System where T : Component
         for (int i = 0; i < comps.Count; i++)
         {
             T? comp = comps[i];
+            if(comp == null) continue;
 
             using (Profiler.BeginEvent($"Tick {comp.Entity.Name}"))
                 OnTick(comp, deltaTime);
