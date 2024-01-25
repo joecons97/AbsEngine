@@ -1,6 +1,7 @@
 ﻿using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models.Meshing;
+using AbsGameProject.Structures;
 using AbsGameProject.Systems.Terrain;
 using Schedulers;
 using Silk.NET.Maths;

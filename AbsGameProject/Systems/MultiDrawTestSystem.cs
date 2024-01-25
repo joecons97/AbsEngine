@@ -2,6 +2,7 @@
 using AbsEngine.Rendering;
 using AbsEngine.Rendering.RenderCommand;
 using AbsGameProject.Models.Meshing;
+using AbsGameProject.Structures;
 using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
 using System.Runtime.InteropServices;
