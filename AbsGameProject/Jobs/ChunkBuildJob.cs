@@ -18,7 +18,7 @@ namespace AbsGameProject.Jobs
         int roundedZ;
 
         IReadOnlyCollection<Component> chunkRefs;
-        List<TerrainChunkComponent> activeChunks;
+        Dictionary<Vector3D<float>, TerrainChunkComponent> activeChunks;
         List<TerrainChunkComponent> chunkPool;
 
         Scene scene;
@@ -26,7 +26,7 @@ namespace AbsGameProject.Jobs
         ChunkBuildJobState state;
 
         public ChunkBuildJob(int radius, int roundedX, int roundedZ, IReadOnlyCollection<Component> previousChunks,
-            List<TerrainChunkComponent> activeChunks, List<TerrainChunkComponent> chunkPool, Scene scene,
+            Dictionary<Vector3D<float>, TerrainChunkComponent> activeChunks, List<TerrainChunkComponent> chunkPool, Scene scene,
             ChunkBuildJobState state)
         {
             this.radius = radius;
@@ -57,7 +57,7 @@ namespace AbsGameProject.Jobs
 
                         if (c != null && c.IsPooled == false)
                         {
-                            activeChunks.Add(c);
+                            activeChunks.Add(pos, c);
 
                             continue;
                         }
@@ -74,7 +74,7 @@ namespace AbsGameProject.Jobs
                             chunkComp.State = TerrainChunkComponent.TerrainState.None;
                             chunkComp.IsPooled = false;
 
-                            activeChunks.Add(chunkComp);
+                            activeChunks.Add(pos, chunkComp);
                         }
                         else
                         {
@@ -85,7 +85,7 @@ namespace AbsGameProject.Jobs
                             chunkComp.State = TerrainChunkComponent.TerrainState.None;
                             chunkComp.IsPooled = false;
 
-                            activeChunks.Add(chunkComp);
+                            activeChunks.Add(pos, chunkComp);
                         }
 
                         HandleNeighbours(chunkComp, (int)pos.X, (int)pos.Z);
@@ -97,7 +97,7 @@ namespace AbsGameProject.Jobs
             using (Profiler.BeginEvent("Update chunk pool"))
             {
                 foreach (var chunk in scene.EntityManager.GetComponents<TerrainChunkComponent>()
-                    .Except(activeChunks))
+                    .Except(activeChunks.Values))
                 {
                     if (!chunkPool.Contains(chunk))
                     {

@@ -3,16 +3,16 @@ using AbsEngine.ECS.Components;
 using AbsEngine.Rendering;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Jobs;
-using Schedulers;
 using Silk.NET.Maths;
-using System.Diagnostics;
 
 namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainChunkGeneratorSystem : AbsEngine.ECS.System
     {
+        public static IReadOnlyDictionary<Vector3D<float>, TerrainChunkComponent> Chunks => ACTIVE_CHUNKS;
+
         readonly List<TerrainChunkComponent> CHUNK_POOL = new();
-        readonly List<TerrainChunkComponent> ACTIVE_CHUNKS = new();
+        static readonly Dictionary<Vector3D<float>, TerrainChunkComponent> ACTIVE_CHUNKS = new();
 
         const int RADIUS = 30;
         float lastX;
