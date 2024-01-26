@@ -36,6 +36,8 @@ namespace AbsGameProject.Components.Terrain
 
         public bool IsPooled { get; set; }
 
+        public int Scale { get; set; } = 1;
+
         public byte[,]? Heightmap { get; set; }
         public ushort[,,]? VoxelData { get; set; }
 

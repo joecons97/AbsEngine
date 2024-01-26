@@ -23,6 +23,12 @@ namespace AbsGameProject.Systems.Terrain
             if(component.IsReadyForDecoration == false)
                 return;
 
+            if (component.Scale != 1)
+            {
+                component.State = TerrainChunkComponent.TerrainState.Decorated;
+                return;
+            }
+
             _ = Task.Run(async () =>
             {
                 var decorationTasks = new List<Task>(); 

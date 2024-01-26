@@ -1,5 +1,6 @@
 ﻿using AbsEngine.ECS;
 using AbsEngine.ECS.Components;
+using AbsEngine.Maths;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Systems.Terrain;
 using Schedulers;
@@ -14,6 +15,7 @@ namespace AbsGameProject.Jobs
 
     public class ChunkBuildJob : IJob
     {
+        float lodScale;
         int radius;
         int roundedX;
         int roundedZ;
@@ -25,8 +27,8 @@ namespace AbsGameProject.Jobs
 
         ChunkBuildJobState state;
 
-        public ChunkBuildJob(int radius, int roundedX, int roundedZ, List<TerrainChunkComponent> activeChunks, 
-            List<TerrainChunkComponent> chunkPool, Scene scene, ChunkBuildJobState state)
+        public ChunkBuildJob(int radius, int roundedX, int roundedZ, List<TerrainChunkComponent> activeChunks,
+            List<TerrainChunkComponent> chunkPool, Scene scene, ChunkBuildJobState state, float lodScale)
         {
             this.radius = radius;
             this.roundedX = roundedX;
@@ -35,6 +37,19 @@ namespace AbsGameProject.Jobs
             this.chunkPool = chunkPool;
             this.scene = scene;
             this.state = state;
+            this.lodScale = lodScale;
+        }
+
+        int GetScale(Vector3D<float> camPos, Vector3D<float> chunkPos)
+        { 
+            var distance = (int)Vector3D.Distance(camPos, chunkPos) / TerrainChunkComponent.WIDTH;
+            if (distance < 1)
+                distance = 1;
+
+            var t = AbsMaths.InverseLerp(0, radius / 2, distance);
+
+            var result = (int)Scalar.Floor(t * lodScale) + 1;
+            return result;
         }
 
         public void Execute()
@@ -65,26 +80,20 @@ namespace AbsGameProject.Jobs
                         {
                             chunkComp = chunkPool.First();
                             chunkPool.Remove(chunkComp);
-
-                            chunkComp.Entity.Transform.LocalPosition = pos;
-                            chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
-                            chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                            chunkComp.IsPooled = false;
-
-                            activeChunks.Add(chunkComp);
                         }
                         else
                         {
                             var chunkEnt = scene.EntityManager.CreateEntity();
                             chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>();
-                            chunkEnt.Transform.LocalPosition = pos;
-                            chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
-                            chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                            chunkComp.IsPooled = false;
-
-                            activeChunks.Add(chunkComp);
                         }
 
+                        chunkComp.Entity.Transform.LocalPosition = pos;
+                        chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
+                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                        chunkComp.IsPooled = false;
+                        chunkComp.Scale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos);
+
+                        activeChunks.Add(chunkComp);
                         HandleNeighbours(chunkComp, (int)pos.X, (int)pos.Z);
                     }
                 }

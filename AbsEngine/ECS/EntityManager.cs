@@ -1,7 +1,5 @@
 ﻿using AbsEngine.Collections;
 using AbsEngine.ECS.Components;
-using System;
-using System.Collections.Concurrent;
 
 namespace AbsEngine.ECS;
 
@@ -25,7 +23,7 @@ public class EntityManager
             _components.Add(type, new UnsafeArrayList() { component });
         else
         {
-            lock(_components[type])
+            lock (_components[type])
                 _components[type].Add(component);
         }
     }

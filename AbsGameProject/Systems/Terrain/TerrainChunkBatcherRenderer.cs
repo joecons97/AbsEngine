@@ -24,8 +24,11 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
         if (chunk == null)
             return;
 
-        if (_batchQueue.Contains(chunk) == false)
-            _batchQueue.Enqueue(chunk);
+        lock (_batchQueue)
+        {
+            if (_batchQueue.Contains(chunk) == false)
+                _batchQueue.Enqueue(chunk);
+        }
     }
 
     public override async void OnTick(float deltaTime)

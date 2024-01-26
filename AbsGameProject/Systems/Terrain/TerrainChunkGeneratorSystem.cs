@@ -12,6 +12,8 @@ namespace AbsGameProject.Systems.Terrain
         readonly List<TerrainChunkComponent> ACTIVE_CHUNKS = new();
 
         const int RADIUS = 30;
+        const float LOD_SCALE = 2;
+
         float lastX;
         float lastZ;
         bool hasBeenInitialised = false;
@@ -53,7 +55,7 @@ namespace AbsGameProject.Systems.Terrain
             activeJobState = new ChunkBuildJobState();
 
             Scene.Game.Scheduler.Schedule(
-                new ChunkBuildJob(RADIUS, roundedX, roundedZ, ACTIVE_CHUNKS, CHUNK_POOL, Scene, activeJobState));
+                new ChunkBuildJob(RADIUS, roundedX, roundedZ, ACTIVE_CHUNKS, CHUNK_POOL, Scene, activeJobState, LOD_SCALE));
 
             Scene.Game.Scheduler.Flush();
         }

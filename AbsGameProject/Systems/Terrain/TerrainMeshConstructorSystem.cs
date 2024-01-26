@@ -27,7 +27,12 @@ namespace AbsGameProject.Systems.Terrain
 
             component.IsAwaitingRebuild = false;
 
-            Scene.Game.Scheduler.Schedule(new ChunkMeshBuildJob(component));
+            if(component.Scale == 1)
+                Scene.Game.Scheduler.Schedule(new ChunkMeshBuildJob(component));
+            else
+                Scene.Game.Scheduler.Schedule(new ChunkMeshBuildLodJob(component));
+
+
             Scene.Game.Scheduler.Flush();
         }
     }

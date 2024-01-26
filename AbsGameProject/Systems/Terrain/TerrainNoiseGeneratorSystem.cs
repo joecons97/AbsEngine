@@ -21,6 +21,12 @@ namespace AbsGameProject.Systems.Terrain
             if ((component.State == TerrainChunkComponent.TerrainState.None && component.IsPooled == false) == false)
                 return;
 
+            if(component.Scale != 1)
+            {
+                component.State = TerrainChunkComponent.TerrainState.NoiseGenerated;
+                return;
+            }
+
             _ = Task.Run(() =>
             {
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
