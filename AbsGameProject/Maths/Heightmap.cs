@@ -55,6 +55,6 @@ public static class Heightmap
         mountains *= amplitude * 2;
         mountains = mountains * mountainStrength;
 
-        return (int)MathF.Max(mountains, continent);
+        return MathF.Max(mountains, continent);
     }
 }
