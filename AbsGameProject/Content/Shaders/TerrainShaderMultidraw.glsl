@@ -47,7 +47,7 @@ struct v2f
         vertData.vertexColour = vColor;
 
         float fogDistance = length(gl_Position.xyz);
-        vertData.fogAmount = clamp(getLinearFogStrength(FogMinDistance, FogMaxDistance, fogDistance), 0.0, 1.0);
+        vertData.fogAmount = 0;//clamp(getLinearFogStrength(FogMinDistance, FogMaxDistance, fogDistance), 0.0, 1.0);
     }
 
 #endif

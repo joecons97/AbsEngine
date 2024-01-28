@@ -15,6 +15,7 @@ namespace AbsGameProject.Components.Terrain
     {
         public const int WIDTH = 16;
         public const int HEIGHT = 255;
+        public const int WATER_HEIGHT = 35;
 
         public enum TerrainState
         {
@@ -49,19 +50,19 @@ namespace AbsGameProject.Components.Terrain
         public bool IsMeshBeingConstructed = false;
 
         public bool IsReadyForDecoration =>
-            State == TerrainState.NoiseGenerated &&
+            State == TerrainState.NoiseGenerated && (Scale != 1 ||
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.NoiseGenerated &&
             RightNeighbour != null && RightNeighbour.State >= TerrainState.NoiseGenerated &&
             NorthNeighbour != null && NorthNeighbour.State >= TerrainState.NoiseGenerated &&
-            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
+            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated);
 
         public bool IsReadyForMeshGeneration =>
-            IsMeshBeingConstructed == false && 
-            State == TerrainState.Decorated &&
+            IsMeshBeingConstructed == false &&
+            State == TerrainState.Decorated && (Scale != 1 ||
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
             RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
             NorthNeighbour != null && NorthNeighbour.State >= TerrainState.Decorated &&
-            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated;
+            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated);
 
         public TerrainChunkComponent? LeftNeighbour;
         public TerrainChunkComponent? RightNeighbour;
@@ -100,10 +101,10 @@ namespace AbsGameProject.Components.Terrain
             return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && z >= 0 && z < WIDTH;
         }
 
-        public ushort GetBlockId(int x, int y, int z)
+        public ushort? GetBlockId(int x, int y, int z)
         {
             if (VoxelData == null)
-                return 0;
+                return null;
 
             if (IsPositionInBounds(x, y, z))
             {
@@ -121,7 +122,7 @@ namespace AbsGameProject.Components.Terrain
                         return LeftNeighbour.GetBlockId(WIDTH + x, y, z);
                     }
 
-                    return 0;
+                    return null;
                 }
                 else if (x >= WIDTH)
                 {
@@ -133,7 +134,7 @@ namespace AbsGameProject.Components.Terrain
                         return RightNeighbour.GetBlockId(x - WIDTH, y, z);
                     }
 
-                    return 0;
+                    return null;
                 }
 
                 if (z <= -1)
@@ -146,7 +147,7 @@ namespace AbsGameProject.Components.Terrain
                         return SouthNeighbour.GetBlockId(x, y, WIDTH + z);
                     }
 
-                    return 0;
+                    return null;
                 }
                 else if (z >= WIDTH)
                 {
@@ -158,7 +159,7 @@ namespace AbsGameProject.Components.Terrain
                         return NorthNeighbour.GetBlockId(x, y, z - WIDTH);
                     }
 
-                    return 0;
+                    return null;
                 }
 
                 if (y < 0 || y > HEIGHT - 1)
@@ -170,7 +171,7 @@ namespace AbsGameProject.Components.Terrain
 
         public Block GetBlock(int x, int y, int z)
         {
-            var id = GetBlockId(x, y, z);
+            var id = GetBlockId(x, y, z) ?? 0;
             return BlockRegistry.GetBlock(id);
         }
 
@@ -324,7 +325,7 @@ namespace AbsGameProject.Components.Terrain
 
             for (int y = HEIGHT - 1; y > 0; y--)
             {
-                var blockId = GetBlockId(x, y, z);
+                var blockId = GetBlockId(x, y, z) ?? 0;
                 var block = BlockRegistry.GetBlock(blockId);
                 if (block.Opacity > 0)
                 {
@@ -341,7 +342,7 @@ namespace AbsGameProject.Components.Terrain
 
             var c = (TerrainChunkComponent)obj;
 
-            return c.Entity.Transform.LocalPosition == Entity.Transform.LocalPosition;
+            return c.Entity.Transform.LocalPosition == Entity.Transform.LocalPosition && c.Scale == Scale;
         }
 
         public override int GetHashCode()

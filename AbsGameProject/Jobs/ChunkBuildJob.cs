@@ -1,5 +1,4 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.ECS.Components;
 using AbsEngine.Maths;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Systems.Terrain;
@@ -41,7 +40,7 @@ namespace AbsGameProject.Jobs
         }
 
         int GetScale(Vector3D<float> camPos, Vector3D<float> chunkPos)
-        { 
+        {
             var distance = (int)Vector3D.Distance(camPos, chunkPos) / TerrainChunkComponent.WIDTH;
             if (distance < 1)
                 distance = 1;
@@ -49,6 +48,7 @@ namespace AbsGameProject.Jobs
             var t = AbsMaths.InverseLerp(0, radius / 2, distance);
 
             var result = (int)Scalar.Floor(t * lodScale) + 1;
+
             return result;
         }
 
@@ -69,6 +69,16 @@ namespace AbsGameProject.Jobs
 
                         if (chunk != null && chunk.IsPooled == false)
                         {
+                            var expectedScale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos);
+                            if (chunk.Scale != expectedScale)
+                            {
+                                chunk.Scale = expectedScale;
+                                chunk.State = TerrainChunkComponent.TerrainState.None;
+                                chunk.Entity.Name = $"{chunk.Entity.Transform.LocalPosition} LOD {chunk.Scale}";
+
+                                HandleNeighbours(chunk, (int)pos.X, (int)pos.Z);
+                            }
+
                             activeChunks.Add(chunk);
 
                             continue;
@@ -88,12 +98,13 @@ namespace AbsGameProject.Jobs
                         }
 
                         chunkComp.Entity.Transform.LocalPosition = pos;
-                        chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         chunkComp.IsPooled = false;
                         chunkComp.Scale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos);
+                        chunkComp.Entity.Name = $"{chunkComp.Entity.Transform.LocalPosition} LOD {chunkComp.Scale}";
 
                         activeChunks.Add(chunkComp);
+
                         HandleNeighbours(chunkComp, (int)pos.X, (int)pos.Z);
                     }
                 }

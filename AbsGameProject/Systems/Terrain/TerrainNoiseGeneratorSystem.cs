@@ -8,8 +8,6 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainNoiseGeneratorSystem : ComponentSystem<TerrainChunkComponent>
     {
-        private int waterHeight = 35;
-
         protected override int MaxIterationsPerFrame => 1;
 
         public TerrainNoiseGeneratorSystem(Scene scene) : base(scene)
@@ -49,14 +47,14 @@ namespace AbsGameProject.Systems.Terrain
                         {
                             if (y == (int)h - 1)
                             {
-                                if (y <= waterHeight + 1)
+                                if (y <= TerrainChunkComponent.WATER_HEIGHT + 1)
                                     component.VoxelData[x, y, z] = 6;
                                 else
                                     component.VoxelData[x, y, z] = 3;
                             }
                             else if (y < h - 1 && y > h - 4)
                             {
-                                if (y <= waterHeight + 1)
+                                if (y <= TerrainChunkComponent.WATER_HEIGHT + 1)
                                     component.VoxelData[x, y, z] = 6;
                                 else
                                     component.VoxelData[x, y, z] = 2;
@@ -67,7 +65,7 @@ namespace AbsGameProject.Systems.Terrain
                             }
                             else
                             {
-                                if (y <= waterHeight)
+                                if (y <= TerrainChunkComponent.WATER_HEIGHT)
                                     component.VoxelData[x, y, z] = 5;
                             }
                         }

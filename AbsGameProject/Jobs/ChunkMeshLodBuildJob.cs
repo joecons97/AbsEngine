@@ -3,7 +3,6 @@ using AbsGameProject.Components.Terrain;
 using AbsGameProject.Maths;
 using AbsGameProject.Models.Meshing;
 using AbsGameProject.Structures;
-using AbsGameProject.Systems.Terrain;
 using Schedulers;
 using Silk.NET.Maths;
 
@@ -48,31 +47,34 @@ namespace AbsGameProject.Jobs
             {
                 for (int z = 0; z < TerrainChunkComponent.WIDTH; z += component.Scale)
                 {
-                    var y = (int)Heightmap.GetHeightAt(x, z);
+                    int worldX = (int)(x + component.Entity.Transform.LocalPosition.X);
+                    int worldZ = (int)(z + component.Entity.Transform.LocalPosition.Z);
+                    var y = (int)Heightmap.GetHeightAt(worldX, worldZ);
 
                     var blockIndex = 3;
+
+                    if (y < TerrainChunkComponent.WATER_HEIGHT - 1)
+                    {
+                        y = TerrainChunkComponent.WATER_HEIGHT - 1;
+                        blockIndex = 5;
+                    }
+
                     var block = BlockRegistry.GetBlock(blockIndex);
                     if (block.Mesh == null) continue;
 
-                    CullFaceDirection toCull = CullFaceDirection.None;
+                    CullFaceDirection toCull = CullFaceDirection.Down;
 
-                    if (ShouldRenderFace(component, x, y, z + 1, blockIndex) == false)
-                        toCull |= CullFaceDirection.North;
+                    //if (ShouldRenderFace(worldX + component.Scale, y, worldZ) == false)
+                    //    toCull |= CullFaceDirection.East;
 
-                    if (ShouldRenderFace(component, x, y, z - 1, blockIndex) == false)
-                        toCull |= CullFaceDirection.South;
+                    //if (ShouldRenderFace(worldX - component.Scale, y, worldZ) == false)
+                    //    toCull |= CullFaceDirection.East;
 
-                    if (ShouldRenderFace(component, x, y + 1, z, blockIndex) == false)
-                        toCull |= CullFaceDirection.Up;
+                    //if (ShouldRenderFace(worldX, y, worldZ + 1) == false)
+                    //    toCull |= CullFaceDirection.North;
 
-                    if (ShouldRenderFace(component, x, y - 1, z, blockIndex) == false)
-                        toCull |= CullFaceDirection.Down;
-
-                    if (ShouldRenderFace(component, x + 1, y, z, blockIndex) == false)
-                        toCull |= CullFaceDirection.West;
-
-                    if (ShouldRenderFace(component, x - 1, y, z, blockIndex) == false)
-                        toCull |= CullFaceDirection.East;
+                    //if (ShouldRenderFace(worldX, y, worldZ - 1) == false)
+                    //    toCull |= CullFaceDirection.South;
 
                     foreach (var face in block.Mesh.Faces)
                     {
@@ -80,12 +82,14 @@ namespace AbsGameProject.Jobs
                         {
                             for (var i = 0; i < face.Value.Positions.Count; i++)
                             {
-                                var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                var pos = (face.Value.Positions[i] * component.Scale) + new Vector3D<float>(x, y, z);
 
                                 var uv = face.Value.UVs[i];
-                                var col = face.Value.TintIndicies[i] == null
-                                    ? new Vector4D<float>(255, 255, 255, 0.0f)
-                                    : new Vector4D<float>(10, 204, 66, 0.0f);
+                                var col = new Vector4D<float>(255, 255, 255, 0.0f);
+                                if (face.Value.TintIndicies[i] != null)
+                                    col = new Vector4D<float>(10, 204, 66, 0.0f);
+                                else if (block.Id == "water")
+                                    col = new Vector4D<float>(24, 154, 227, 0.0f);
 
                                 var vert = new TerrainVertex()
                                 {
@@ -94,10 +98,8 @@ namespace AbsGameProject.Jobs
                                     uv = (Vector2D<Half>)uv
                                 };
 
-                                if (block.Id == "water")
-                                    component.WaterVertices.Add(vert);
-                                else
-                                    component.TerrainVertices.Add(vert);
+                                component.TerrainVertices.Add(vert);
+
                             }
                         }
                     }
@@ -106,12 +108,19 @@ namespace AbsGameProject.Jobs
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
             component.IsMeshBeingConstructed = false;
-            TerrainChunkBatcherRenderer.QueueChunkForBatching(component);
         }
 
-        bool ShouldRenderFace(TerrainChunkComponent component, int x, int y, int z, int workingBlockId)
+        bool ShouldRenderFace(int x, int y, int z)
         {
+            var h = (int)Heightmap.GetHeightAt(x, z);
+            if (y < TerrainChunkComponent.WATER_HEIGHT - 1)
+                y = TerrainChunkComponent.WATER_HEIGHT - 1;
+
+            if (h == y)
+                return false;
+
             return true;
+
             //var blockId = component.GetBlockId(x, y, z);
             //if (blockId == 0)
             //    return true;

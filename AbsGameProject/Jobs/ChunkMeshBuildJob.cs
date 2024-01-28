@@ -110,16 +110,18 @@ namespace AbsGameProject.Jobs
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructed;
             component.IsMeshBeingConstructed = false;
-            TerrainChunkBatcherRenderer.QueueChunkForBatching(component);
         }
 
         bool ShouldRenderFace(TerrainChunkComponent component, int x, int y, int z, int workingBlockId)
         {
             var blockId = component.GetBlockId(x, y, z);
+            if (blockId == null)
+                return false;
+
             if (blockId == 0)
                 return true;
 
-            var block = BlockRegistry.GetBlock(blockId);
+            var block = BlockRegistry.GetBlock(blockId.Value);
             if (block.IsTransparent)
             {
                 if (blockId != workingBlockId)

@@ -85,7 +85,7 @@ public static class ChunkPhysics
 
                     if (chunk != null && chunk.VoxelData != null)
                     {
-                        var blockId = chunk.GetBlockId(pos.X, pos.Y, pos.Z);
+                        var blockId = chunk.GetBlockId(pos.X, pos.Y, pos.Z) ?? 0;
                         var block = BlockRegistry.GetBlock(blockId);
 
                         if (blockId != 0 && block.CollisionShapes.Length > 0)

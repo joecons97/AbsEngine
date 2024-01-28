@@ -19,7 +19,7 @@ public enum ChunkRenderLayer
 
 public class ChunkRenderJob
 {
-    const int MAX_VERTEX_COUNT = 30_000 * 60;
+    const int MAX_VERTEX_COUNT = 30_000 * 100;
 
     private static readonly VertexAttributeDescriptor[] VERTEX_ATTRIBS = new VertexAttributeDescriptor[]
     {
@@ -37,6 +37,8 @@ public class ChunkRenderJob
     List<DrawArraysIndirectCommand> _drawCommands;
     List<Matrix4X4<float>> _worldMatrices;
     int _vertexCount = 0;
+
+    int? _scale = null;
 
     MultiDrawRenderCommand<Matrix4X4<float>> _interalDrawCommand;
     private List<TerrainChunkComponent> _chunks;
@@ -56,6 +58,8 @@ public class ChunkRenderJob
         }
     }
     public IReadOnlyList<TerrainChunkComponent> Chunks { get => _chunks; }
+
+    public int Scale => _scale ?? 0;
 
     public ChunkRenderLayer Layer { get; }
 
@@ -137,6 +141,9 @@ public class ChunkRenderJob
             instanceCount = 1,
             count = (uint)count
         };
+
+        if (_scale == null)
+            _scale = chunk.Scale;
 
         _vertexCount += count;
 

@@ -82,7 +82,7 @@ public class VoxelBoundingBox : BoundingBox, IVoxelShape
 
             if (chunk != null)
             {
-                ushort id = chunk.GetBlockId((int)(posInChunk.X), (int)(posInChunk.Y), (int)(posInChunk.Z));
+                ushort id = chunk.GetBlockId((int)(posInChunk.X), (int)(posInChunk.Y), (int)(posInChunk.Z)) ?? 0;
                 if (id == 0)
                     return false;
 

@@ -50,7 +50,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             {
                 if (opaqueJob == null)
                     opaqueJob = _renderJobs
-                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices!.Count))
+                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Opaque && x.HasSpaceFor(chunk.TerrainVertices!.Count) && x.Scale == chunk.Scale)
                         ?? new ChunkRenderJob(ChunkRenderLayer.Opaque);
 
                 opaqueJobTask = UpdateChunk(chunk, opaqueJob, ChunkRenderLayer.Opaque);
@@ -62,7 +62,7 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
             {
                 if (transparentJob == null)
                     transparentJob = _renderJobs
-                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices!.Count))
+                        .FirstOrDefault(x => x.Layer == ChunkRenderLayer.Transparent && x.HasSpaceFor(chunk.WaterVertices!.Count) && x.Scale == chunk.Scale)
                         ?? new ChunkRenderJob(ChunkRenderLayer.Transparent);
 
                 transparentJobTask = UpdateChunk(chunk, transparentJob, ChunkRenderLayer.Transparent);
@@ -83,11 +83,10 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                 transparentJob?.UpdateBuffers();
             }
 
-            bool isValidUpdate = false;
-            isValidUpdate =
-                (chunk.TerrainVertices != null && chunk.TerrainVertices.Count > 0 && chunk.StoredRenderJobOpaque != null)
-                ||
-                (chunk.WaterVertices != null && chunk.WaterVertices.Count > 0 && chunk.StoredRenderJobTransparent != null);
+            bool isValidUpdate =
+                    (chunk.StoredRenderJobOpaque != null || chunk.TerrainVertices == null || chunk.TerrainVertices.Count == 0)
+                    &&
+                    (chunk.StoredRenderJobTransparent != null || chunk.WaterVertices == null || chunk.WaterVertices.Count == 0);
 
             if (isValidUpdate)
             {
