@@ -68,6 +68,7 @@ public class Game
         };
 
         _window = Silk.NET.Windowing.Window.Create(_windowOptions);
+        _window.ShouldSwapAutomatically = false;
 
         _window.Load += () =>
         {
@@ -102,6 +103,8 @@ public class Game
 
         _window.Update += (dt) =>
         {
+            Profiler.ProfileFrame("Main");
+
             DeltaTime = (float)dt;
             Time += DeltaTime;
 
@@ -169,7 +172,10 @@ public class Game
                 _imGuiController?.Render();
             }
 
-            Profiler.ProfileFrame("Main");
+            using (Profiler.BeginEvent("Swap Render Buffers"))
+            {
+                Graphics.Swap();
+            }
         };
 
         _window.FramebufferResize += (s) =>

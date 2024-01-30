@@ -41,4 +41,6 @@ public interface IGraphics : IDisposable
 
         Game.Instance.Window.WindowState = fullscreen ? WindowState.Fullscreen : WindowState.Maximized;
     }
+
+    void Swap();
 }

@@ -1,6 +1,5 @@
 ﻿using AbsGameProject.Blocks;
 using AbsGameProject.Components.Terrain;
-using AbsGameProject.Maths;
 using AbsGameProject.Models.Meshing;
 using AbsGameProject.Structures;
 using Schedulers;
@@ -47,59 +46,65 @@ namespace AbsGameProject.Jobs
             {
                 for (int z = 0; z < TerrainChunkComponent.WIDTH; z += component.Scale)
                 {
-                    int worldX = (int)(x + component.Entity.Transform.LocalPosition.X);
-                    int worldZ = (int)(z + component.Entity.Transform.LocalPosition.Z);
-                    var y = (int)Heightmap.GetHeightAt(worldX, worldZ);
-
-                    var blockIndex = 3;
-
-                    if (y < TerrainChunkComponent.WATER_HEIGHT - 1)
+                    for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                     {
-                        y = TerrainChunkComponent.WATER_HEIGHT - 1;
-                        blockIndex = 5;
-                    }
+                        var state = component.GetBlockId(x, y, z) ?? 0;
+                        if (state == 0)
+                            continue;
 
-                    var block = BlockRegistry.GetBlock(blockIndex);
-                    if (block.Mesh == null) continue;
+                        var blockIndex = state;
+                        var block = BlockRegistry.GetBlock(blockIndex);
+                        if (block.Mesh == null) continue;
 
-                    CullFaceDirection toCull = CullFaceDirection.Down;
+                        CullFaceDirection toCull = CullFaceDirection.None;
 
-                    //if (ShouldRenderFace(worldX + component.Scale, y, worldZ) == false)
-                    //    toCull |= CullFaceDirection.East;
+                        if (ShouldRenderFace(component, x, y, z + component.Scale, blockIndex) == false)
+                            toCull |= CullFaceDirection.North;
 
-                    //if (ShouldRenderFace(worldX - component.Scale, y, worldZ) == false)
-                    //    toCull |= CullFaceDirection.East;
+                        if (ShouldRenderFace(component, x, y, z - component.Scale, blockIndex) == false)
+                            toCull |= CullFaceDirection.South;
 
-                    //if (ShouldRenderFace(worldX, y, worldZ + 1) == false)
-                    //    toCull |= CullFaceDirection.North;
+                        if (ShouldRenderFace(component, x, y + component.Scale, z, blockIndex) == false)
+                            toCull |= CullFaceDirection.Up;
 
-                    //if (ShouldRenderFace(worldX, y, worldZ - 1) == false)
-                    //    toCull |= CullFaceDirection.South;
+                        if (ShouldRenderFace(component, x, y - component.Scale, z, blockIndex) == false)
+                            toCull |= CullFaceDirection.Down;
 
-                    foreach (var face in block.Mesh.Faces)
-                    {
-                        if ((toCull & face.Key) != face.Key)
+                        if (ShouldRenderFace(component, x + component.Scale, y, z, blockIndex) == false)
+                            toCull |= CullFaceDirection.West;
+
+                        if (ShouldRenderFace(component, x - component.Scale, y, z, blockIndex) == false)
+                            toCull |= CullFaceDirection.East;
+
+                        if (toCull == CullFaceDirection.All)
+                            continue;
+
+                        foreach (var face in block.Mesh.Faces)
                         {
-                            for (var i = 0; i < face.Value.Positions.Count; i++)
+                            if ((toCull & face.Key) != face.Key)
                             {
-                                var pos = (face.Value.Positions[i] * component.Scale) + new Vector3D<float>(x, y, z);
-
-                                var uv = face.Value.UVs[i];
-                                var col = new Vector4D<float>(255, 255, 255, 0.0f);
-                                if (face.Value.TintIndicies[i] != null)
-                                    col = new Vector4D<float>(10, 204, 66, 0.0f);
-                                else if (block.Id == "water")
-                                    col = new Vector4D<float>(24, 154, 227, 0.0f);
-
-                                var vert = new TerrainVertex()
+                                for (var i = 0; i < face.Value.Positions.Count; i++)
                                 {
-                                    position = (Vector3D<byte>)pos,
-                                    colour = (Vector4D<byte>)col,
-                                    uv = (Vector2D<Half>)uv
-                                };
+                                    var basePos = face.Value.Positions[i];
 
-                                component.TerrainVertices.Add(vert);
+                                    var pos = (basePos * component.Scale) + new Vector3D<float>(x, y, z);
 
+                                    var uv = face.Value.UVs[i];
+                                    var col = new Vector4D<float>(255, 255, 255, 0.0f);
+                                    if (face.Value.TintIndicies[i] != null)
+                                        col = new Vector4D<float>(10, 204, 66, 0.0f);
+                                    else if (block.Id == "water")
+                                        col = new Vector4D<float>(24, 154, 227, 0.0f);
+
+                                    var vert = new TerrainVertex()
+                                    {
+                                        position = (Vector3D<byte>)pos,
+                                        colour = (Vector4D<byte>)col,
+                                        uv = (Vector2D<Half>)uv
+                                    };
+
+                                    component.TerrainVertices.Add(vert);
+                                }
                             }
                         }
                     }
@@ -110,34 +115,28 @@ namespace AbsGameProject.Jobs
             component.IsMeshBeingConstructed = false;
         }
 
-        bool ShouldRenderFace(int x, int y, int z)
+        bool ShouldRenderFace(TerrainChunkComponent component, int x, int y, int z, int workingBlockId)
         {
-            var h = (int)Heightmap.GetHeightAt(x, z);
-            if (y < TerrainChunkComponent.WATER_HEIGHT - 1)
-                y = TerrainChunkComponent.WATER_HEIGHT - 1;
-
-            if (h == y)
+            var blockId = component.GetBlockId(x, y, z, out var takenFrom);
+            if (blockId == null)
                 return false;
 
-            return true;
+            if (blockId == 0)
+                return true;
 
-            //var blockId = component.GetBlockId(x, y, z);
-            //if (blockId == 0)
-            //    return true;
+            var block = BlockRegistry.GetBlock(blockId.Value);
+            if (block.IsTransparent)
+            {
+                if (blockId != workingBlockId)
+                    return true;
 
-            //var block = BlockRegistry.GetBlock(blockId);
-            //if (block.IsTransparent)
-            //{
-            //    if (blockId != workingBlockId)
-            //        return true;
+                if (block.TransparentCullSelf || takenFrom?.Scale != 1)
+                    return false;
 
-            //    if (block.TransparentCullSelf)
-            //        return false;
+                return true;
+            }
 
-            //    return true;
-            //}
-
-            //return false;
+            return false;
         }
 
     }

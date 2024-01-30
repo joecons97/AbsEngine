@@ -19,19 +19,13 @@ namespace AbsGameProject.Systems.Terrain
             if ((component.State == TerrainChunkComponent.TerrainState.None && component.IsPooled == false) == false)
                 return;
 
-            if(component.Scale != 1)
-            {
-                component.State = TerrainChunkComponent.TerrainState.NoiseGenerated;
-                return;
-            }
-
             _ = Task.Run(() =>
             {
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
                 var maxY = 0;
                 var trans = component.Entity.Transform;
-                component.VoxelData = new ushort[TerrainChunkComponent.WIDTH, TerrainChunkComponent.HEIGHT, TerrainChunkComponent.WIDTH];
-                component.Heightmap = new byte[TerrainChunkComponent.WIDTH, TerrainChunkComponent.WIDTH];
+                component.VoxelData = new byte[TerrainChunkComponent.WIDTH * TerrainChunkComponent.HEIGHT * TerrainChunkComponent.WIDTH];
+                component.Heightmap = new byte[TerrainChunkComponent.WIDTH * TerrainChunkComponent.WIDTH];
 
                 for (int x = 0; x < TerrainChunkComponent.WIDTH; x++)
                 {
@@ -42,31 +36,31 @@ namespace AbsGameProject.Systems.Terrain
                         if (h > maxY)
                             maxY = (int)h;
 
-                        component.Heightmap[x, z] = Math.Min((byte)h, (byte)TerrainChunkComponent.HEIGHT);
+                        component.Heightmap[component.GetIndexFromCoords(x, z)] = Math.Min((byte)h, (byte)TerrainChunkComponent.HEIGHT);
                         for (int y = 0; y < TerrainChunkComponent.HEIGHT - 1; y++)
                         {
                             if (y == (int)h - 1)
                             {
                                 if (y <= TerrainChunkComponent.WATER_HEIGHT + 1)
-                                    component.VoxelData[x, y, z] = 6;
+                                    component.VoxelData[component.GetIndexFromCoords(x, y, z)] = 6;
                                 else
-                                    component.VoxelData[x, y, z] = 3;
+                                    component.VoxelData[component.GetIndexFromCoords(x, y, z)] = 3;
                             }
                             else if (y < h - 1 && y > h - 4)
                             {
                                 if (y <= TerrainChunkComponent.WATER_HEIGHT + 1)
-                                    component.VoxelData[x, y, z] = 6;
+                                    component.VoxelData[component.GetIndexFromCoords(x, y, z)] = 6;
                                 else
-                                    component.VoxelData[x, y, z] = 2;
+                                    component.VoxelData[component.GetIndexFromCoords(x, y, z)] = 2;
                             }
                             else if (y < h - 4)
                             {
-                                component.VoxelData[x, y, z] = 1;
+                                component.VoxelData[component.GetIndexFromCoords(x, y, z)] = 1;
                             }
                             else
                             {
                                 if (y <= TerrainChunkComponent.WATER_HEIGHT)
-                                    component.VoxelData[x, y, z] = 5;
+                                    component.VoxelData[component.GetIndexFromCoords(x, y, z)] = 5;
                             }
                         }
                     }

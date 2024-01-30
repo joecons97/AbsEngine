@@ -30,12 +30,12 @@ public static class BlockRegistry
         return block;
     }
 
-    public static ushort GetBlockIndex(Block? block)
+    public static byte GetBlockIndex(Block? block)
     {
         if (block == null)
             return 0;
 
-        return (ushort)_blocks.Keys.ToList().IndexOf(block.Id);
+        return (byte)_blocks.Keys.ToList().IndexOf(block.Id);
     }
 
     public static List<Block> GetBlocks() 

@@ -144,5 +144,10 @@ namespace AbsEngine.Rendering.DirectX11
         {
             throw new NotImplementedException();
         }
+
+        public void Swap()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,8 +1,8 @@
 ﻿#define culling back
+#define GOOD_FOG
 
 struct v2f 
 {
-    vec4 localPos;
     vec4 worldPos;
     vec2 uvs;
     vec4 vertexColour;
@@ -24,6 +24,7 @@ struct v2f
     
     uniform float FogMaxDistance;
     uniform float FogMinDistance;
+    uniform vec3 _CameraPosition;
 
     out v2f vertData;
     
@@ -41,13 +42,17 @@ struct v2f
         mat4 mvp = _Vp * worldMat;
         gl_Position = mvp * vec4(vPos, 1.0);
 
-        vertData.localPos = vec4(vPos, 1.0);
-        vertData.worldPos = worldMat * vec4(vPos, 1.0);
-        vertData.uvs = vec2(vUvs.x, vUvs.y);
+        vertData.uvs = vUvs.xy;
         vertData.vertexColour = vColor;
+        
+        #ifdef GOOD_FOG
+            vertData.worldPos = worldMat * vec4(vPos, 1.0);
+            float fogDistance = length(_CameraPosition - vertData.worldPos.xyz);
+        #else
+            float fogDistance = length(gl_Position.xyz);
+        #endif
 
-        float fogDistance = length(gl_Position.xyz);
-        vertData.fogAmount = 0;//clamp(getLinearFogStrength(FogMinDistance, FogMaxDistance, fogDistance), 0.0, 1.0);
+        vertData.fogAmount = clamp(getLinearFogStrength(FogMinDistance, FogMaxDistance, fogDistance), 0.0, 1.0);
     }
 
 #endif
@@ -60,8 +65,6 @@ struct v2f
 
     uniform vec4 uFogColour;
     
-    uniform vec3 _CameraPosition;
-
     out vec4 FragColor;
     
     void main()

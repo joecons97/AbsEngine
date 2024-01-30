@@ -73,7 +73,7 @@ namespace AbsGameProject
             SetupPlayer(scene);
 
             scene.RegisterMeshRenderer();
-            scene.RegisterSceneCamera();
+            scene.RegisterSceneCamera(30);
 
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();

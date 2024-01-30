@@ -303,59 +303,63 @@ internal class OpenGLShader : IBackendShader
         var directives = allLines.Where(x => x.Contains("#define"));
         foreach (var item in directives)
         {
-            var directive = item.Trim().ToLower();
-            var split = directive.Split(" ");
-            var type = split[1];
-            var param = split[2].TrimEnd(';');
-
-            switch (type)
+            try
             {
-                case "include":
-                    var file = File.ReadAllText(param.Trim('\"'));
-                    shader = $"{file}\n{shader}".Replace(item, "");
-                    break;
-                case "culling":
-                    _culling = param.ToLower() switch
-                    {
-                        "back" => TriangleFace.Back,
-                        "front" => TriangleFace.Front,
-                        "both" => TriangleFace.FrontAndBack,
-                        "none" => null,
-                        _ => TriangleFace.Back
-                    };
-                    break;
-                case "blending":
-                    var srcStr = param.Split(":")[0].ToLower();
-                    var dstStr = param.Split(":")[1].ToLower();
+                var directive = item.Trim().ToLower();
+                var split = directive.Split(" ");
+                var type = split[1];
+                var param = split[2].TrimEnd(';');
 
-                    BlendingFactor srcBlendingFactor = default;
-                    BlendingFactor dstBlendingFactor = default;
+                switch (type)
+                {
+                    case "include":
+                        var file = File.ReadAllText(param.Trim('\"'));
+                        shader = $"{file}\n{shader}".Replace(item, "");
+                        break;
+                    case "culling":
+                        _culling = param.ToLower() switch
+                        {
+                            "back" => TriangleFace.Back,
+                            "front" => TriangleFace.Front,
+                            "both" => TriangleFace.FrontAndBack,
+                            "none" => null,
+                            _ => TriangleFace.Back
+                        };
+                        break;
+                    case "blending":
+                        var srcStr = param.Split(":")[0].ToLower();
+                        var dstStr = param.Split(":")[1].ToLower();
 
-                    if (!Enum.TryParse(srcStr, true, out srcBlendingFactor))
-                        throw new InvalidDataException($"Invalid blending type: {srcStr}");
+                        BlendingFactor srcBlendingFactor = default;
+                        BlendingFactor dstBlendingFactor = default;
 
-                    if (!Enum.TryParse(dstStr, true, out dstBlendingFactor))
-                        throw new InvalidDataException($"Invalid blending type: {dstStr}");
+                        if (!Enum.TryParse(srcStr, true, out srcBlendingFactor))
+                            throw new InvalidDataException($"Invalid blending type: {srcStr}");
 
-                    _blendSrcFactor = srcBlendingFactor;
-                    _blendDstFactor = dstBlendingFactor;
+                        if (!Enum.TryParse(dstStr, true, out dstBlendingFactor))
+                            throw new InvalidDataException($"Invalid blending type: {dstStr}");
 
-                    break;
-                case "queue":
+                        _blendSrcFactor = srcBlendingFactor;
+                        _blendDstFactor = dstBlendingFactor;
 
-                    if (param.ToLower() == "transparent")
-                    {
-                        _isTransparent = true;
-                        _renderQueuePos = Renderer.TRANSPARENT_QUEUE_POSITION;
-                    }
-                    else
-                    {
-                        if (!int.TryParse(param, out _renderQueuePos))
-                            throw new InvalidDataException($"Invalid render queue position: {param}");
-                    }
+                        break;
+                    case "queue":
 
-                    break;
+                        if (param.ToLower() == "transparent")
+                        {
+                            _isTransparent = true;
+                            _renderQueuePos = Renderer.TRANSPARENT_QUEUE_POSITION;
+                        }
+                        else
+                        {
+                            if (!int.TryParse(param, out _renderQueuePos))
+                                throw new InvalidDataException($"Invalid render queue position: {param}");
+                        }
+
+                        break;
+                }
             }
+            catch { }
         }
     }
 

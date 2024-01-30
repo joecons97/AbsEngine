@@ -2,7 +2,6 @@
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Models.Meshing;
 using AbsGameProject.Structures;
-using AbsGameProject.Systems.Terrain;
 using Schedulers;
 using Silk.NET.Maths;
 
@@ -25,15 +24,15 @@ namespace AbsGameProject.Jobs
             component.IsMeshBeingConstructed = true;
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructing;
-            if (component.TerrainVertices == null)
-                component.TerrainVertices = new List<TerrainVertex>();
-            else
+            if (component.TerrainVertices != null)
                 component.TerrainVertices.Clear();
-
-            if (component.WaterVertices == null)
-                component.WaterVertices = new List<TerrainVertex>();
             else
+                component.TerrainVertices = new List<TerrainVertex>();
+
+            if (component.WaterVertices != null)
                 component.WaterVertices.Clear();
+            else
+                component.WaterVertices = new List<TerrainVertex>();
 
             var vertices = new List<Vector3D<float>>();
             var colours = new List<Vector4D<float>>();
@@ -49,7 +48,7 @@ namespace AbsGameProject.Jobs
                 {
                     for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                     {
-                        var state = component.VoxelData[x, y, z];
+                        var state = component.GetBlockId(x, y, z) ?? 0;
                         if (state == 0)
                             continue;
 
@@ -76,6 +75,9 @@ namespace AbsGameProject.Jobs
 
                         if (ShouldRenderFace(component, x - 1, y, z, blockIndex) == false)
                             toCull |= CullFaceDirection.East;
+
+                        if (toCull == CullFaceDirection.All)
+                            continue;
 
                         foreach (var face in block.Mesh.Faces)
                         {

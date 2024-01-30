@@ -1,9 +1,7 @@
-﻿using AbsEngine.Physics;
-using AbsEngine.Rendering;
+﻿using AbsEngine.Rendering;
 using AbsEngine.Rendering.RenderCommand;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Structures;
-using AbsGameProject.Systems.Terrain;
 using AbsGameProject.Textures;
 using Silk.NET.Maths;
 using System.Diagnostics;
@@ -38,8 +36,6 @@ public class ChunkRenderJob
     List<Matrix4X4<float>> _worldMatrices;
     int _vertexCount = 0;
 
-    int? _scale = null;
-
     MultiDrawRenderCommand<Matrix4X4<float>> _interalDrawCommand;
     private List<TerrainChunkComponent> _chunks;
 
@@ -58,8 +54,6 @@ public class ChunkRenderJob
         }
     }
     public IReadOnlyList<TerrainChunkComponent> Chunks { get => _chunks; }
-
-    public int Scale => _scale ?? 0;
 
     public ChunkRenderLayer Layer { get; }
 
@@ -112,8 +106,8 @@ public class ChunkRenderJob
 
                 count = chunk.TerrainVertices.Count;
                 if (!HasSpaceFor(count))
-                     throw new OverflowException($"ChunkRenderJob Capacity reached " +
-                        $"{_vertexCount} + {count} = {_vertexCount + count} > {MAX_VERTEX_COUNT}");
+                    throw new OverflowException($"ChunkRenderJob Capacity reached " +
+                       $"{_vertexCount} + {count} = {_vertexCount + count} > {MAX_VERTEX_COUNT}");
 
                 chunk.StoredRenderJobOpaque = this;
 
@@ -142,9 +136,6 @@ public class ChunkRenderJob
             count = (uint)count
         };
 
-        if (_scale == null)
-            _scale = chunk.Scale;
-
         _vertexCount += count;
 
         _chunks.Add(chunk);
@@ -161,6 +152,15 @@ public class ChunkRenderJob
         _interalDrawCommand.Commands = _drawCommands.ToArray();
     }
 
+    public int? TryGetChunkIndex(TerrainChunkComponent chunk)
+    {
+        var index = _chunks.IndexOf(chunk);
+        if (index == -1)
+            return null;
+
+        return index;
+    }
+
     public void RemoveChunk(TerrainChunkComponent chunk)
     {
         var index = _chunks.IndexOf(chunk);
@@ -169,13 +169,6 @@ public class ChunkRenderJob
         {
             Debug.WriteLine("Chunk does not exist in batch");
             return;
-            //throw new Exception("Chunk does not exist in batch");
-        }
-
-        var oldMax = _drawCommands.Max(x => x.firstVertex + x.count);
-        if (_vertexCount != oldMax)
-        {
-            throw new Exception("Somehow vertex count has got out of sync!");
         }
 
         switch (Layer)
@@ -188,10 +181,15 @@ public class ChunkRenderJob
                 break;
         }
 
-        var chunkCmd = _drawCommands[index];
+        RemoveChunk(index);
+    }
+
+    public void RemoveChunk(int chunkIndex)
+    {
+        var chunkCmd = _drawCommands[chunkIndex];
         var nextStart = chunkCmd.firstVertex;
 
-        for (int i = index + 1; i < _drawCommands.Count; i++)
+        for (int i = chunkIndex + 1; i < _drawCommands.Count; i++)
         {
             var cmd = _drawCommands[i];
 
@@ -223,9 +221,9 @@ public class ChunkRenderJob
             _drawCommands[i] = cmd;
         }
 
-        _drawCommands.RemoveAt(index);
-        _worldMatrices.RemoveAt(index);
-        _chunks.RemoveAt(index);
+        _drawCommands.RemoveAt(chunkIndex);
+        _worldMatrices.RemoveAt(chunkIndex);
+        _chunks.RemoveAt(chunkIndex);
 
         _vertexCount = _drawCommands.Count > 0 ?
             (int)_drawCommands.Max(x => x.firstVertex + x.count)

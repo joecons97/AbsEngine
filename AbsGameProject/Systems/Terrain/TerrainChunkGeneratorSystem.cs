@@ -11,8 +11,8 @@ namespace AbsGameProject.Systems.Terrain
         readonly List<TerrainChunkComponent> CHUNK_POOL = new();
         readonly List<TerrainChunkComponent> ACTIVE_CHUNKS = new();
 
-        const int RADIUS = 30;
-        const float LOD_SCALE = 2;
+        const int RADIUS = 32;
+        const float LOD_SCALE = 2f;
 
         float lastX;
         float lastZ;
@@ -26,7 +26,7 @@ namespace AbsGameProject.Systems.Terrain
         public TerrainChunkGeneratorSystem(Scene scene) : base(scene)
         {
             var rh = RADIUS / 2;
-            Shader.SetGlobalFloat("FogMaxDistance", (rh - 1) * TerrainChunkComponent.WIDTH);
+            Shader.SetGlobalFloat("FogMaxDistance", (rh) * TerrainChunkComponent.WIDTH);
             Shader.SetGlobalFloat("FogMinDistance", (rh - 5) * TerrainChunkComponent.WIDTH);
 
             _mainCam = Scene.EntityManager.GetComponents<CameraComponent>().FirstOrDefault(x => x.IsMainCamera)?.Entity.Transform;
