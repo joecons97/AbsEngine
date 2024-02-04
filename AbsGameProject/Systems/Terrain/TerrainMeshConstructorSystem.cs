@@ -6,7 +6,7 @@ namespace AbsGameProject.Systems.Terrain
 {
     public class TerrainMeshConstructorSystem : ComponentSystem<TerrainChunkComponent>
     {
-        //protected override int MaxIterationsPerFrame => 50;
+        protected override int MaxIterationsPerFrame => 50;
 
         public override bool UseJobSystem => false;
 

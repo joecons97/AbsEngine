@@ -10,11 +10,6 @@ using System.Diagnostics;
 
 namespace AbsGameProject.Components.Terrain
 {
-    public class TerrainLodChunkComponent : Component
-    {
-        public TerrainChunkComponent? Data { get; set; }
-    }
-
     public class TerrainChunkComponent : Component
     {
         public const int WIDTH = 32;
