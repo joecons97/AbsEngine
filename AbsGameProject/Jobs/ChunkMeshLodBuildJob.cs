@@ -7,32 +7,32 @@ using Silk.NET.Maths;
 
 namespace AbsGameProject.Jobs
 {
-    public class ChunkMeshBuildJob : IJob
+    public class ChunkMeshBuildLodJob : IJob
     {
         public TerrainChunkComponent component;
 
-        public ChunkMeshBuildJob(TerrainChunkComponent component)
+        public ChunkMeshBuildLodJob(TerrainChunkComponent component)
         {
             this.component = component;
         }
 
         public void Execute()
         {
-            if (component.VoxelData == null || component.State == TerrainChunkComponent.TerrainState.MeshConstructing)
+            if (component.State == TerrainChunkComponent.TerrainState.MeshConstructing)
                 return;
 
             component.IsMeshBeingConstructed = true;
 
             component.State = TerrainChunkComponent.TerrainState.MeshConstructing;
-            if (component.TerrainVertices != null)
-                component.TerrainVertices.Clear();
-            else
+            if (component.TerrainVertices == null)
                 component.TerrainVertices = new List<TerrainVertex>();
-
-            if (component.WaterVertices != null)
-                component.WaterVertices.Clear();
             else
+                component.TerrainVertices.Clear();
+
+            if (component.WaterVertices == null)
                 component.WaterVertices = new List<TerrainVertex>();
+            else
+                component.WaterVertices.Clear();
 
             var vertices = new List<Vector3D<float>>();
             var colours = new List<Vector4D<float>>();
@@ -42,9 +42,9 @@ namespace AbsGameProject.Jobs
             var transparentColours = new List<Vector4D<float>>();
             var transparentUvs = new List<Vector2D<float>>();
 
-            for (int x = 0; x < TerrainChunkComponent.WIDTH; x++)
+            for (int x = 0; x < TerrainChunkComponent.WIDTH; x += component.Scale)
             {
-                for (int z = 0; z < TerrainChunkComponent.WIDTH; z++)
+                for (int z = 0; z < TerrainChunkComponent.WIDTH; z += component.Scale)
                 {
                     for (int y = 0; y < TerrainChunkComponent.HEIGHT; y++)
                     {
@@ -58,39 +58,45 @@ namespace AbsGameProject.Jobs
 
                         CullFaceDirection toCull = CullFaceDirection.None;
 
-                        if (ShouldRenderFace(component, x, y, z + 1, blockIndex) == false)
+                        if (ShouldRenderFace(component, x, y, z + component.Scale, blockIndex) == false)
                             toCull |= CullFaceDirection.North;
 
-                        if (ShouldRenderFace(component, x, y, z - 1, blockIndex) == false)
+                        if (ShouldRenderFace(component, x, y, z - component.Scale, blockIndex) == false)
                             toCull |= CullFaceDirection.South;
 
-                        if (ShouldRenderFace(component, x, y + 1, z, blockIndex) == false)
+                        if (ShouldRenderFace(component, x, y + component.Scale, z, blockIndex) == false)
                             toCull |= CullFaceDirection.Up;
 
-                        if (ShouldRenderFace(component, x, y - 1, z, blockIndex) == false)
+                        if (ShouldRenderFace(component, x, y - component.Scale, z, blockIndex) == false)
                             toCull |= CullFaceDirection.Down;
 
-                        if (ShouldRenderFace(component, x + 1, y, z, blockIndex) == false)
+                        if (ShouldRenderFace(component, x + component.Scale, y, z, blockIndex) == false)
                             toCull |= CullFaceDirection.West;
 
-                        if (ShouldRenderFace(component, x - 1, y, z, blockIndex) == false)
+                        if (ShouldRenderFace(component, x - component.Scale, y, z, blockIndex) == false)
                             toCull |= CullFaceDirection.East;
 
                         if (toCull == CullFaceDirection.All)
                             continue;
 
-                        foreach (var face in block.Mesh.Faces)
+                        var mesh = block.MeshLod ?? block.Mesh;
+
+                        foreach (var face in mesh.Faces)
                         {
                             if ((toCull & face.Key) != face.Key)
                             {
                                 for (var i = 0; i < face.Value.Positions.Count; i++)
                                 {
-                                    var pos = face.Value.Positions[i] + new Vector3D<float>(x, y, z);
+                                    var basePos = face.Value.Positions[i];
+
+                                    var pos = (basePos * component.Scale) + new Vector3D<float>(x, y, z);
 
                                     var uv = face.Value.UVs[i];
-                                    var col = face.Value.TintIndicies[i] == null
-                                        ? new Vector4D<float>(255, 255, 255, 0.0f)
-                                        : new Vector4D<float>(10, 204, 66, 0.0f);
+                                    var col = new Vector4D<float>(255, 255, 255, 0.0f);
+                                    if (face.Value.TintIndicies[i] != null)
+                                        col = new Vector4D<float>(10, 204, 66, 0.0f);
+                                    else if (block.Id == "water")
+                                        col = new Vector4D<float>(24, 154, 227, 0.0f);
 
                                     var vert = new TerrainVertex()
                                     {
@@ -99,10 +105,7 @@ namespace AbsGameProject.Jobs
                                         uv = (Vector2D<Half>)uv
                                     };
 
-                                    if (block.Id == "water")
-                                        component.WaterVertices.Add(vert);
-                                    else
-                                        component.TerrainVertices.Add(vert);
+                                    component.TerrainVertices.Add(vert);
                                 }
                             }
                         }
@@ -116,7 +119,7 @@ namespace AbsGameProject.Jobs
 
         bool ShouldRenderFace(TerrainChunkComponent component, int x, int y, int z, int workingBlockId)
         {
-            var blockId = component.GetBlockId(x, y, z);
+            var blockId = component.GetBlockId(x, y, z, out var takenFrom);
             if (blockId == null)
                 return false;
 
@@ -129,10 +132,7 @@ namespace AbsGameProject.Jobs
                 if (blockId != workingBlockId)
                     return true;
 
-                if (block.TransparentCullSelf)
-                    return false;
-
-                return true;
+                return false;
             }
 
             return false;

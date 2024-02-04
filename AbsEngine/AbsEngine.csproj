@@ -10,6 +10,16 @@
     <Authors>Josephus</Authors>
     <Product>Abs Engine</Product>
     <Configurations>Debug;Release;Release_Profiler;Debug_NoProfiler</Configurations>
+    <SignAssembly>False</SignAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NoProfiler|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_Profiler|AnyCPU'">
+    <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+    <Optimize>True</Optimize>
   </PropertyGroup>
 
   <ItemGroup>

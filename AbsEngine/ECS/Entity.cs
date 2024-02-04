@@ -53,7 +53,20 @@ public class Entity
         if (Components.ContainsKey(type) == false)
             return null;
 
-        return (T)Components[type].First();
+        return (T?)Components[type].FirstOrDefault();
+    }
+
+    public void RemoveComponent<T>(T component) where T : Component
+    {
+        Scene.EntityManager.RemoveComponent(this, component);
+    }
+
+    public void RemoveComponent<T>() where T : Component
+    {
+        var comp = GetComponent<T>();
+
+        if (comp != null)
+            Scene.EntityManager.RemoveComponent(this, comp);
     }
 
     public T AddComponent<T>(params object?[] ctr) where T : Component

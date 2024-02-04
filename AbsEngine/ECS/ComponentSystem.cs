@@ -23,7 +23,7 @@ public abstract class ComponentSystem<T> : System where T : Component
             {
                 var arr = Scene.EntityManager.GetComponentsUnsafe<T>();
                 count = arr.Length;
-                initQuery = arr;
+                initQuery = arr.Where(x => x != null && x.IsEnabled);
             }
 
             using (Profiler.BeginEvent($"Skip"))

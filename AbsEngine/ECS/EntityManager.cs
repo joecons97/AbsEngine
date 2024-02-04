@@ -1,7 +1,5 @@
 ﻿using AbsEngine.Collections;
 using AbsEngine.ECS.Components;
-using System;
-using System.Collections.Concurrent;
 
 namespace AbsEngine.ECS;
 
@@ -25,7 +23,7 @@ public class EntityManager
             _components.Add(type, new UnsafeArrayList() { component });
         else
         {
-            lock(_components[type])
+            lock (_components[type])
                 _components[type].Add(component);
         }
     }
@@ -84,6 +82,22 @@ public class EntityManager
         component.OnStart();
 
         return component;
+    }
+
+    public void RemoveComponent<T>(Entity entity, T component) where T : Component
+    {
+        var type = typeof(T);
+        if (entity.Components.ContainsKey(type))
+        {
+            if (entity.Components[type].Contains(component))
+                entity.Components[typeof(T)].Remove(component);
+        }
+
+        if (_components.ContainsKey(type))
+        {
+            if (_components[type].Contains(component))  
+                _components[type].Remove(component);
+        }
     }
 
     public Entity CreateEntity(string name = "New Entity")

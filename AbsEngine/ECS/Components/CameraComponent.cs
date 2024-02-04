@@ -50,4 +50,5 @@ public class CameraComponent : Component
 public class SceneCameraComponent : CameraComponent
 {
     public static bool IsInSceneView = false;
+    public float MoveSpeed = 15;
 }

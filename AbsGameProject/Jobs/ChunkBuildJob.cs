@@ -1,5 +1,5 @@
 ﻿using AbsEngine.ECS;
-using AbsEngine.ECS.Components;
+using AbsEngine.Maths;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Systems.Terrain;
 using Schedulers;
@@ -14,6 +14,7 @@ namespace AbsGameProject.Jobs
 
     public class ChunkBuildJob : IJob
     {
+        float lodScale;
         int radius;
         int roundedX;
         int roundedZ;
@@ -25,8 +26,8 @@ namespace AbsGameProject.Jobs
 
         ChunkBuildJobState state;
 
-        public ChunkBuildJob(int radius, int roundedX, int roundedZ, List<TerrainChunkComponent> activeChunks, 
-            List<TerrainChunkComponent> chunkPool, Scene scene, ChunkBuildJobState state)
+        public ChunkBuildJob(int radius, int roundedX, int roundedZ, List<TerrainChunkComponent> activeChunks,
+            List<TerrainChunkComponent> chunkPool, Scene scene, ChunkBuildJobState state, float lodScale)
         {
             this.radius = radius;
             this.roundedX = roundedX;
@@ -35,6 +36,23 @@ namespace AbsGameProject.Jobs
             this.chunkPool = chunkPool;
             this.scene = scene;
             this.state = state;
+            this.lodScale = lodScale;
+        }
+
+        int GetScale(Vector3D<float> camPos, Vector3D<float> chunkPos, out bool isFull)
+        {
+            var distance = (int)Vector3D.Distance(camPos, chunkPos) / TerrainChunkComponent.WIDTH;
+            if (distance < 1)
+                distance = 1;
+
+            var t = AbsMaths.InverseLerp(0, radius / 2, distance);
+
+            var result = (int)Scalar.Floor(t * lodScale);
+            isFull = result == 0;
+
+            result = result < 1 ? 1 : result;   
+
+            return result;
         }
 
         public void Execute()
@@ -45,6 +63,7 @@ namespace AbsGameProject.Jobs
                 {
                     for (int z = -(radius / 2); z < radius / 2; z++)
                     {
+                        bool isFull;
                         int xF = roundedX + x * TerrainChunkComponent.WIDTH;
                         int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
 
@@ -54,6 +73,17 @@ namespace AbsGameProject.Jobs
 
                         if (chunk != null && chunk.IsPooled == false)
                         {
+                            var expectedScale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos, out isFull);
+                            if (chunk.Scale != expectedScale || chunk.IsFull != isFull)
+                            {
+                                chunk.Scale = expectedScale;
+                                chunk.State = TerrainChunkComponent.TerrainState.None;
+                                chunk.Entity.Name = $"{chunk.Entity.Transform.LocalPosition} LOD {chunk.Scale}";
+                                chunk.IsFull = isFull;
+
+                                HandleNeighbours(chunk, (int)pos.X, (int)pos.Z);
+                            }
+
                             activeChunks.Add(chunk);
 
                             continue;
@@ -65,25 +95,21 @@ namespace AbsGameProject.Jobs
                         {
                             chunkComp = chunkPool.First();
                             chunkPool.Remove(chunkComp);
-
-                            chunkComp.Entity.Transform.LocalPosition = pos;
-                            chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
-                            chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                            chunkComp.IsPooled = false;
-
-                            activeChunks.Add(chunkComp);
                         }
                         else
                         {
                             var chunkEnt = scene.EntityManager.CreateEntity();
                             chunkComp = chunkEnt.AddComponent<TerrainChunkComponent>();
-                            chunkEnt.Transform.LocalPosition = pos;
-                            chunkComp.Entity.Name = chunkComp.Entity.Transform.LocalPosition.ToString();
-                            chunkComp.State = TerrainChunkComponent.TerrainState.None;
-                            chunkComp.IsPooled = false;
-
-                            activeChunks.Add(chunkComp);
                         }
+
+                        chunkComp.Entity.Transform.LocalPosition = pos;
+                        chunkComp.State = TerrainChunkComponent.TerrainState.None;
+                        chunkComp.IsPooled = false;
+                        chunkComp.Scale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos, out isFull);
+                        chunkComp.Entity.Name = $"{chunkComp.Entity.Transform.LocalPosition} LOD {chunkComp.Scale}";
+                        chunkComp.IsFull = isFull;
+
+                        activeChunks.Add(chunkComp);
 
                         HandleNeighbours(chunkComp, (int)pos.X, (int)pos.Z);
                     }

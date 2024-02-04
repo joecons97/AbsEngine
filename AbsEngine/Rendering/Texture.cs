@@ -67,6 +67,7 @@ internal interface IBackendTexture : IDisposable
     public void SetMinFilter(TextureMinFilter minFilter);
     public void SetMagFilter(TextureMagFilter magFilter);
     public void SetMaxMips(int maxMips);
+    public void SetMipMaxBias(float bias);
     public void GenerateMipMaps();
     public void Update();
 }
@@ -75,6 +76,7 @@ public class Texture : IDisposable
 {
     internal IBackendTexture _backendTexture = null!;
 
+    private float _mipMapBias = 0.0f;
     private TextureTarget _textureTarget = TextureTarget.Texture2D;
     private InternalFormat _internalFormat = InternalFormat.Rgba;
     private PixelFormat _pixelFormat = PixelFormat.Rgba;
@@ -148,6 +150,15 @@ public class Texture : IDisposable
     }
 
     public Vector2D<int> Size { get; private set; }
+
+    public float MipMapBias
+    {
+        get => _mipMapBias;
+        set {
+            _backendTexture.SetMipMaxBias(value);
+            _mipMapBias = value;
+        }
+    }
 
     public Texture()
     {

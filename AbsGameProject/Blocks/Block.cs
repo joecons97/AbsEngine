@@ -10,9 +10,12 @@ public class Block
     public string Name { get; init; } = "";
 
     public string? VoxelModelFile { get; init; } = "";
-    
+    public string? VoxelModelFileLod { get; init; } = "";
+
     public VoxelModel? VoxelModel { get; init; }
+    public VoxelModel? VoxelModelLod { get; init; }
     public CullableMesh? Mesh { get;init; }
+    public CullableMesh? MeshLod { get; init; }
 
     public int Opacity { get; init; }
     public int Light { get; init; }

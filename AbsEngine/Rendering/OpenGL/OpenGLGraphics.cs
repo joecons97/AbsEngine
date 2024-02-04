@@ -14,8 +14,12 @@ internal class OpenGLGraphics : IGraphics
 
     public IShaderTranspiler ShaderTranspiler { get; }
 
+    private IWindow _window;
+
     public OpenGLGraphics(IWindow window, GraphicsAPIs graphicsAPIs)
     {
+        _window = window;
+
         Gl = window.CreateOpenGL();
         GraphicsAPIs = graphicsAPIs;
         ShaderTranspiler = new OpenGLShaderTranspiler();
@@ -53,5 +57,10 @@ internal class OpenGLGraphics : IGraphics
     public void Dispose()
     {
         Gl.Dispose();
+    }
+
+    public void Swap()
+    {
+        _window.GLContext?.SwapBuffers();
     }
 }

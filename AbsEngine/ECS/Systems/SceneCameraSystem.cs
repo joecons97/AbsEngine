@@ -15,8 +15,6 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
 
     bool canMove;
 
-    public float MoveSpeed { get; private set; } = 15;
-
     public SceneCameraSystem(Scene scene) : base(scene)
     {
         inputContext = scene.Game.InputContext;
@@ -63,20 +61,20 @@ public class SceneCameraSystem : AsyncComponentSystem<SceneCameraComponent>
         {
             if (keyboard.IsKeyPressed(Key.W))
             {
-                velocity += t.Forward * MoveSpeed * deltaTime;
+                velocity += t.Forward * component.MoveSpeed * deltaTime;
             }
             else if (keyboard.IsKeyPressed(Key.S))
             {
-                velocity += t.Forward * -MoveSpeed * deltaTime;
+                velocity += t.Forward * -component.MoveSpeed * deltaTime;
             }
 
             if (keyboard.IsKeyPressed(Key.D))
             {
-                velocity += t.Right * -MoveSpeed * deltaTime;
+                velocity += t.Right * -component.MoveSpeed * deltaTime;
             }
             else if (keyboard.IsKeyPressed(Key.A))
             {
-                velocity += t.Right * MoveSpeed * deltaTime;
+                velocity += t.Right * component.MoveSpeed * deltaTime;
             }
         }
 

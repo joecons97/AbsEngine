@@ -1,11 +1,6 @@
-﻿using AbsEngine;
-using AbsEngine.ECS;
-using AbsGameProject.Blocks;
+﻿using AbsEngine.ECS;
 using AbsGameProject.Components.Terrain;
 using AbsGameProject.Jobs;
-using AbsGameProject.Models.Meshing;
-using Silk.NET.Maths;
-using System.Runtime.InteropServices;
 
 namespace AbsGameProject.Systems.Terrain
 {
@@ -21,13 +16,17 @@ namespace AbsGameProject.Systems.Terrain
 
         public override void OnTick(TerrainChunkComponent component, float deltaTime)
         {
-            if (component.IsReadyForMeshGeneration == false 
+            if (component.IsReadyForMeshGeneration == false
                 && ((component.State == TerrainChunkComponent.TerrainState.Done && component.IsAwaitingRebuild) == false))
                 return;
 
             component.IsAwaitingRebuild = false;
 
-            Scene.Game.Scheduler.Schedule(new ChunkMeshBuildJob(component));
+            if(component.IsFull)
+                Scene.Game.Scheduler.Schedule(new ChunkMeshBuildJob(component));
+            else
+                Scene.Game.Scheduler.Schedule(new ChunkMeshBuildLodJob(component));
+
             Scene.Game.Scheduler.Flush();
         }
     }

@@ -10,10 +10,11 @@ public static class SceneExtensions
         scene.RegisterSystem<MeshRendererSystem>();
     }
 
-    public static void RegisterSceneCamera(this Scene scene)
+    public static void RegisterSceneCamera(this Scene scene, float cameraSpeed = 15)
     {
         var sceneCam = scene.EntityManager.CreateEntity("Scene Camera");
-        sceneCam.AddComponent<SceneCameraComponent>();
+        var cam = sceneCam.AddComponent<SceneCameraComponent>();
+        cam.MoveSpeed = cameraSpeed;
 
         scene.RegisterSystem<SceneCameraSystem>();
     }

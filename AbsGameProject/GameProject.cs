@@ -21,7 +21,7 @@ namespace AbsGameProject
 
         public static void Main()
         {
-            var game = new Game("Josephus", "Test Game", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
+            var game = new Game("Josephus", "Absolute Voxels", GraphicsAPIs.OpenGL, new Vector2D<int>(800, 600));
 
             game.OnLoad += Instance_OnLoad;
 
@@ -44,20 +44,17 @@ namespace AbsGameProject
             TextureAtlas.Initialise(1024, 0);
 
             BlockRegistry.AddBlock(Block.New("air", "Air").WithOpacity(0).Build());
-            BlockRegistry.AddBlock(Block.New("stone", "Stone").WithVoxelModel("Content/Models/Blocks/Stone.json").Build());
-            BlockRegistry.AddBlock(Block.New("dirt", "Dirt").WithVoxelModel("Content/Models/Blocks/Dirt.json").Build());
-            BlockRegistry.AddBlock(Block.New("grass", "Grass").WithVoxelModel("Content/Models/Blocks/Grass.json").Build());
-            BlockRegistry.AddBlock(Block.New("light", "Light").WithLight(15).WithVoxelModel("Content/Models/Blocks/Glowstone.json").Build());
+            BlockRegistry.AddBlock(Block.New("stone", "Stone").WithVoxelModel("Stone.json").Build());
+            BlockRegistry.AddBlock(Block.New("dirt", "Dirt").WithVoxelModel("Dirt.json").Build());
+            BlockRegistry.AddBlock(Block.New("grass", "Grass").WithVoxelModel("Grass.json").WithVoxelLodModel("Grass_Lod.json").Build());
+            BlockRegistry.AddBlock(Block.New("light", "Light").WithLight(15).WithVoxelModel("Glowstone.json").Build());
 
-            BlockRegistry.AddBlock(Block.New("water", "Water").WithTransparency(true).WithNoCollision().
-                WithVoxelModel("Content/Models/Blocks/Water.json").Build());
+            BlockRegistry.AddBlock(Block.New("water", "Water").WithTransparency(true).WithNoCollision().WithVoxelModel("Water.json").Build());
 
-            BlockRegistry.AddBlock(Block.New("sand", "Sand").WithVoxelModel("Content/Models/Blocks/Sand.json").Build());
+            BlockRegistry.AddBlock(Block.New("sand", "Sand").WithVoxelModel("Sand.json").Build());
 
-            BlockRegistry.AddBlock(Block.New("log_oak", "Oak Log").
-                WithVoxelModel("Content/Models/Blocks/Log.json").Build());
-            BlockRegistry.AddBlock(Block.New("leaves_oak", "Oak Leaves").WithTransparency(false).
-                WithVoxelModel("Content/Models/Blocks/Leaves.json").Build());
+            BlockRegistry.AddBlock(Block.New("log_oak", "Oak Log").WithVoxelModel("Log.json").Build());
+            BlockRegistry.AddBlock(Block.New("leaves_oak", "Oak Leaves").WithTransparency(false).WithVoxelModel("Leaves.json").Build());
 
             for (int i = 0; i < 9; i++)
             {
@@ -73,12 +70,13 @@ namespace AbsGameProject
             SetupPlayer(scene);
 
             scene.RegisterMeshRenderer();
-            scene.RegisterSceneCamera();
+            scene.RegisterSceneCamera(30);
 
             scene.RegisterSystem<TerrainChunkGeneratorSystem>();
             scene.RegisterSystem<TerrainNoiseGeneratorSystem>();
             scene.RegisterSystem<TerrainDecoratorSystem>();
             scene.RegisterSystem<TerrainMeshConstructorSystem>();
+            scene.RegisterSystem<TerrainChunkQueuerSystem>();
             scene.RegisterSystem<TerrainChunkBatcherRenderer>();
             scene.RegisterSystem<BlockBreakerSystem>();
             scene.RegisterSystem<VoxelRigidbodySimulationSystem>();
@@ -101,7 +99,7 @@ namespace AbsGameProject
 
             var playerCameraEnt = scene.EntityManager.CreateEntity("Player Camera");
             var camera = playerCameraEnt.AddComponent<CameraComponent>();
-            camera.FieldOfView = 90;
+            camera.FieldOfView = 70;
             playerCameraEnt.Transform.Parent = playerEntity.Transform;
             playerCameraEnt.Transform.LocalPosition = Vector3D<float>.Zero;
 

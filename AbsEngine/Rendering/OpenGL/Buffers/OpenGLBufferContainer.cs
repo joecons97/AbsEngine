@@ -83,5 +83,14 @@ namespace AbsEngine.Rendering.OpenGL.Buffers
             //Remember to delete our buffer.
             _gl.DeleteBuffer(_handle);
         }
+
+        public void WaitForUpdates()
+        {
+            using (Profiler.BeginEvent("WaitForUpdates - OpenGl:SyncGpuCommandsComplete"))
+            {
+                var fence = _gl.FenceSync(SyncCondition.SyncGpuCommandsComplete, SyncBehaviorFlags.None);
+                _gl.ClientWaitSync(fence, SyncObjectMask.Bit, 100000);
+            }
+        }
     }
 }

@@ -4,7 +4,6 @@ using AbsGameProject.Blocks;
 using AbsGameProject.Maths.Physics;
 using AbsGameProject.Models;
 using AbsGameProject.Structures;
-using AbsGameProject.Systems.Terrain;
 using Silk.NET.Maths;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -13,8 +12,11 @@ namespace AbsGameProject.Components.Terrain
 {
     public class TerrainChunkComponent : Component
     {
-        public const int WIDTH = 16;
+        public const int WIDTH = 32;
         public const int HEIGHT = 255;
+        public const int WATER_HEIGHT = 35;
+
+        public static readonly BoundingBox DEFAULT_BOX = new BoundingBox(0, WIDTH, 0, HEIGHT, 0, WIDTH);
 
         public enum TerrainState
         {
@@ -36,8 +38,11 @@ namespace AbsGameProject.Components.Terrain
 
         public bool IsPooled { get; set; }
 
-        public byte[,]? Heightmap { get; set; }
-        public ushort[,,]? VoxelData { get; set; }
+        public int Scale { get; set; } = 1;
+        public bool IsFull { get; set; }
+
+        public byte[]? Heightmap { get; set; }
+        public byte[]? VoxelData { get; set; }
 
         public BoundingBox? BoundingBox { get; set; }
 
@@ -46,20 +51,22 @@ namespace AbsGameProject.Components.Terrain
 
         public bool IsMeshBeingConstructed = false;
 
+        public bool IsWaitingForLookAt = false;
+
         public bool IsReadyForDecoration =>
-            State == TerrainState.NoiseGenerated &&
+            State == TerrainState.NoiseGenerated && (Scale != 1 ||
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.NoiseGenerated &&
             RightNeighbour != null && RightNeighbour.State >= TerrainState.NoiseGenerated &&
             NorthNeighbour != null && NorthNeighbour.State >= TerrainState.NoiseGenerated &&
-            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated;
+            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.NoiseGenerated);
 
         public bool IsReadyForMeshGeneration =>
-            IsMeshBeingConstructed == false && 
-            State == TerrainState.Decorated &&
+            IsMeshBeingConstructed == false &&
+            State == TerrainState.Decorated && (Scale != 1 ||
             LeftNeighbour != null && LeftNeighbour.State >= TerrainState.Decorated &&
             RightNeighbour != null && RightNeighbour.State >= TerrainState.Decorated &&
             NorthNeighbour != null && NorthNeighbour.State >= TerrainState.Decorated &&
-            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated;
+            SouthNeighbour != null && SouthNeighbour.State >= TerrainState.Decorated);
 
         public TerrainChunkComponent? LeftNeighbour;
         public TerrainChunkComponent? RightNeighbour;
@@ -82,6 +89,11 @@ namespace AbsGameProject.Components.Terrain
             }
         }
 
+        public bool CanSee(Frustum frustum)
+        {
+            return frustum.Intersects(DEFAULT_BOX.Transform(Entity.Transform.LocalPosition, Vector3D<float>.One));
+        }
+
         public override void OnStart()
         {
             var waterEntity = Entity.Scene.EntityManager.CreateEntity("Water");
@@ -98,14 +110,31 @@ namespace AbsGameProject.Components.Terrain
             return x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT && z >= 0 && z < WIDTH;
         }
 
-        public ushort GetBlockId(int x, int y, int z)
+        public int GetIndexFromCoords(int x, int y, int z)
         {
+            return (z * WIDTH * HEIGHT) + (y * WIDTH) + x;
+        }
+
+        public int GetIndexFromCoords(int x, int z)
+        {
+            return x * WIDTH + z;
+        }
+
+        public ushort? GetBlockId(int x, int y, int z)
+            => GetBlockId(x, y, z, out _);
+
+        public ushort? GetBlockId(int x, int y, int z, out TerrainChunkComponent? takenFrom)
+        {
+            takenFrom = null;
             if (VoxelData == null)
-                return 0;
+            {
+                return null;
+            }
 
             if (IsPositionInBounds(x, y, z))
             {
-                return VoxelData[x, y, z];
+                takenFrom = this;
+                return VoxelData[GetIndexFromCoords(x, y, z)];
             }
             else
             {
@@ -113,50 +142,42 @@ namespace AbsGameProject.Components.Terrain
                 {
                     if (LeftNeighbour != null)
                     {
-                        //if (LeftNeighbour.VoxelData == null)
-                        //    Debug.WriteLine("LeftNeighbour VoxelData is null!", "Warning");
-
+                        takenFrom = LeftNeighbour;
                         return LeftNeighbour.GetBlockId(WIDTH + x, y, z);
                     }
 
-                    return 0;
+                    return null;
                 }
                 else if (x >= WIDTH)
                 {
                     if (RightNeighbour != null)
                     {
-                        //if (RightNeighbour.VoxelData == null)
-                        //    Debug.WriteLine("RightNeighbour VoxelData is null!", "Warning");
-
+                        takenFrom = RightNeighbour;
                         return RightNeighbour.GetBlockId(x - WIDTH, y, z);
                     }
 
-                    return 0;
+                    return null;
                 }
 
                 if (z <= -1)
                 {
                     if (SouthNeighbour != null)
                     {
-                        //if (SouthNeighbour.VoxelData == null)
-                        //    Debug.WriteLine("SouthNeighbour VoxelData is null!", "Warning");
-
+                        takenFrom = SouthNeighbour;
                         return SouthNeighbour.GetBlockId(x, y, WIDTH + z);
                     }
 
-                    return 0;
+                    return null;
                 }
                 else if (z >= WIDTH)
                 {
                     if (NorthNeighbour != null)
                     {
-                        //if (NorthNeighbour.VoxelData == null)
-                        //    Debug.WriteLine("NorthNeighbour VoxelData is null!", "Warning");
-
+                        takenFrom = NorthNeighbour;
                         return NorthNeighbour.GetBlockId(x, y, z - WIDTH);
                     }
 
-                    return 0;
+                    return null;
                 }
 
                 if (y < 0 || y > HEIGHT - 1)
@@ -168,7 +189,7 @@ namespace AbsGameProject.Components.Terrain
 
         public Block GetBlock(int x, int y, int z)
         {
-            var id = GetBlockId(x, y, z);
+            var id = GetBlockId(x, y, z) ?? 0;
             return BlockRegistry.GetBlock(id);
         }
 
@@ -230,7 +251,7 @@ namespace AbsGameProject.Components.Terrain
             if (y < 0 || y > HEIGHT - 1)
                 return;
 
-            VoxelData[x, y, z] = BlockRegistry.GetBlockIndex(block);
+            VoxelData[GetIndexFromCoords(x, y, z)] = BlockRegistry.GetBlockIndex(block);
 
             CalculateHeightmapAtPos(x, z);
             RebuildMesh();
@@ -293,7 +314,7 @@ namespace AbsGameProject.Components.Terrain
                 return 0;
             }
 
-            return Heightmap[x, z];
+            return Heightmap[GetIndexFromCoords(x, z)];
         }
 
         public void RebuildMesh()
@@ -322,11 +343,11 @@ namespace AbsGameProject.Components.Terrain
 
             for (int y = HEIGHT - 1; y > 0; y--)
             {
-                var blockId = GetBlockId(x, y, z);
+                var blockId = GetBlockId(x, y, z) ?? 0;
                 var block = BlockRegistry.GetBlock(blockId);
                 if (block.Opacity > 0)
                 {
-                    Heightmap[x, z] = (byte)y;
+                    Heightmap[GetIndexFromCoords(x, z)] = (byte)y;
                     break;
                 }
             }
@@ -334,12 +355,12 @@ namespace AbsGameProject.Components.Terrain
 
         public override bool Equals(object? obj)
         {
-            if (obj == null) 
+            if (obj == null)
                 return false;
 
             var c = (TerrainChunkComponent)obj;
 
-            return c.Entity.Transform.LocalPosition == Entity.Transform.LocalPosition;
+            return c.Entity.Transform.LocalPosition == Entity.Transform.LocalPosition && c.Scale == Scale;
         }
 
         public override int GetHashCode()
