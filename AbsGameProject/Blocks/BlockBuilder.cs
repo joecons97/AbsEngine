@@ -15,6 +15,7 @@ namespace AbsGameProject.Blocks
         bool _noCollision;
 
         string? _voxelModelFile;
+        string? _voxelModelFileLod;
 
         public BlockBuilder(string name, string id)
         {
@@ -25,7 +26,19 @@ namespace AbsGameProject.Blocks
 
         public BlockBuilder WithVoxelModel(string voxelModelFile)
         {
+            if(!voxelModelFile.StartsWith("Content/Models/Blocks/"))
+                voxelModelFile = "Content/Models/Blocks/" + voxelModelFile;
+
             _voxelModelFile = voxelModelFile;
+            return this;
+        }
+
+        public BlockBuilder WithVoxelLodModel(string voxelModelLodFile)
+        {
+            if (!voxelModelLodFile.StartsWith("Content/Models/Blocks/"))
+                voxelModelLodFile = "Content/Models/Blocks/" + voxelModelLodFile;
+
+            _voxelModelFileLod = voxelModelLodFile;
             return this;
         }
 
@@ -76,13 +89,32 @@ namespace AbsGameProject.Blocks
                     boundingBoxes = cullableMesh.CollisionBoxes.ToArray();
             }
 
+            VoxelModel? voxelModelLod = null;
+            CullableMesh? cullableMeshLod = null;
+
+            if (string.IsNullOrEmpty(_voxelModelFileLod) == false)
+            {
+                voxelModelLod = VoxelModel.TryFromFile(_voxelModelFileLod);
+                if (voxelModelLod == null)
+                    throw new Exception("Failed to load voxel model");
+
+                TextureAtlas.InsertVoxelModel(voxelModelLod);
+
+                cullableMeshLod = CullableMesh.TryFromVoxelMesh(voxelModelLod);
+                if (cullableMeshLod == null)
+                    throw new Exception("Failed to load mesh from voxel model");
+            }
+
             return new Block()
             {
                 Id = _id,
                 Name = _name,
                 VoxelModelFile = _voxelModelFile,
+                VoxelModelFileLod = _voxelModelFileLod,
                 VoxelModel = voxelModel,
                 Mesh = cullableMesh,
+                VoxelModelLod = voxelModelLod,
+                MeshLod = cullableMeshLod,
                 CollisionShapes = boundingBoxes,
                 Opacity = _opacity,
                 Light = _light,

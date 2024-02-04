@@ -7,6 +7,8 @@ namespace AbsGameProject.Systems.Terrain;
 
 public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
 {
+    const int MAX_PER_FRAME = 2;
+
     static List<TerrainChunkComponent> _batchQueue = new List<TerrainChunkComponent>();
 
     List<ChunkRenderJob> _renderJobs = new List<ChunkRenderJob>();
@@ -37,13 +39,13 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
     {
         doDequeue = true;
 
-        while (doDequeue)
+        for (int i = 0; i < MAX_PER_FRAME; i++)
         {
             doDequeue = false;
             if (_batchQueue.Count > 0)
             {
                 var chunk = _batchQueue.First();
-                _batchQueue.Remove(chunk);  
+                _batchQueue.Remove(chunk);
                 if (chunk == null)
                     return;
 
@@ -101,7 +103,10 @@ public class TerrainChunkBatcherRenderer : AbsEngine.ECS.System
                     chunk.State = TerrainChunkComponent.TerrainState.Done;
                 }
             }
+            else
+                break;
         }
+
         foreach (var job in _renderJobs)
         {
             job.Render();

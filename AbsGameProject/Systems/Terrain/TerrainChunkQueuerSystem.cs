@@ -26,3 +26,27 @@ public class TerrainChunkQueuerSystem : ComponentSystem<TerrainChunkComponent>
         }
     }
 }
+
+public class TerrainLodChunkQueuerSystem : ComponentSystem<TerrainLodChunkComponent>
+{
+    protected override int MaxIterationsPerFrame => 50;
+
+    CameraComponent _cam;
+
+    public TerrainLodChunkQueuerSystem(Scene scene) : base(scene)
+    {
+        _cam = Scene.EntityManager.GetFirstOrDefault<CameraComponent>(x => x.IsMainCamera) ?? throw new Exception();
+    }
+
+    public override void OnTick(TerrainLodChunkComponent component, float deltaTime)
+    {
+        var chunk = component.Data;
+        if (chunk != null && chunk.State == TerrainChunkComponent.TerrainState.MeshConstructed)
+        {
+            if (chunk.CanSee(_cam.GetFrustum()))
+                TerrainChunkBatcherRenderer.QueueChunkForBatching(chunk);
+            else
+                chunk.IsWaitingForLookAt = true;
+        }
+    }
+}

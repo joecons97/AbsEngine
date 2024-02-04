@@ -9,15 +9,25 @@ struct v2f
     float fogAmount;
 };
 
+struct ChunkBuffer
+{
+    int scale;
+
+    float p1;
+    float p2;
+    float p3;
+    mat4 worldMat;
+};
+
 #ifdef VERT
 
     layout (location = 0) in vec3 vPos;
     layout (location = 1) in vec4 vColor;
     layout (location = 2) in vec2 vUvs;
     
-    layout(std430, binding = 3) buffer multiDrawBuff 
+    layout(std430, binding = 3) buffer multiDrawBuff
     {
-        mat4 transforms[];
+        ChunkBuffer bufferData[];
     };
 
     uniform mat4 _Vp;
@@ -27,6 +37,7 @@ struct v2f
     uniform vec3 _CameraPosition;
 
     out v2f vertData;
+    flat out int chunkScale;
     
     float getLinearFogStrength(float fogMin, float fogMax, float dist)
     {
@@ -38,12 +49,15 @@ struct v2f
 
     void main() 
     {
-        mat4 worldMat = transforms[gl_DrawID];
+        ChunkBuffer chunkData = bufferData[gl_DrawID];
+        mat4 worldMat = chunkData.worldMat;
         mat4 mvp = _Vp * worldMat;
         gl_Position = mvp * vec4(vPos, 1.0);
 
         vertData.uvs = vUvs.xy;
         vertData.vertexColour = vColor;
+
+        chunkScale = chunkData.scale;
         
         #ifdef GOOD_FOG
             vertData.worldPos = worldMat * vec4(vPos, 1.0);
@@ -59,6 +73,7 @@ struct v2f
 
 #ifdef FRAG
 
+    flat in int chunkScale;
     in v2f vertData;
 
     uniform sampler2D uAtlas;
@@ -69,10 +84,16 @@ struct v2f
     
     void main()
     {
-        vec4 col = texture(uAtlas, vertData.uvs.yx);
+        vec4 col = vec4(0);
 
-        if(col.a < 0.05)
-            discard;
+        if (chunkScale == 1) {
+            col = texture(uAtlas, vertData.uvs.yx);
+            if (col.a < 0.05)
+                discard;
+        }
+        else {
+            col = textureLod(uAtlas, vertData.uvs.yx, chunkScale + 1);
+        }
 
         col = vertData.vertexColour * col;
 

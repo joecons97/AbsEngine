@@ -168,4 +168,9 @@ internal class OpenGLTexture : IBackendTexture
 
     public void SetPixelType(PixelType pixelType)
         => _pixelType = pixelType;
+
+    public void SetMipMaxBias(float bias)
+    {
+        _gl.TextureParameter(Handle, GLEnum.TextureLodBias, bias);
+    }
 }

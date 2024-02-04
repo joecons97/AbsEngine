@@ -79,7 +79,9 @@ namespace AbsGameProject.Jobs
                         if (toCull == CullFaceDirection.All)
                             continue;
 
-                        foreach (var face in block.Mesh.Faces)
+                        var mesh = block.MeshLod ?? block.Mesh;
+
+                        foreach (var face in mesh.Faces)
                         {
                             if ((toCull & face.Key) != face.Key)
                             {
@@ -130,10 +132,7 @@ namespace AbsGameProject.Jobs
                 if (blockId != workingBlockId)
                     return true;
 
-                if (block.TransparentCullSelf || takenFrom?.Scale != 1)
-                    return false;
-
-                return true;
+                return false;
             }
 
             return false;

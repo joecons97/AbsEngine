@@ -99,6 +99,8 @@ public class Game
         {
             Profiler.Dispose();
             Graphics.Dispose();
+
+            Environment.Exit(0);
         };
 
         _window.Update += (dt) =>

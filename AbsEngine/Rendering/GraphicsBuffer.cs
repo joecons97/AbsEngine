@@ -36,6 +36,7 @@ internal interface IBackendGraphicsBuffer : IDisposable
     void SetSize<TDataType>(int size) where TDataType : unmanaged;
     void SetSubData<TDataType>(Span<TDataType> data, int offset) where TDataType : unmanaged;
     void SetUsage(GraphicsBufferUsage usage);
+    void WaitForUpdates();
 }
 
 public class GraphicsBuffer
@@ -84,6 +85,9 @@ public class GraphicsBuffer
 
     public void SetUsage(GraphicsBufferUsage usage)
         => _backendBuffer?.SetUsage(usage);
+
+    public void WaitForUpdates()
+        => _backendBuffer?.WaitForUpdates();
 
     public void Dispose()
     {

@@ -84,6 +84,22 @@ public class EntityManager
         return component;
     }
 
+    public void RemoveComponent<T>(Entity entity, T component) where T : Component
+    {
+        var type = typeof(T);
+        if (entity.Components.ContainsKey(type))
+        {
+            if (entity.Components[type].Contains(component))
+                entity.Components[typeof(T)].Remove(component);
+        }
+
+        if (_components.ContainsKey(type))
+        {
+            if (_components[type].Contains(component))  
+                _components[type].Remove(component);
+        }
+    }
+
     public Entity CreateEntity(string name = "New Entity")
     {
         var ent = new Entity((uint)_entities.Count, Scene);

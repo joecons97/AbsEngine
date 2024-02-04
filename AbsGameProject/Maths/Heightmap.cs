@@ -26,12 +26,14 @@ public static class Heightmap
     public static float GetHeightAt(int x, int z)
     {
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
-        var continent = (noise.GetNoise(
+        var continent = noise.GetNoise(
             new Vector2D<float>(x, z),
             noiseSize,
             octaves,
             persistence,
-            lacunarity) + 1) / 2;
+            lacunarity);
+
+        continent = (MathF.Abs(continent) + 1) / 2;
 
         continent = MathF.Pow(continent, 1.5f);
         continent *= amplitude / 1.25f;
@@ -44,17 +46,32 @@ public static class Heightmap
             persistence,
         lacunarity) + 1) / 2;
 
-        var mountains = (noise.GetNoiseRidged(
+        var mountains = noise.GetNoiseRidged(
             new Vector2D<float>(x, z),
             noiseSize * 3,
             8,
             persistence,
-            lacunarity) + 1) / 2;
+            lacunarity);
+
+        mountains = (MathF.Abs(mountains) + 1) / 2;
 
         mountains = MathF.Pow(mountains, 3);
         mountains *= amplitude * 2;
         mountains = mountains * mountainStrength;
 
-        return MathF.Max(mountains, continent);
+        var oceans = (noise.GetNoise(
+            new Vector2D<float>(x, z),
+            20,
+            3,
+            persistence,
+            lacunarity) + 1) / 2;
+
+        if (oceans < 0.1f)
+            oceans = 0.1f;
+
+        if (oceans > 0)
+            oceans = MathF.Pow(oceans, 0.02f);
+
+        return MathF.Max(mountains, continent) * oceans;
     }
 }

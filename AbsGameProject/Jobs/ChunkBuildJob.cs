@@ -39,7 +39,7 @@ namespace AbsGameProject.Jobs
             this.lodScale = lodScale;
         }
 
-        int GetScale(Vector3D<float> camPos, Vector3D<float> chunkPos)
+        int GetScale(Vector3D<float> camPos, Vector3D<float> chunkPos, out bool isFull)
         {
             var distance = (int)Vector3D.Distance(camPos, chunkPos) / TerrainChunkComponent.WIDTH;
             if (distance < 1)
@@ -47,7 +47,10 @@ namespace AbsGameProject.Jobs
 
             var t = AbsMaths.InverseLerp(0, radius / 2, distance);
 
-            var result = (int)Scalar.Floor(t * lodScale) + 1;
+            var result = (int)Scalar.Floor(t * lodScale);
+            isFull = result == 0;
+
+            result = result < 1 ? 1 : result;   
 
             return result;
         }
@@ -60,6 +63,9 @@ namespace AbsGameProject.Jobs
                 {
                     for (int z = -(radius / 2); z < radius / 2; z++)
                     {
+                        bool isFull;
+                        TerrainLodChunkComponent? possibleLod;
+
                         int xF = roundedX + x * TerrainChunkComponent.WIDTH;
                         int zF = roundedZ + z * TerrainChunkComponent.WIDTH;
 
@@ -69,12 +75,25 @@ namespace AbsGameProject.Jobs
 
                         if (chunk != null && chunk.IsPooled == false)
                         {
-                            var expectedScale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos);
-                            if (chunk.Scale != expectedScale)
+                            var expectedScale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos, out isFull);
+                            if (chunk.Scale != expectedScale || chunk.IsFull != isFull)
                             {
                                 chunk.Scale = expectedScale;
                                 chunk.State = TerrainChunkComponent.TerrainState.None;
                                 chunk.Entity.Name = $"{chunk.Entity.Transform.LocalPosition} LOD {chunk.Scale}";
+                                chunk.IsFull = isFull;
+
+                                //possibleLod = chunk.Entity.GetComponent<TerrainLodChunkComponent>();
+                                //if (isFull && possibleLod != null)
+                                //{
+                                //    chunk.Entity.RemoveComponent<TerrainLodChunkComponent>();
+                                //    chunk.IsEnabled = true;
+                                //}
+                                //else if(!isFull && possibleLod == null)
+                                //{
+                                //    var lod = chunk.Entity.AddComponent<TerrainLodChunkComponent>();
+                                //    lod.Data = chunk;
+                                //}
 
                                 HandleNeighbours(chunk, (int)pos.X, (int)pos.Z);
                             }
@@ -100,8 +119,21 @@ namespace AbsGameProject.Jobs
                         chunkComp.Entity.Transform.LocalPosition = pos;
                         chunkComp.State = TerrainChunkComponent.TerrainState.None;
                         chunkComp.IsPooled = false;
-                        chunkComp.Scale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos);
+                        chunkComp.Scale = GetScale(new Vector3D<float>(roundedX, 0, roundedZ), pos, out isFull);
                         chunkComp.Entity.Name = $"{chunkComp.Entity.Transform.LocalPosition} LOD {chunkComp.Scale}";
+                        chunkComp.IsFull = isFull;
+
+                        //possibleLod = chunkComp.Entity.GetComponent<TerrainLodChunkComponent>();
+                        //if (isFull && possibleLod != null)
+                        //{
+                        //    chunkComp.Entity.RemoveComponent<TerrainLodChunkComponent>();
+                        //    chunkComp.IsEnabled = true;
+                        //}
+                        //else if (!isFull && possibleLod == null)
+                        //{
+                        //    var lod = chunkComp.Entity.AddComponent<TerrainLodChunkComponent>();
+                        //    lod.Data = chunkComp;
+                        //}
 
                         activeChunks.Add(chunkComp);
 

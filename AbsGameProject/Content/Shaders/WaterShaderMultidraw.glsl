@@ -4,11 +4,20 @@
 
 struct v2f 
 {
-    vec4 localPos;
     vec4 worldPos;
     vec2 uvs;
     vec4 vertexColour;
     float fogAmount;
+};
+
+struct ChunkBuffer
+{
+    int scale;
+
+    float p1;
+    float p2;
+    float p3;
+    mat4 worldMat;
 };
 
 #ifdef VERT
@@ -16,18 +25,19 @@ struct v2f
     layout (location = 0) in vec3 vPos;
     layout (location = 1) in vec4 vColor;
     layout (location = 2) in vec2 vUvs;
-    
-    layout(std430, binding = 3) buffer multiDrawBuff 
+
+    layout(std430, binding = 3) buffer multiDrawBuff
     {
-        mat4 transforms[];
+        ChunkBuffer bufferData[];
     };
-    
+
     uniform mat4 _Vp;
     
     uniform float FogMaxDistance;
     uniform float FogMinDistance;
 
     out v2f vertData;
+    flat out int chunkScale;
     
     float getLinearFogStrength(float fogMin, float fogMax, float dist)
     {
@@ -39,14 +49,16 @@ struct v2f
 
     void main() 
     {
-        mat4 worldMat = transforms[gl_DrawID];
+        ChunkBuffer chunkData = bufferData[gl_DrawID];
+        mat4 worldMat = chunkData.worldMat;
         mat4 mvp = _Vp * worldMat;
         gl_Position = mvp * vec4(vPos, 1.0);
 
-        vertData.localPos = vec4(vPos, 1.0);
         vertData.worldPos = worldMat * vec4(vPos, 1.0);
         vertData.uvs = vec2(vUvs.x, vUvs.y);
         vertData.vertexColour = vColor;
+
+        chunkScale = chunkData.scale;
 
         float fogDistance = length(gl_Position.xyz);
         vertData.fogAmount = clamp(getLinearFogStrength(FogMinDistance, FogMaxDistance, fogDistance), 0.0, 1.0);
@@ -56,6 +68,7 @@ struct v2f
 
 #ifdef FRAG
 
+    flat in int chunkScale;
     in v2f vertData;
     
     uniform float _NearClipPlane;
@@ -95,8 +108,16 @@ struct v2f
     void main()
     {
         vec2 uv = vertData.uvs.yx;
-        vec4 col = texture(uAtlas, uv) * waterColour;
 
+        vec4 col = vec4(0);
+        if (chunkScale == 1) {
+            col = texture(uAtlas, uv);
+        }
+        else {
+            col = textureLod(uAtlas, uv, 10);
+        }
+
+        col *= waterColour;
         //Maybe re-add later
 
         //vec3 viewDir = normalize(_CameraPosition - vertData.worldPos.xyz);

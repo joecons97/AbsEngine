@@ -10,6 +10,11 @@ using System.Diagnostics;
 
 namespace AbsGameProject.Components.Terrain
 {
+    public class TerrainLodChunkComponent : Component
+    {
+        public TerrainChunkComponent? Data { get; set; }
+    }
+
     public class TerrainChunkComponent : Component
     {
         public const int WIDTH = 32;
@@ -39,6 +44,7 @@ namespace AbsGameProject.Components.Terrain
         public bool IsPooled { get; set; }
 
         public int Scale { get; set; } = 1;
+        public bool IsFull { get; set; }
 
         public byte[]? Heightmap { get; set; }
         public byte[]? VoxelData { get; set; }
