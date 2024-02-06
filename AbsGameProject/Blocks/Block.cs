@@ -29,4 +29,13 @@ public class Block
     {
         return new BlockBuilder(name, id);
     }
+
+    public override bool Equals(object? obj)
+    {
+        var other = obj as Block;
+
+        if(other == null) return false;
+
+        return other.Id == Id;
+    }
 }

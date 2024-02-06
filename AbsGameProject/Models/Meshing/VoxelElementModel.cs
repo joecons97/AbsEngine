@@ -4,7 +4,7 @@ namespace AbsGameProject.Models.Meshing;
 
 [Flags]
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum CullFaceDirection
+public enum FaceDirection
 {
     None = 1 << 0,
     North = 1 << 1,
@@ -13,7 +13,7 @@ public enum CullFaceDirection
     West = 1 << 4,
     Up = 1 << 5,
     Down = 1 << 6,
-    All = North | East | South | West | Up | Down
+    All = North | East | South | West | Up | Down | None
 }
 
 public class VoxelElementModelFace
@@ -28,14 +28,14 @@ public class VoxelElementModelFace
     public int? TintIndex { get; init; } = null;
 
     [JsonPropertyName("cullface")]
-    public CullFaceDirection? CullFace { get; init; }
+    public FaceDirection? CullFace { get; init; }
 
     public VoxelElementModelFace()
     {
         UV = Array.Empty<float>();
 
         if (CullFace == null)
-            CullFace = CullFaceDirection.All;
+            CullFace = FaceDirection.All;
     }
 }
 
@@ -46,5 +46,5 @@ public class VoxelElementModel
     [JsonPropertyName("to")]
     public float[] To { get; init; } = Array.Empty<float>();
     [JsonPropertyName("faces")]
-    public Dictionary<CullFaceDirection, VoxelElementModelFace> Faces { get; init; } = new();
+    public Dictionary<FaceDirection, VoxelElementModelFace> Faces { get; init; } = new();
 }

@@ -14,15 +14,15 @@ public class CullableMesh
         public List<int?> TintIndicies = new();
     }
 
-    public Dictionary<CullFaceDirection, CullableFace> Faces { get; private set; } = new()
+    public Dictionary<FaceDirection, CullableFace> Faces { get; private set; } = new()
     {
-        {CullFaceDirection.Down, new CullableFace() },
-        {CullFaceDirection.Up, new CullableFace() },
-        {CullFaceDirection.North, new CullableFace() },
-        {CullFaceDirection.South, new CullableFace() },
-        {CullFaceDirection.East, new CullableFace() },
-        {CullFaceDirection.West, new CullableFace() },
-        {CullFaceDirection.All, new CullableFace() }
+        {FaceDirection.Down, new CullableFace() },
+        {FaceDirection.Up, new CullableFace() },
+        {FaceDirection.North, new CullableFace() },
+        {FaceDirection.South, new CullableFace() },
+        {FaceDirection.East, new CullableFace() },
+        {FaceDirection.West, new CullableFace() },
+        {FaceDirection.All, new CullableFace() }
     };
 
     public List<VoxelBoundingBox> CollisionBoxes { get; private set; } = new List<VoxelBoundingBox>();
@@ -65,124 +65,124 @@ public class CullableMesh
                     coords.Size.X / (float)TextureAtlas.Size,
                     coords.Size.Y / (float)TextureAtlas.Size);
 
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].UVs
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].UVs
                     .Add(new Vector2D<float>(uvs.Origin.X + uvs.Size.X, uvs.Origin.Y + uvs.Size.Y));
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].UVs
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].UVs
                     .Add(new Vector2D<float>(uvs.Origin.X + uvs.Size.X, uvs.Origin.Y));
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].UVs
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].UVs
                     .Add(new Vector2D<float>(uvs.Origin.X, uvs.Origin.Y + uvs.Size.Y));
 
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].UVs
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].UVs
                     .Add(new Vector2D<float>(uvs.Origin.X, uvs.Origin.Y + uvs.Size.Y));
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].UVs
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].UVs
                     .Add(new Vector2D<float>(uvs.Origin.X + uvs.Size.X, uvs.Origin.Y));
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].UVs
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].UVs
                     .Add(new Vector2D<float>(uvs.Origin.X, uvs.Origin.Y));
 
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
-                mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
+                mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].TintIndicies.Add(facePair.Value.TintIndex);
 
                 switch (facePair.Key)
                 {
-                    case CullFaceDirection.Up:
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[2]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[3]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[6]);
+                    case FaceDirection.Up:
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[2]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[3]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[6]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[6]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[3]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[7]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[6]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[3]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[7]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitY);
                         break;
-                    case CullFaceDirection.Down:
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[4]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[5]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[0]);
+                    case FaceDirection.Down:
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[4]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[5]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[0]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[0]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[5]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[1]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[0]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[5]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[1]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitY);
                         break;
-                    case CullFaceDirection.West:
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[6]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[7]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[4]);
+                    case FaceDirection.West:
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[6]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[7]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[4]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[4]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[7]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[5]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[4]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[7]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[5]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitX);
                         break;
-                    case CullFaceDirection.East:
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[3]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[2]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[1]);
+                    case FaceDirection.East:
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[3]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[2]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[1]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[1]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[2]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[0]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[1]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[2]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[0]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitX);
                         break;
-                    case CullFaceDirection.North:
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[7]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[3]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[5]);
+                    case FaceDirection.North:
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[7]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[3]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[5]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[5]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[3]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[1]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[5]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[3]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[1]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(Vector3D<float>.UnitZ);
                         break;
-                    case CullFaceDirection.South:
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[2]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[6]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[0]);
+                    case FaceDirection.South:
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[2]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[6]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[0]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[0]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[6]);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Positions.Add(elemVerts[4]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[0]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[6]);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Positions.Add(elemVerts[4]);
 
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
-                        mesh.Faces[facePair.Value.CullFace ?? CullFaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
+                        mesh.Faces[facePair.Value.CullFace ?? FaceDirection.All].Normals.Add(-Vector3D<float>.UnitZ);
                         break;
                 }
             }

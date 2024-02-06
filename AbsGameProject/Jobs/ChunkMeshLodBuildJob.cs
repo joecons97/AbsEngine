@@ -56,27 +56,27 @@ namespace AbsGameProject.Jobs
                         var block = BlockRegistry.GetBlock(blockIndex);
                         if (block.Mesh == null) continue;
 
-                        CullFaceDirection toCull = CullFaceDirection.None;
+                        FaceDirection toCull = FaceDirection.None;
 
                         if (ShouldRenderFace(component, x, y, z + component.Scale, blockIndex) == false)
-                            toCull |= CullFaceDirection.North;
+                            toCull |= FaceDirection.North;
 
                         if (ShouldRenderFace(component, x, y, z - component.Scale, blockIndex) == false)
-                            toCull |= CullFaceDirection.South;
+                            toCull |= FaceDirection.South;
 
                         if (ShouldRenderFace(component, x, y + component.Scale, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.Up;
+                            toCull |= FaceDirection.Up;
 
                         if (ShouldRenderFace(component, x, y - component.Scale, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.Down;
+                            toCull |= FaceDirection.Down;
 
                         if (ShouldRenderFace(component, x + component.Scale, y, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.West;
+                            toCull |= FaceDirection.West;
 
                         if (ShouldRenderFace(component, x - component.Scale, y, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.East;
+                            toCull |= FaceDirection.East;
 
-                        if (toCull == CullFaceDirection.All)
+                        if (toCull == FaceDirection.All)
                             continue;
 
                         var mesh = block.MeshLod ?? block.Mesh;
@@ -92,16 +92,17 @@ namespace AbsGameProject.Jobs
                                     var pos = (basePos * component.Scale) + new Vector3D<float>(x, y, z);
 
                                     var uv = face.Value.UVs[i];
-                                    var col = new Vector4D<float>(255, 255, 255, 0.0f);
+                                    var col = new Vector3D<float>(255, 255, 255);
+
                                     if (face.Value.TintIndicies[i] != null)
-                                        col = new Vector4D<float>(10, 204, 66, 0.0f);
+                                        col = new Vector3D<float>(10, 204, 66);
                                     else if (block.Id == "water")
-                                        col = new Vector4D<float>(24, 154, 227, 0.0f);
+                                        col = new Vector3D<float>(24, 154, 227);
 
                                     var vert = new TerrainVertex()
                                     {
                                         position = (Vector3D<byte>)pos,
-                                        colour = (Vector4D<byte>)col,
+                                        colour = (Vector3D<byte>)col,
                                         uv = (Vector2D<Half>)uv
                                     };
 

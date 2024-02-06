@@ -10,6 +10,7 @@ namespace AbsGameProject.Jobs
     public class ChunkMeshBuildJob : IJob
     {
         public TerrainChunkComponent component;
+        bool[] visitedLocations = new bool[TerrainChunkComponent.WIDTH * TerrainChunkComponent.WIDTH * TerrainChunkComponent.HEIGHT];
 
         public ChunkMeshBuildJob(TerrainChunkComponent component)
         {
@@ -56,27 +57,27 @@ namespace AbsGameProject.Jobs
                         var block = BlockRegistry.GetBlock(blockIndex);
                         if (block.Mesh == null) continue;
 
-                        CullFaceDirection toCull = CullFaceDirection.None;
+                        FaceDirection toCull = FaceDirection.None;
 
                         if (ShouldRenderFace(component, x, y, z + 1, blockIndex) == false)
-                            toCull |= CullFaceDirection.North;
+                            toCull |= FaceDirection.North;
 
                         if (ShouldRenderFace(component, x, y, z - 1, blockIndex) == false)
-                            toCull |= CullFaceDirection.South;
+                            toCull |= FaceDirection.South;
 
                         if (ShouldRenderFace(component, x, y + 1, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.Up;
+                            toCull |= FaceDirection.Up;
 
                         if (ShouldRenderFace(component, x, y - 1, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.Down;
+                            toCull |= FaceDirection.Down;
 
                         if (ShouldRenderFace(component, x + 1, y, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.West;
+                            toCull |= FaceDirection.West;
 
                         if (ShouldRenderFace(component, x - 1, y, z, blockIndex) == false)
-                            toCull |= CullFaceDirection.East;
+                            toCull |= FaceDirection.East;
 
-                        if (toCull == CullFaceDirection.All)
+                        if (toCull == FaceDirection.All)
                             continue;
 
                         foreach (var face in block.Mesh.Faces)
@@ -89,13 +90,13 @@ namespace AbsGameProject.Jobs
 
                                     var uv = face.Value.UVs[i];
                                     var col = face.Value.TintIndicies[i] == null
-                                        ? new Vector4D<float>(255, 255, 255, 0.0f)
-                                        : new Vector4D<float>(10, 204, 66, 0.0f);
+                                        ? new Vector3D<float>(255, 255, 255)
+                                        : new Vector3D<float>(10, 204, 66);
 
                                     var vert = new TerrainVertex()
                                     {
                                         position = (Vector3D<byte>)pos,
-                                        colour = (Vector4D<byte>)col,
+                                        colour = (Vector3D<byte>)col,
                                         uv = (Vector2D<Half>)uv
                                     };
 
@@ -132,7 +133,7 @@ namespace AbsGameProject.Jobs
                 if (block.TransparentCullSelf)
                     return false;
 
-                return true;
+                return false;
             }
 
             return false;

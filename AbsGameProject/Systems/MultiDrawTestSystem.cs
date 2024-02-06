@@ -49,7 +49,7 @@ internal class MultiDrawTestSystem : AbsEngine.ECS.System
                 {
                     position = (Vector3D<byte>)pos,
                     uv = (Vector2D<Half>)uv,
-                    colour = new Vector4D<byte>(255, 255, 255, 255)
+                    colour = new Vector3D<byte>(255, 255, 255)
                 });
             }
         }

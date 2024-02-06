@@ -35,7 +35,7 @@ public class ChunkRenderJob
     private static readonly VertexAttributeDescriptor[] VERTEX_ATTRIBS = new VertexAttributeDescriptor[]
     {
         new VertexAttributeDescriptor(VertexAttributeFormat.UInt8, 3),
-        new VertexAttributeDescriptor(VertexAttributeFormat.UNorm8, 4),
+        new VertexAttributeDescriptor(VertexAttributeFormat.UNorm8, 3),
         new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
     };
 

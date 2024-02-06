@@ -23,7 +23,7 @@ struct ChunkBuffer
 #ifdef VERT
 
     layout (location = 0) in vec3 vPos;
-    layout (location = 1) in vec4 vColor;
+    layout (location = 1) in vec3 vColor;
     layout (location = 2) in vec2 vUvs;
 
     layout(std430, binding = 3) buffer multiDrawBuff
@@ -56,7 +56,7 @@ struct ChunkBuffer
 
         vertData.worldPos = worldMat * vec4(vPos, 1.0);
         vertData.uvs = vec2(vUvs.x, vUvs.y);
-        vertData.vertexColour = vColor;
+        vertData.vertexColour = vec4(vColor, 1);
 
         chunkScale = chunkData.scale;
 

@@ -24,8 +24,16 @@ namespace AbsGameProject.Systems.Terrain
                 var bb = new BoundingBox(0, TerrainChunkComponent.WIDTH, 0, TerrainChunkComponent.HEIGHT, 0, TerrainChunkComponent.WIDTH);
                 var maxY = 0;
                 var trans = component.Entity.Transform;
-                component.VoxelData = new byte[TerrainChunkComponent.WIDTH * TerrainChunkComponent.HEIGHT * TerrainChunkComponent.WIDTH];
-                component.Heightmap = new byte[TerrainChunkComponent.WIDTH * TerrainChunkComponent.WIDTH];
+
+                if (component.VoxelData == null)
+                    component.VoxelData = new byte[TerrainChunkComponent.WIDTH * TerrainChunkComponent.HEIGHT * TerrainChunkComponent.WIDTH];
+                else
+                    Array.Clear(component.VoxelData, 0, TerrainChunkComponent.WIDTH * TerrainChunkComponent.HEIGHT * TerrainChunkComponent.WIDTH);
+
+                if (component.Heightmap == null)
+                    component.Heightmap = new byte[TerrainChunkComponent.WIDTH * TerrainChunkComponent.WIDTH];
+                else
+                    Array.Clear(component.Heightmap, 0, TerrainChunkComponent.WIDTH * TerrainChunkComponent.WIDTH);
 
                 for (int x = 0; x < TerrainChunkComponent.WIDTH; x++)
                 {

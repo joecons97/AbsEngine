@@ -37,7 +37,7 @@ public class VoxelModel
     [JsonPropertyName("elements")]
     public List<VoxelElementModel> Elements { get; init; } = new List<VoxelElementModel>();
 
-    public RawMesh ToRawMesh(CullFaceDirection cullFaces)
+    public RawMesh ToRawMesh(FaceDirection cullFaces)
     {
         RawMesh mesh = new RawMesh();
         var verts = new List<Vector3D<float>>();
@@ -67,12 +67,12 @@ public class VoxelModel
             {
                 var face = facePair.Value;
 
-                if (cullFaces.HasFlag(face.CullFace ?? CullFaceDirection.All))
+                if (cullFaces.HasFlag(face.CullFace ?? FaceDirection.All))
                     continue;
 
                 switch (facePair.Key)
                 {
-                    case CullFaceDirection.Up:
+                    case FaceDirection.Up:
                         indices.Add(vertOffset + 6);
                         indices.Add(vertOffset + 3);
                         indices.Add(vertOffset + 2);
@@ -81,7 +81,7 @@ public class VoxelModel
                         indices.Add(vertOffset + 7);
                         indices.Add(vertOffset + 3);
                         break;
-                    case CullFaceDirection.Down:
+                    case FaceDirection.Down:
                         indices.Add(vertOffset + 0);
                         indices.Add(vertOffset + 5);
                         indices.Add(vertOffset + 4);
@@ -90,7 +90,7 @@ public class VoxelModel
                         indices.Add(vertOffset + 1);
                         indices.Add(vertOffset + 5);
                         break;
-                    case CullFaceDirection.East:
+                    case FaceDirection.East:
                         indices.Add(vertOffset + 4);
                         indices.Add(vertOffset + 7);
                         indices.Add(vertOffset + 6);
@@ -99,7 +99,7 @@ public class VoxelModel
                         indices.Add(vertOffset + 5);
                         indices.Add(vertOffset + 7);
                         break;
-                    case CullFaceDirection.West:
+                    case FaceDirection.West:
                         indices.Add(vertOffset + 1);
                         indices.Add(vertOffset + 2);
                         indices.Add(vertOffset + 3);
@@ -108,7 +108,7 @@ public class VoxelModel
                         indices.Add(vertOffset + 0);
                         indices.Add(vertOffset + 2);
                         break;
-                    case CullFaceDirection.South:
+                    case FaceDirection.South:
                         indices.Add(vertOffset + 5);
                         indices.Add(vertOffset + 3);
                         indices.Add(vertOffset + 7);
@@ -117,7 +117,7 @@ public class VoxelModel
                         indices.Add(vertOffset + 1);
                         indices.Add(vertOffset + 3);
                         break;
-                    case CullFaceDirection.North:
+                    case FaceDirection.North:
                         indices.Add(vertOffset + 0);
                         indices.Add(vertOffset + 6);
                         indices.Add(vertOffset + 2);
