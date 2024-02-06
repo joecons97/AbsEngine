@@ -10,7 +10,6 @@ namespace AbsGameProject.Jobs
     public class ChunkMeshBuildJob : IJob
     {
         public TerrainChunkComponent component;
-        bool[] visitedLocations = new bool[TerrainChunkComponent.WIDTH * TerrainChunkComponent.WIDTH * TerrainChunkComponent.HEIGHT];
 
         public ChunkMeshBuildJob(TerrainChunkComponent component)
         {
