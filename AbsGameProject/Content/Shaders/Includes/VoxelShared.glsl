@@ -7,4 +7,5 @@ struct v2f
     vec2 uvs;
     vec4 vertexColour;
     float fogAmount;
+    float lightValue;
 };

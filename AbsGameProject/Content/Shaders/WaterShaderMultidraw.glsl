@@ -56,6 +56,7 @@
             col = textureLod(uAtlas, uv, 10);
         }
 
+        col *= vertData.lightValue;
         col *= waterColour;
         //Maybe re-add later
 

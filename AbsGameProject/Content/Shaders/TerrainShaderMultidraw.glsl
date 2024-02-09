@@ -26,7 +26,7 @@
             col = textureLod(uAtlas, vertData.uvs.yx, chunkScale + 1);
         }
 
-        col = vertData.vertexColour * col;
+        col = vertData.vertexColour * col * vertData.lightValue;
 
         col = mix(col, uFogColour, vertData.fogAmount);
 
