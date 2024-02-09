@@ -96,7 +96,8 @@ namespace AbsGameProject.Jobs
                                     {
                                         position = (Vector3D<byte>)pos,
                                         colour = (Vector3D<byte>)col,
-                                        uv = (Vector2D<Half>)uv
+                                        uv = (Vector2D<Half>)uv,
+                                        light = 248
                                     };
 
                                     if (block.Id == "water")

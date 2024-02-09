@@ -9,4 +9,5 @@ public struct TerrainVertex
     public Vector3D<byte> position;
     public Vector3D<byte> colour;
     public Vector2D<Half> uv;
+    public byte light;
 }

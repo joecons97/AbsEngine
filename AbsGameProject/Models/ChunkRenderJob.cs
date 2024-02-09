@@ -37,6 +37,7 @@ public class ChunkRenderJob
         new VertexAttributeDescriptor(VertexAttributeFormat.UInt8, 3),
         new VertexAttributeDescriptor(VertexAttributeFormat.UNorm8, 3),
         new VertexAttributeDescriptor(VertexAttributeFormat.Float16, 2),
+        new VertexAttributeDescriptor(VertexAttributeFormat.UInt8, 1),
     };
 
     private static Material MATERIAL_OPAQUE = new Material("TerrainShaderMultidraw");

@@ -13,7 +13,7 @@
     layout(location = 0) in vec3 vPos;
     layout(location = 1) in vec3 vColor;
     layout(location = 2) in vec2 vUvs;
-    layout(location = 3) in uint vLight;
+    layout(location = 3) in float vLight;
 
     layout(std430, binding = 3) buffer multiDrawBuff
     {
@@ -49,9 +49,12 @@
 
         chunkScale = chunkData.scale;
 
-        int skyLight = chunkScale & 0x0F;
-        int blockLight = (chunkScale & 0xF0) >> 4;
-        float light = float(max(skyLight, blockLight)) / 15;
+        int iLight = int(vLight);
+
+        int skyLight = iLight & 0x0F;
+        int blockLight = (iLight & 0xF0) >> 4;
+        vertData.lightValue = float(max(skyLight, blockLight)) / 15;
+
 
     #ifdef GOOD_FOG
         vertData.worldPos = worldMat * vec4(vPos, 1.0);
