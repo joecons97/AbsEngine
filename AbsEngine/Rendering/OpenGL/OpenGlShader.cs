@@ -107,6 +107,8 @@ internal class OpenGLShader : IBackendShader
 
     public void LoadFromString(string str)
     {
+        GetIncludes(ref str);
+
         GetUniforms(str);
         GetDirectives(ref str);
 
@@ -297,6 +299,27 @@ internal class OpenGLShader : IBackendShader
         }
     }
 
+    private void GetIncludes(ref string shader)
+    {
+        var allLines = shader.Replace("\r", "").Split("\n").ToList();
+        var directives = allLines.Where(x => x.Contains("#include"));
+
+        foreach (var item in directives.ToArray())
+        {
+            var lineIndex = allLines.IndexOf(item);
+            var directive = item.Trim().ToLower();
+            var split = directive.Split(" ");
+            var fileLoc = split[1]; 
+            
+            var file = File.ReadAllText(fileLoc.Trim('\"'));
+
+            allLines.Remove(item);
+            allLines.Insert(lineIndex, file);
+
+            shader = string.Join('\n', allLines);
+        }
+    }
+
     private void GetDirectives(ref string shader)
     {
         var allLines = shader.Replace("\r", "").Split("\n").ToList();
@@ -312,10 +335,6 @@ internal class OpenGLShader : IBackendShader
 
                 switch (type)
                 {
-                    case "include":
-                        var file = File.ReadAllText(param.Trim('\"'));
-                        shader = $"{file}\n{shader}".Replace(item, "");
-                        break;
                     case "culling":
                         _culling = param.ToLower() switch
                         {

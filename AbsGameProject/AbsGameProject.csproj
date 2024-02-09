@@ -74,6 +74,12 @@
     <None Update="Content\Shaders\BlockSelection.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Content\Shaders\Includes\VoxelShared.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Content\Shaders\Includes\VoxelVert.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Content\Shaders\NewSyntax.glsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
